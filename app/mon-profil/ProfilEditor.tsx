@@ -6,6 +6,7 @@ import { initiales, euros } from '@/lib/utils';
 import { getVerifChecks } from '@/lib/verification';
 import { CATEGORIES_LIST } from '@/lib/constants';
 import { toast } from '@/lib/toast';
+import { compressImage } from '@/lib/image-compress';
 
 interface Service {
   id: string;
@@ -95,13 +96,27 @@ export default function ProfilEditor({
 
   // ----- Photo -----
   async function uploadPhoto(file: File) {
-    const fd = new FormData();
-    fd.append('file', file);
-    const res = await fetch('/api/profile/photo', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!res.ok) return toast(data.error || 'Échec de l’envoi.');
-    setPhoto(data.photoUrl);
-    toast('Photo de profil ajoutée ✓');
+    const prev = photo;
+    const localUrl = URL.createObjectURL(file);
+    setPhoto(localUrl); // aperçu instantané pendant l'envoi
+    try {
+      const compressed = await compressImage(file, 512, 0.85);
+      const fd = new FormData();
+      fd.append('file', compressed);
+      const res = await fetch('/api/profile/photo', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) {
+        setPhoto(prev);
+        return toast(data.error || 'Échec de l’envoi.');
+      }
+      setPhoto(data.photoUrl);
+      toast('Photo de profil ajoutée ✓');
+    } catch {
+      setPhoto(prev);
+      toast('Échec de l’envoi.');
+    } finally {
+      URL.revokeObjectURL(localUrl);
+    }
   }
   async function supprPhoto() {
     const res = await fetch('/api/profile/photo', { method: 'DELETE' });
@@ -161,13 +176,21 @@ export default function ProfilEditor({
 
   // ----- Portfolio -----
   async function uploadPortfolio(files: FileList) {
-    const fd = new FormData();
-    Array.from(files).forEach((f) => fd.append('files', f));
-    const res = await fetch('/api/profile/portfolio', { method: 'POST', body: fd });
-    const data = await res.json();
-    if (!res.ok) return toast(data.error || 'Échec de l’envoi.');
-    setPortfolio([...portfolio, ...data.items]);
-    toast('Image(s) ajoutée(s) au portfolio ✓');
+    toast('Envoi des images…');
+    try {
+      const compressed = await Promise.all(
+        Array.from(files).map((f) => compressImage(f, 1280, 0.82))
+      );
+      const fd = new FormData();
+      compressed.forEach((f) => fd.append('files', f));
+      const res = await fetch('/api/profile/portfolio', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) return toast(data.error || 'Échec de l’envoi.');
+      setPortfolio([...portfolio, ...data.items]);
+      toast('Image(s) ajoutée(s) au portfolio ✓');
+    } catch {
+      toast('Échec de l’envoi.');
+    }
   }
   async function removePf(id: string) {
     const res = await fetch(`/api/profile/portfolio?id=${id}`, { method: 'DELETE' });
@@ -176,6 +199,7 @@ export default function ProfilEditor({
 
   // ----- CV -----
   async function uploadCV(file: File) {
+    toast('Envoi du CV…');
     const fd = new FormData();
     fd.append('file', file);
     const res = await fetch('/api/profile/cv', { method: 'POST', body: fd });

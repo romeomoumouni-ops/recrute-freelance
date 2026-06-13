@@ -46,6 +46,31 @@ export async function getConversationsFor(userId: string): Promise<ConversationS
   }));
 }
 
+// Retrouve la conversation entre deux utilisateurs (dans n'importe quel sens),
+// ou la crée. `initiatorId` devient le côté "clientId", `targetId` le "freelanceId".
+export async function findOrCreateConversation(
+  initiatorId: string,
+  targetId: string
+): Promise<string | null> {
+  const sb = supabaseAdmin();
+  const { data: existing } = await sb
+    .from('Conversation')
+    .select('id')
+    .or(
+      `and(clientId.eq.${initiatorId},freelanceId.eq.${targetId}),and(clientId.eq.${targetId},freelanceId.eq.${initiatorId})`
+    )
+    .maybeSingle();
+  if (existing) return (existing as { id: string }).id;
+
+  const { data: created, error } = await sb
+    .from('Conversation')
+    .insert({ clientId: initiatorId, freelanceId: targetId })
+    .select('id')
+    .single();
+  if (error || !created) return null;
+  return (created as { id: string }).id;
+}
+
 // Vérifie que l'utilisateur fait partie de la conversation.
 export async function assertMember(conversationId: string, userId: string) {
   const { data: conv } = await supabaseAdmin()

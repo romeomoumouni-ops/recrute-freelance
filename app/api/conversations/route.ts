@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { conversationSchema } from '@/lib/validations';
-import { getConversationsFor } from '@/lib/conversations';
+import { getConversationsFor, findOrCreateConversation } from '@/lib/conversations';
 
 // Liste des conversations de l'utilisateur (pour le polling de la messagerie).
 export async function GET() {
@@ -24,12 +24,6 @@ export async function POST(req: Request) {
   }
   const { freelanceId } = parsed.data;
 
-  if (session.user.role !== 'CLIENT') {
-    return NextResponse.json(
-      { error: 'Seules les entreprises peuvent contacter un freelance.' },
-      { status: 403 }
-    );
-  }
   if (freelanceId === session.user.id) {
     return NextResponse.json({ error: 'Conversation invalide.' }, { status: 400 });
   }
@@ -43,15 +37,8 @@ export async function POST(req: Request) {
     .maybeSingle();
   if (!freelance) return NextResponse.json({ error: 'Freelance introuvable.' }, { status: 404 });
 
-  const { data: conv, error } = await sb
-    .from('Conversation')
-    .upsert(
-      { clientId: session.user.id, freelanceId },
-      { onConflict: 'clientId,freelanceId' }
-    )
-    .select('id')
-    .single();
-  if (error || !conv) return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
+  const conversationId = await findOrCreateConversation(session.user.id, freelanceId);
+  if (!conversationId) return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
 
-  return NextResponse.json({ conversationId: (conv as { id: string }).id });
+  return NextResponse.json({ conversationId });
 }

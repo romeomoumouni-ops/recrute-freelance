@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
+import { findOrCreateConversation } from '@/lib/conversations';
 import { z } from 'zod';
 
 const devisSchema = z.object({
@@ -10,15 +11,10 @@ const devisSchema = z.object({
 });
 
 // Demande de devis : crée/retrouve la conversation et y poste un message de type DEVIS.
+// Ouvert aux clients ET aux freelances (un freelance peut solliciter un autre freelance).
 export async function POST(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
-  if (session.user.role !== 'CLIENT') {
-    return NextResponse.json(
-      { error: 'Seules les entreprises peuvent demander un devis.' },
-      { status: 403 }
-    );
-  }
 
   const body = await req.json().catch(() => null);
   const parsed = devisSchema.safeParse(body);
@@ -52,12 +48,8 @@ export async function POST(req: Request) {
     }
   }
 
-  const { data: conv, error: convErr } = await sb
-    .from('Conversation')
-    .upsert({ clientId: session.user.id, freelanceId }, { onConflict: 'clientId,freelanceId' })
-    .select('id')
-    .single();
-  if (convErr || !conv) return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
+  const conversationId = await findOrCreateConversation(session.user.id, freelanceId);
+  if (!conversationId) return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
 
   const contenu =
     description ||
@@ -66,12 +58,12 @@ export async function POST(req: Request) {
       : 'Bonjour, je souhaite obtenir un devis pour une mission.');
 
   await sb.from('Message').insert({
-    conversationId: (conv as { id: string }).id,
+    conversationId,
     senderId: session.user.id,
     type: 'DEVIS',
     meta: JSON.stringify({ serviceTitre, prix }),
     contenu,
   });
 
-  return NextResponse.json({ conversationId: (conv as { id: string }).id });
+  return NextResponse.json({ conversationId });
 }

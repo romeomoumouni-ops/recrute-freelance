@@ -387,6 +387,9 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .devis-msg.offer { border-color: var(--green); }
 .devis-msg.offer .devis-msg-prix { color: var(--green); }
 
+/* Pop-up de paiement Chariow */
+.chariow-pay { display: flex; justify-content: center; align-items: center; min-height: 64px; margin: 14px 0 4px; }
+
 /* Message fichier (livraison) */
 .msg.file { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; max-width: 78%; }
 .msg.file.moi { align-self: flex-end; background: var(--black); color: var(--white); }

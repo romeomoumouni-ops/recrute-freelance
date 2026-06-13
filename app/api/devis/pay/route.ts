@@ -64,29 +64,50 @@ export async function POST(req: Request) {
   const payerEmail = (payer?.email ?? session.user.email ?? '').toLowerCase();
   const payerPrenom = payer?.prenom ?? session.user.prenom ?? '';
 
-  const { data: pending, error } = await sb
+  // Idempotence : on réutilise un paiement déjà "en attente" pour ce devis + ce payeur
+  // (évite d'empiler des lignes si on clique plusieurs fois sur « Payer »).
+  let pendingId: string | null = null;
+  const { data: existing } = await sb
     .from('DevisPayment')
-    .insert({
-      offerMessageId,
-      conversationId: offer.conversationId,
-      freelanceId: offer.senderId,
-      payerId: session.user.id,
-      payerEmail,
-      montantEur,
-      montantFcfa,
-      productId: tier.productId,
-      status: 'awaiting',
-    })
     .select('id')
-    .single();
-  if (error || !pending) return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
+    .eq('offerMessageId', offerMessageId)
+    .eq('payerId', session.user.id)
+    .eq('status', 'awaiting')
+    .maybeSingle();
+  if (existing) {
+    pendingId = (existing as { id: string }).id;
+  } else {
+    const { data: pending, error } = await sb
+      .from('DevisPayment')
+      .insert({
+        offerMessageId,
+        conversationId: offer.conversationId,
+        freelanceId: offer.senderId,
+        payerId: session.user.id,
+        payerEmail,
+        montantEur,
+        montantFcfa,
+        productId: tier.productId,
+        status: 'awaiting',
+      })
+      .select('id')
+      .single();
+    if (error || !pending) return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
+    pendingId = (pending as { id: string }).id;
+  }
 
   const checkoutUrl = buildTierCheckoutUrl({
     checkoutUrl: tier.checkoutUrl,
     email: payerEmail,
     prenom: payerPrenom,
-    ref: (pending as { id: string }).id,
+    ref: pendingId,
   });
 
-  return NextResponse.json({ checkoutUrl, montantFcfa });
+  // productId + storeDomain : pour afficher le widget Chariow (pop-up) côté client.
+  return NextResponse.json({
+    checkoutUrl,
+    montantFcfa,
+    productId: tier.productId,
+    storeDomain: 'bajiuulm.mychariow.shop',
+  });
 }

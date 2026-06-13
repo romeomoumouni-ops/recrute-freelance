@@ -194,6 +194,43 @@ function FileCard({ m }: { m: Msg }) {
   );
 }
 
+// Widget Chariow "Snap" : affiche un bouton de paiement qui ouvre la caisse
+// en pop-up, sans quitter le site. On (re)charge le script à chaque montage
+// pour qu'il détecte le div fraîchement rendu.
+function ChariowWidget({ productId, storeDomain }: { productId: string; storeDomain: string }) {
+  useEffect(() => {
+    if (!document.querySelector('link[data-chariow]')) {
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'https://js.chariowcdn.com/v1/widget.min.css';
+      link.setAttribute('data-chariow', '1');
+      document.head.appendChild(link);
+    }
+    const prev = document.getElementById('chariow-widget-script');
+    if (prev) prev.remove();
+    const script = document.createElement('script');
+    script.id = 'chariow-widget-script';
+    script.src = 'https://js.chariowcdn.com/v1/widget.min.js';
+    script.async = true;
+    document.head.appendChild(script);
+  }, [productId]);
+
+  return (
+    <div
+      id="chariow-widget"
+      data-product-id={productId}
+      data-store-domain={storeDomain}
+      data-style="tap"
+      data-border-style="rounded"
+      data-cta-width="lg"
+      data-background-color="#FFFFFF"
+      data-cta-animation="shake_scale"
+      data-locale="fr"
+      data-primary-color="#0d0d0d"
+    />
+  );
+}
+
 export default function MessagesClient({
   initialConversations,
 }: {
@@ -213,6 +250,11 @@ export default function MessagesClient({
   const [offerDesc, setOfferDesc] = useState('');
   const [offerSending, setOfferSending] = useState(false);
   const [payingId, setPayingId] = useState<string | null>(null);
+  const [payModal, setPayModal] = useState<{
+    productId: string;
+    storeDomain: string;
+    checkoutUrl: string;
+  } | null>(null);
 
   async function sendOffer() {
     if (!activeId) return;
@@ -244,11 +286,14 @@ export default function MessagesClient({
       body: JSON.stringify({ offerMessageId }),
     });
     const data = await res.json();
-    if (!res.ok) {
-      setPayingId(null);
-      return toast(data.error || 'Paiement impossible.');
-    }
-    window.location.href = data.checkoutUrl; // redirection vers Chariow
+    setPayingId(null);
+    if (!res.ok) return toast(data.error || 'Paiement impossible.');
+    // Ouvre le widget Chariow en pop-up (sur le site) au lieu de rediriger.
+    setPayModal({
+      productId: data.productId,
+      storeDomain: data.storeDomain,
+      checkoutUrl: data.checkoutUrl,
+    });
   }
 
   // Actions sur une commande (livrer / valider / retouche).
@@ -535,6 +580,46 @@ export default function MessagesClient({
           </button>
         </div>
       </div>
+
+      {/* Pop-up de paiement Chariow (sur le site) */}
+      {payModal && (
+        <div
+          className="modal-backdrop open"
+          onClick={() => {
+            setPayModal(null);
+            if (activeId) loadMessages(activeId);
+          }}
+        >
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close"
+              onClick={() => {
+                setPayModal(null);
+                if (activeId) loadMessages(activeId);
+              }}
+              aria-label="Fermer"
+            >
+              ✕
+            </button>
+            <h2>Paiement sécurisé</h2>
+            <p className="sub">
+              Réglez par carte (Visa / Mastercard) sans quitter le site. Les fonds sont sécurisés
+              jusqu&apos;à la livraison et la validation de la commande.
+            </p>
+            <div className="chariow-pay">
+              <ChariowWidget productId={payModal.productId} storeDomain={payModal.storeDomain} />
+            </div>
+            <p className="hint" style={{ marginTop: 14 }}>
+              Le bouton de paiement ne s&apos;affiche pas ?{' '}
+              <a href={payModal.checkoutUrl} target="_blank" rel="noopener noreferrer">
+                Payer dans un nouvel onglet
+              </a>
+              .
+            </p>
+            <p className="hint">Une fois le paiement effectué, fermez cette fenêtre.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

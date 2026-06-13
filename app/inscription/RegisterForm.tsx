@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PAYS_AFRIQUE } from '@/lib/constants';
+import PasswordInput from '@/components/PasswordInput';
 
 type Role = 'CLIENT' | 'FREELANCE';
 
@@ -112,9 +113,8 @@ export default function RegisterForm() {
           </div>
           <div className="field">
             <label htmlFor="password">Mot de passe</label>
-            <input
+            <PasswordInput
               id="password"
-              type="password"
               required
               minLength={6}
               autoComplete="new-password"

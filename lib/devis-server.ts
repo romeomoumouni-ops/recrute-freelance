@@ -49,7 +49,8 @@ export async function postSystemMessage(
   senderId: string,
   contenu: string
 ): Promise<void> {
+  // type SYSTEM : message automatique de la plateforme (affiché centré, en gris).
   await supabaseAdmin()
     .from('Message')
-    .insert({ conversationId, senderId, type: 'TEXT', contenu });
+    .insert({ conversationId, senderId, type: 'SYSTEM', contenu });
 }

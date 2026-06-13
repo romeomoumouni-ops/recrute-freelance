@@ -12,10 +12,13 @@ export function buildTierCheckoutUrl(opts: {
   email: string;
   prenom: string;
   ref: string;
+  redirectUrl?: string;
 }): string {
   const u = new URL(opts.checkoutUrl);
   u.searchParams.set('email', opts.email);
   u.searchParams.set('first_name', opts.prenom);
   u.searchParams.set('ref', opts.ref);
+  // Retour automatique vers la discussion après paiement (best-effort).
+  if (opts.redirectUrl) u.searchParams.set('redirect_url', opts.redirectUrl);
   return u.toString();
 }

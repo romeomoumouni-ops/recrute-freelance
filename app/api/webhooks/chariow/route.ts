@@ -166,11 +166,11 @@ async function handleSale(payload: any) {
   if (order) meta.orderId = (order as { id: string }).id;
   await sb.from('Message').update({ meta: JSON.stringify(meta) }).eq('id', r.offerMessageId);
 
-  // Message de confirmation qui explique le séquestre au client.
+  // Message automatique (centré, gris) qui explique le séquestre.
   await sb.from('Message').insert({
     conversationId: r.conversationId,
     senderId: r.payerId,
-    type: 'TEXT',
+    type: 'SYSTEM',
     contenu:
       `✅ Paiement reçu (${euros(r.montantEur)}). Les fonds sont sécurisés par ` +
       `recrutefreelance.com et seront versés au freelance une fois la commande livrée et validée par vos soins.`,

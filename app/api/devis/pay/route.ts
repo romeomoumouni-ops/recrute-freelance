@@ -101,6 +101,7 @@ export async function POST(req: Request) {
     email: payerEmail,
     prenom: payerPrenom,
     ref: pendingId,
+    redirectUrl: `https://www.recrutefreelance.com/messages?c=${offer.conversationId}`,
   });
 
   // productId + storeDomain : pour afficher le widget Chariow (pop-up) côté client.

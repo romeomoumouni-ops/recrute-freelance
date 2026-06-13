@@ -31,7 +31,9 @@ function DevisCard({ m }: { m: Msg }) {
   }
   return (
     <div className={`devis-msg ${m.mine ? 'moi' : 'eux'}`}>
-      <div className="devis-msg-head">📋 Demande de devis</div>
+      <div className="devis-msg-head">
+        📋 Demande de devis {m.mine ? 'envoyée' : 'reçue'}
+      </div>
       {serviceTitre && (
         <div className="devis-msg-service">
           <span>{serviceTitre}</span>
@@ -485,6 +487,11 @@ export default function MessagesClient({
                   />
                 ) : m.type === 'FILE' ? (
                   <FileCard key={m.id} m={m} />
+                ) : m.type === 'SYSTEM' ? (
+                  <div key={m.id} className="msg-system">
+                    {m.contenu}
+                    <span className="heure-sys">{m.heure}</span>
+                  </div>
                 ) : (
                   <div key={m.id} className={`msg ${m.mine ? 'moi' : 'eux'}`}>
                     {m.contenu}

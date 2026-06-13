@@ -282,6 +282,8 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .chat-input input { flex: 1; border: 1.5px solid var(--border); border-radius: 999px; padding: 11px 18px; font-size: .85rem; outline: none; }
 .chat-input input:focus { border-color: var(--black); }
 .chat-input button { background: var(--black); color: var(--white); border: none; border-radius: 999px; padding: 11px 22px; font-weight: 600; font-size: .82rem; }
+.msg-system { align-self: center; max-width: 88%; text-align: center; color: var(--gray-500); font-size: .75rem; line-height: 1.45; padding: 7px 14px; background: rgba(0,0,0,.045); border-radius: 12px; }
+.msg-system .heure-sys { display: block; font-size: .6rem; opacity: .6; margin-top: 3px; }
 .chat-vide { flex: 1; display: grid; place-items: center; color: var(--gray-500); font-size: .85rem; background: var(--off-white); text-align: center; padding: 24px; }
 
 /* ---------- Paramètres ---------- */
@@ -408,11 +410,14 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
   .settings-nav { position: static; flex-direction: row; overflow-x: auto; gap: 4px; background: var(--off-white); border: 1px solid var(--border); border-radius: 999px; padding: 5px; -webkit-overflow-scrolling: touch; }
   .settings-nav button { white-space: nowrap; border-radius: 999px; flex-shrink: 0; }
   .settings-nav button.active { box-shadow: 0 2px 8px rgba(0,0,0,.18); }
-  .chat-layout { grid-template-columns: 1fr; height: calc(100vh - 140px); }
+  /* Le chat occupe l'écran sous le header (72px) ; dvh évite que la barre de
+     saisie passe sous la barre du navigateur mobile. */
+  .chat-layout { grid-template-columns: 1fr; height: calc(100dvh - 96px); min-height: 0; margin: 10px 0 14px; border-radius: var(--radius); }
   .conv-list { display: none; }
   .chat-layout.vue-liste .conv-list { display: block; border-right: none; }
   .chat-layout.vue-liste .chat-zone { display: none; }
   .chat-back { display: inline-block; }
+  .chat-input { padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
   .msg { max-width: 85%; }
   .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
   .cards, .freelance-grid { grid-template-columns: repeat(2,1fr); }

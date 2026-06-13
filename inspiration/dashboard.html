@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de bord — recrutefreelance.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <nav class="nav">
+        <a href="recherche.html">Trouver un freelance</a>
+        <a href="dashboard.html">Tableau de bord</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <div class="container dash" id="dash"></div>
+
+  <!-- Modal retrait Mobile Money -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" id="modal-content"></div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const user = getUser();
+    if (!user) { location.href = 'connexion.html'; throw new Error('redirect'); }
+    if (new URLSearchParams(location.search).get('bienvenue')) {
+      setTimeout(() => toast('Bienvenue ' + user.prenom + ' ! Votre compte est créé. 🎉'), 400);
+    }
+
+    const STATUTS = { encours: 'En cours', livree: 'Livrée', payee: 'Payée' };
+
+    function renderDash() {
+      const orders = getOrders();
+      const el = document.getElementById('dash');
+
+      if (user.role === 'client') {
+        const enCours = orders.filter(o => o.statut === 'encours').length;
+        const totalDepense = orders.reduce((s, o) => s + o.montant + o.commission, 0);
+        el.innerHTML =
+          '<h1>Bonjour ' + user.prenom + ' 👋</h1>' +
+          '<p class="sub">Voici l\'état de vos missions.</p>' +
+          '<div class="dash-stats">' +
+            '<div class="dash-stat dark"><div class="label">Missions en cours</div><div class="value">' + enCours + '</div></div>' +
+            '<div class="dash-stat"><div class="label">Missions au total</div><div class="value">' + orders.length + '</div></div>' +
+            '<div class="dash-stat"><div class="label">Total investi</div><div class="value">' + euros(totalDepense) + '</div></div>' +
+          '</div>' +
+          (orders.length ? tableClient(orders) :
+            '<div class="empty">Aucune mission pour le moment.<br><br><a class="btn btn-dark" href="recherche.html">Trouver un freelance</a></div>');
+      } else {
+        // Vue freelance : missions de démo + solde
+        const missions = orders.length ? orders : [];
+        const solde = store.get('solde', 0);
+        const gagne = store.get('gagne', 0);
+        el.innerHTML =
+          '<h1>Bonjour ' + user.prenom + ' 👋</h1>' +
+          '<p class="sub">Vos missions et vos gains' + (user.momo ? ' — Mobile Money : ' + user.momo : '') + '.</p>' +
+          '<div class="dash-stats">' +
+            '<div class="dash-stat dark"><div class="label">Solde disponible</div><div class="value">' + euros(solde) + '</div>' +
+              (solde > 0 ? '<button class="btn btn-light btn-sm" style="margin-top:14px" onclick="openRetrait()">Retirer sur Mobile Money</button>' : '') + '</div>' +
+            '<div class="dash-stat"><div class="label">Total gagné</div><div class="value">' + euros(gagne) + '</div></div>' +
+            '<div class="dash-stat"><div class="label">Missions reçues</div><div class="value">' + missions.length + '</div></div>' +
+          '</div>' +
+          (missions.length ? tableFreelance(missions) :
+            '<div class="empty">Aucune mission reçue pour l\'instant.<br><span style="font-size:.78rem">Astuce prototype : créez une commande côté entreprise, marquez-la « livrée », et les fonds apparaîtront ici.</span></div>');
+      }
+    }
+
+    function tableClient(orders) {
+      return '<div class="table-wrap"><table><thead><tr>' +
+        '<th>Mission</th><th>Freelance</th><th>Montant</th><th>Date</th><th>Statut</th><th></th></tr></thead><tbody>' +
+        orders.map(o =>
+          '<tr><td><strong>' + o.titre + '</strong></td><td>' + o.freelance + '</td>' +
+          '<td>' + euros(o.montant + o.commission) + '</td><td>' + o.date + '</td>' +
+          '<td><span class="status ' + o.statut + '">' + STATUTS[o.statut] + '</span></td>' +
+          '<td>' + (o.statut === 'encours'
+            ? '<button class="btn btn-dark btn-sm" onclick="validerLivraison(' + o.id + ')">Valider la livraison</button>'
+            : o.statut === 'livree'
+            ? '<span style="font-size:.72rem;color:var(--green)">✓ Fonds envoyés sur ' + o.momo + '</span>'
+            : '') + '</td></tr>'
+        ).join('') + '</tbody></table></div>';
+    }
+
+    function tableFreelance(missions) {
+      return '<div class="table-wrap"><table><thead><tr>' +
+        '<th>Mission</th><th>Client</th><th>Montant net</th><th>Date</th><th>Statut</th></tr></thead><tbody>' +
+        missions.map(o =>
+          '<tr><td><strong>' + o.titre + '</strong></td><td>' + o.client + '</td>' +
+          '<td>' + euros(o.montant) + '</td><td>' + o.date + '</td>' +
+          '<td><span class="status ' + o.statut + '">' + STATUTS[o.statut] + '</span></td></tr>'
+        ).join('') + '</tbody></table></div>';
+    }
+
+    /* ----- Client : valider la livraison → fonds libérés vers Mobile Money ----- */
+    function validerLivraison(id) {
+      const orders = getOrders();
+      const o = orders.find(x => x.id === id);
+      if (!o) return;
+      o.statut = 'livree';
+      setOrders(orders);
+      store.set('solde', store.get('solde', 0) + o.montant);
+      store.set('gagne', store.get('gagne', 0) + o.montant);
+      toast('Livraison validée ✓ ' + euros(o.montant) + ' envoyés sur le ' + o.momo + ' de ' + o.freelance + '.');
+      renderDash();
+    }
+
+    /* ----- Freelance : retrait Mobile Money ----- */
+    let operateur = 'Orange Money';
+    function openRetrait() {
+      const solde = store.get('solde', 0);
+      document.getElementById('modal-content').innerHTML =
+        '<button class="modal-close" onclick="closeModal()">✕</button>' +
+        '<h2>Retirer mes gains</h2><p class="sub">Solde disponible : <strong>' + euros(solde) + '</strong></p>' +
+        '<div class="field"><label>Opérateur Mobile Money</label></div>' +
+        '<div class="momo-options">' +
+          ['Orange Money', 'MTN MoMo', 'Wave', 'Moov Money'].map(op =>
+            '<button type="button" class="' + (op === operateur ? 'active' : '') + '" onclick="setOp(this, \'' + op + '\')">' + op + '</button>'
+          ).join('') + '</div>' +
+        '<div class="field"><label>Numéro Mobile Money</label>' +
+        '<input id="r-num" type="tel" value="' + (user.momo || '+229 01 90 00 00 00') + '"></div>' +
+        '<div class="field"><label>Montant (€)</label>' +
+        '<input id="r-montant" type="number" max="' + solde + '" min="1" value="' + solde + '">' +
+        '<div class="hint">Converti en FCFA au taux du jour, sans frais cachés.</div></div>' +
+        '<button class="btn btn-dark btn-block" onclick="confirmRetrait()">Confirmer le retrait</button>';
+      document.getElementById('modal').classList.add('open');
+    }
+    function setOp(btn, op) {
+      operateur = op;
+      btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+    function confirmRetrait() {
+      const solde = store.get('solde', 0);
+      const montant = Math.min(solde, Number(document.getElementById('r-montant').value) || 0);
+      if (montant <= 0) { toast('Montant invalide.'); return; }
+      const num = document.getElementById('r-num').value.trim();
+      const fcfa = Math.round(montant * 655.96).toLocaleString('fr-FR');
+      store.set('solde', solde - montant);
+      document.getElementById('modal-content').innerHTML =
+        '<div class="center"><div class="success-icon">✓</div>' +
+        '<h2>Retrait effectué !</h2>' +
+        '<p class="sub" style="margin-top:8px">' + euros(montant) + ' (≈ ' + fcfa + ' FCFA) envoyés via <strong>' + operateur + '</strong> au ' + num + '.</p>' +
+        '<button class="btn btn-dark btn-block" onclick="closeModal();renderDash()">Fermer</button></div>';
+    }
+
+    renderDash();
+  </script>
+</body>
+</html>

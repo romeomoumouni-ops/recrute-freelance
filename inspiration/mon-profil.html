@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon profil — recrutefreelance.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <nav class="nav">
+        <a href="recherche.html">Trouver un freelance</a>
+        <a href="dashboard.html">Tableau de bord</a>
+        <a href="messagerie.html">Messagerie</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <div class="container profil-edit">
+    <h1>Mon profil</h1>
+    <p class="sub">C'est ce que les clients verront. Plus il est complet, plus vite vous serez <strong>vérifié ✓</strong>.</p>
+
+    <!-- Photo de profil -->
+    <div class="edit-card">
+      <h2>Photo de profil</h2>
+      <div class="photo-row">
+        <div class="photo-preview" id="photo-preview"></div>
+        <div>
+          <input type="file" id="photo-input" accept="image/*" hidden onchange="uploadPhoto(this)">
+          <button class="btn btn-dark" onclick="document.getElementById('photo-input').click()">Charger une photo</button>
+          <button class="btn btn-outline" id="photo-suppr" style="margin-left:8px" onclick="supprPhoto()">Supprimer</button>
+          <div class="hint" style="margin-top:10px;font-size:.72rem;color:var(--gray-500)">JPG ou PNG, visage visible de préférence.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Présentation -->
+    <div class="edit-card">
+      <h2>Présentation</h2>
+      <div class="field">
+        <label>Titre professionnel</label>
+        <input id="f-titre" type="text" placeholder="Ex : Développeur Web Full-Stack">
+      </div>
+      <div class="field">
+        <label>Bio</label>
+        <textarea id="f-bio" rows="5" placeholder="Présentez votre parcours, vos spécialités, vos résultats… (50 caractères minimum pour la vérification)"></textarea>
+        <div class="hint" id="bio-count"></div>
+      </div>
+    </div>
+
+    <!-- Compétences -->
+    <div class="edit-card">
+      <h2>Compétences</h2>
+      <div class="skill-input-row field" style="margin-bottom:0">
+        <input id="skill-input" type="text" placeholder="Ex : React, Figma, SEO…" onkeydown="if(event.key==='Enter'){event.preventDefault();addSkill()}">
+        <button class="btn btn-dark" type="button" onclick="addSkill()">Ajouter</button>
+      </div>
+      <div class="skills-edit" id="skills-list"></div>
+    </div>
+
+    <!-- Services -->
+    <div class="edit-card">
+      <h2>Mes services</h2>
+      <div id="services-list"></div>
+      <div class="field"><label>Titre du service</label><input id="s-titre" type="text" placeholder="Ex : Création de site vitrine WordPress"></div>
+      <div class="field"><label>Description</label><textarea id="s-desc" rows="2" placeholder="Ce que le client obtient, délais, révisions…"></textarea></div>
+      <div class="field"><label>Prix (€)</label><input id="s-prix" type="number" min="1" placeholder="Ex : 450"></div>
+      <button class="btn btn-outline" onclick="addService()">+ Ajouter ce service</button>
+    </div>
+
+    <!-- Portfolio -->
+    <div class="edit-card">
+      <h2>Portfolio</h2>
+      <input type="file" id="pf-input" accept="image/*" multiple hidden onchange="uploadPortfolio(this)">
+      <div class="upload-zone" onclick="document.getElementById('pf-input').click()">
+        📁 <strong>Cliquez pour ajouter des images</strong><br>de vos réalisations (2 minimum pour la vérification)
+      </div>
+      <div class="portfolio-grid" id="pf-grid"></div>
+    </div>
+
+    <!-- CV -->
+    <div class="edit-card">
+      <h2>CV</h2>
+      <input type="file" id="cv-input" accept=".pdf,.doc,.docx" hidden onchange="uploadCV(this)">
+      <div class="upload-zone" onclick="document.getElementById('cv-input').click()">
+        📄 <strong>Cliquez pour charger votre CV</strong><br>PDF ou Word
+      </div>
+      <div id="cv-zone"></div>
+    </div>
+
+    <div class="save-bar">
+      <span id="verif-status"></span>
+      <button class="btn btn-light" onclick="saveAll()">Enregistrer mon profil</button>
+    </div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const user = getUser();
+    if (!user) { location.href = 'connexion.html'; throw new Error('redirect'); }
+    let p = getProfil();
+
+    /* ----- Photo ----- */
+    function renderPhoto() {
+      document.getElementById('photo-preview').innerHTML =
+        p.photo ? '<img src="' + p.photo + '">' : initiales(user.prenom);
+      document.getElementById('photo-suppr').style.display = p.photo ? 'inline-block' : 'none';
+    }
+    function uploadPhoto(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = e => { p.photo = e.target.result; setProfil(p); renderPhoto(); renderStatus(); renderHeaderActions(); toast('Photo de profil ajoutée ✓'); };
+      reader.readAsDataURL(file);
+    }
+    function supprPhoto() { p.photo = null; setProfil(p); renderPhoto(); renderStatus(); renderHeaderActions(); }
+
+    /* ----- Compétences ----- */
+    function renderSkills() {
+      document.getElementById('skills-list').innerHTML = p.skills.map((s, i) =>
+        '<span class="badge">' + s + ' <button onclick="removeSkill(' + i + ')">✕</button></span>'
+      ).join('') || '<span style="font-size:.78rem;color:var(--gray-500)">Aucune compétence ajoutée.</span>';
+    }
+    function addSkill() {
+      const input = document.getElementById('skill-input');
+      const v = input.value.trim();
+      if (!v) return;
+      p.skills.push(v); setProfil(p); input.value = ''; renderSkills();
+    }
+    function removeSkill(i) { p.skills.splice(i, 1); setProfil(p); renderSkills(); }
+
+    /* ----- Services ----- */
+    function renderServices() {
+      document.getElementById('services-list').innerHTML = p.services.map((s, i) =>
+        '<div class="service-item"><div><div class="titre">' + s.titre + '</div><div class="desc">' + s.desc + '</div></div>' +
+        '<div style="text-align:right"><div class="prix">' + euros(s.prix) + '</div>' +
+        '<button class="suppr" onclick="removeService(' + i + ')">Supprimer</button></div></div>'
+      ).join('');
+    }
+    function addService() {
+      const titre = document.getElementById('s-titre').value.trim();
+      const desc = document.getElementById('s-desc').value.trim();
+      const prix = Number(document.getElementById('s-prix').value);
+      if (!titre || !prix) { toast('Indiquez au moins un titre et un prix.'); return; }
+      p.services.push({ titre, desc, prix });
+      setProfil(p);
+      ['s-titre', 's-desc', 's-prix'].forEach(id => document.getElementById(id).value = '');
+      renderServices(); renderStatus();
+      toast('Service ajouté ✓');
+    }
+    function removeService(i) { p.services.splice(i, 1); setProfil(p); renderServices(); renderStatus(); }
+
+    /* ----- Portfolio ----- */
+    function renderPortfolio() {
+      document.getElementById('pf-grid').innerHTML = p.portfolio.map((img, i) =>
+        '<div class="portfolio-item"><img src="' + img + '"><button onclick="removePf(' + i + ')">✕</button></div>'
+      ).join('');
+    }
+    function uploadPortfolio(input) {
+      [...input.files].forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          p.portfolio.push(e.target.result);
+          setProfil(p); renderPortfolio(); renderStatus();
+        };
+        reader.readAsDataURL(file);
+      });
+      toast('Image(s) ajoutée(s) au portfolio ✓');
+    }
+    function removePf(i) { p.portfolio.splice(i, 1); setProfil(p); renderPortfolio(); renderStatus(); }
+
+    /* ----- CV ----- */
+    function renderCV() {
+      document.getElementById('cv-zone').innerHTML = p.cv
+        ? '<div class="cv-file">📄 ' + p.cv + '<button onclick="removeCV()">✕</button></div>' : '';
+    }
+    function uploadCV(input) {
+      const file = input.files[0];
+      if (!file) return;
+      p.cv = file.name; setProfil(p); renderCV(); renderStatus();
+      toast('CV chargé ✓');
+    }
+    function removeCV() { p.cv = null; setProfil(p); renderCV(); renderStatus(); }
+
+    /* ----- Bio / titre ----- */
+    document.getElementById('f-bio').addEventListener('input', updateBioCount);
+    function updateBioCount() {
+      const len = document.getElementById('f-bio').value.length;
+      document.getElementById('bio-count').textContent = len + ' caractère' + (len > 1 ? 's' : '') + (len < 50 ? ' — encore ' + (50 - len) + ' pour la vérification' : ' ✓');
+    }
+
+    /* ----- Statut vérification ----- */
+    function renderStatus() {
+      const checks = getVerifChecks();
+      const faits = checks.filter(c => c.ok).length;
+      document.getElementById('verif-status').innerHTML = faits === checks.length
+        ? '✓ Profil complet — <a href="parametres.html" style="text-decoration:underline">vérifié</a>'
+        : faits + ' / ' + checks.length + ' critères de <a href="parametres.html" style="text-decoration:underline">vérification</a> remplis';
+    }
+
+    function saveAll() {
+      p.titre = document.getElementById('f-titre').value.trim();
+      p.bio = document.getElementById('f-bio').value.trim();
+      setProfil(p);
+      renderStatus();
+      toast('Profil enregistré ✓');
+    }
+
+    /* ----- Init ----- */
+    document.getElementById('f-titre').value = p.titre || '';
+    document.getElementById('f-bio').value = p.bio || '';
+    updateBioCount();
+    renderPhoto(); renderSkills(); renderServices(); renderPortfolio(); renderCV(); renderStatus();
+  </script>
+</body>
+</html>

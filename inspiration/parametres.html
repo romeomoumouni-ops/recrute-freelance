@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paramètres — recrutefreelance.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <nav class="nav">
+        <a href="recherche.html">Trouver un freelance</a>
+        <a href="dashboard.html">Tableau de bord</a>
+        <a href="messagerie.html">Messagerie</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <div class="container settings-layout">
+    <div class="settings-nav" id="settings-nav"></div>
+    <div class="settings-panel" id="panel"></div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const user = getUser();
+    if (!user) { location.href = 'connexion.html'; throw new Error('redirect'); }
+
+    const ONGLETS = user.role === 'freelance'
+      ? [['verification', 'Vérification du profil'], ['compte', 'Compte'], ['paiement', 'Paiement'], ['notifications', 'Notifications']]
+      : [['compte', 'Compte'], ['notifications', 'Notifications']];
+
+    let onglet = ONGLETS[0][0];
+
+    function renderNav() {
+      document.getElementById('settings-nav').innerHTML = ONGLETS.map(([id, label]) =>
+        '<button class="' + (id === onglet ? 'active' : '') + '" onclick="go(\'' + id + '\')">' + label + '</button>'
+      ).join('');
+    }
+
+    function go(id) { onglet = id; renderNav(); renderPanel(); }
+
+    function renderPanel() {
+      const el = document.getElementById('panel');
+
+      /* ----- Vérification du profil (freelance) ----- */
+      if (onglet === 'verification') {
+        const checks = getVerifChecks();
+        const faits = checks.filter(c => c.ok).length;
+        const pct = Math.round(faits / checks.length * 100);
+        const verifie = faits === checks.length;
+        el.innerHTML =
+          '<h2>Vérification du profil</h2>' +
+          '<p class="sub">Complétez ces étapes pour obtenir le badge <strong>« Freelance approuvé »</strong> et apparaître en priorité dans les résultats.</p>' +
+          (verifie
+            ? '<div class="verif-banner ok"><span class="big">✓</span><span>Votre profil est <strong>vérifié par recrutefreelance.com</strong>. Le badge « Freelance approuvé » est visible sur votre profil.</span></div>'
+            : '<div class="verif-banner pending"><span class="big">⏳</span><span>Profil <strong>en attente de vérification</strong> — ' + faits + ' / ' + checks.length + ' critères remplis.</span></div>') +
+          '<div class="progress-bar"><div style="width:' + pct + '%"></div></div>' +
+          '<div class="check-list">' +
+          checks.map(c =>
+            '<div class="check-item">' +
+            '<div class="check-icon ' + (c.ok ? 'done' : 'todo') + '">' + (c.ok ? '✓' : '•') + '</div>' +
+            '<div class="txt"><div class="titre">' + c.titre + '</div><div class="desc">' + c.desc + '</div></div>' +
+            (c.ok ? '' : '<a href="' + c.lien + '">Compléter →</a>') +
+            '</div>'
+          ).join('') + '</div>';
+        return;
+      }
+
+      /* ----- Compte ----- */
+      if (onglet === 'compte') {
+        el.innerHTML =
+          '<h2>Compte</h2><p class="sub">Vos informations personnelles.</p>' +
+          '<div class="field"><label>Prénom</label><input id="c-prenom" type="text" value="' + (user.prenom || '') + '"></div>' +
+          '<div class="field"><label>Adresse e-mail</label><input id="c-email" type="email" value="' + (user.email || '') + '"></div>' +
+          (user.role === 'freelance'
+            ? '<div class="field"><label>Pays</label><input id="c-pays" type="text" value="' + (user.pays || '') + '"></div>' : '') +
+          '<div class="field"><label>Type de compte</label><input type="text" disabled value="' + (user.role === 'client' ? 'Entreprise / Client' : 'Freelance') + '"></div>' +
+          '<button class="btn btn-dark" onclick="saveCompte()">Enregistrer</button>';
+        return;
+      }
+
+      /* ----- Paiement (freelance) ----- */
+      if (onglet === 'paiement') {
+        el.innerHTML =
+          '<h2>Paiement</h2><p class="sub">C\'est ici que vous recevez vos gains.</p>' +
+          '<div class="field"><label>Numéro Mobile Money</label>' +
+          '<input id="p-momo" type="tel" value="' + (user.momo || '') + '" placeholder="+229 01 90 00 00 00">' +
+          '<div class="hint">Orange Money, MTN MoMo, Wave ou Moov Money.</div></div>' +
+          '<button class="btn btn-dark" onclick="saveMomo()">Enregistrer</button>';
+        return;
+      }
+
+      /* ----- Notifications ----- */
+      if (onglet === 'notifications') {
+        const prefs = store.get('notifs', { messages: true, missions: true, paiements: true, newsletter: false });
+        const rows = [
+          ['messages', 'Nouveaux messages', 'Recevoir un e-mail quand on vous écrit.'],
+          ['missions', 'Missions', 'Nouvelles commandes, livraisons et validations.'],
+          ['paiements', 'Paiements', 'Confirmations de paiement et de retrait Mobile Money.'],
+          ['newsletter', 'Newsletter', 'Conseils et nouveautés de la plateforme.']
+        ];
+        el.innerHTML =
+          '<h2>Notifications</h2><p class="sub">Choisissez ce que vous recevez par e-mail.</p>' +
+          rows.map(([id, titre, desc]) =>
+            '<div class="switch-row"><div><div class="titre">' + titre + '</div><div class="desc">' + desc + '</div></div>' +
+            '<label class="switch"><input type="checkbox" ' + (prefs[id] ? 'checked' : '') + ' onchange="toggleNotif(\'' + id + '\', this.checked)"><span class="slider"></span></label></div>'
+          ).join('');
+        return;
+      }
+    }
+
+    function saveCompte() {
+      user.prenom = document.getElementById('c-prenom').value.trim();
+      user.email = document.getElementById('c-email').value.trim();
+      const pays = document.getElementById('c-pays');
+      if (pays) user.pays = pays.value.trim();
+      setUser(user);
+      renderHeaderActions();
+      toast('Compte mis à jour ✓');
+    }
+
+    function saveMomo() {
+      user.momo = document.getElementById('p-momo').value.trim();
+      setUser(user);
+      toast('Numéro Mobile Money enregistré ✓');
+      renderNav();
+    }
+
+    function toggleNotif(id, val) {
+      const prefs = store.get('notifs', {});
+      prefs[id] = val;
+      store.set('notifs', prefs);
+      toast('Préférence enregistrée ✓');
+    }
+
+    renderNav();
+    renderPanel();
+  </script>
+</body>
+</html>

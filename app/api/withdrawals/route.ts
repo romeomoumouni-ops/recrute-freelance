@@ -1,0 +1,50 @@
+import { NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
+import { supabaseAdmin } from '@/lib/supabase';
+import { withdrawalSchema } from '@/lib/validations';
+import { payoutProvider } from '@/lib/payments';
+import { TAUX_FCFA } from '@/lib/constants';
+
+// Retrait Mobile Money (freelance) : RPC atomique (débite le solde + enregistre le retrait).
+export async function POST(req: Request) {
+  const session = await auth();
+  if (!session) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  if (session.user.role !== 'FREELANCE') {
+    return NextResponse.json({ error: 'Réservé aux freelances.' }, { status: 403 });
+  }
+
+  const body = await req.json().catch(() => null);
+  const parsed = withdrawalSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.errors[0]?.message ?? 'Données invalides.' },
+      { status: 400 }
+    );
+  }
+  const { montant, operateur, numero } = parsed.data;
+
+  // Versement Mobile Money simulé (avant le débit ; le débit reste atomique côté DB).
+  const payout = await payoutProvider.payout(montant, operateur, numero);
+  if (!payout.success) {
+    return NextResponse.json({ error: 'Le retrait a échoué.' }, { status: 402 });
+  }
+
+  const { data, error } = await supabaseAdmin().rpc('withdraw', {
+    actor_id: session.user.id,
+    amount: montant,
+    op: operateur,
+    num: numero,
+  });
+
+  if (error) {
+    const msg = error.message || '';
+    if (msg.includes('bad_amount'))
+      return NextResponse.json({ error: 'Montant supérieur au solde disponible.' }, { status: 400 });
+    if (msg.includes('no_profile'))
+      return NextResponse.json({ error: 'Profil introuvable.' }, { status: 404 });
+    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
+  }
+
+  const m = data as number;
+  return NextResponse.json({ ok: true, montant: m, fcfa: Math.round(m * TAUX_FCFA), operateur });
+}

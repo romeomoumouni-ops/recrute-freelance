@@ -1,0 +1,32 @@
+PROTOTYPE HTML — recrutefreelance.com
+=====================================
+
+Ouvrir index.html dans un navigateur. Aucune installation nécessaire.
+
+Pages :
+- index.html       Page d'accueil
+- recherche.html   Recherche de freelances (filtres : catégorie, pays, budget, tri)
+- freelance.html   Profil public d'un freelance + commande + paiement simulé
+- inscription.html Création de compte (entreprise ou freelance + Mobile Money)
+- connexion.html   Connexion
+- dashboard.html   Tableau de bord (vue entreprise ou vue freelance)
+- messagerie.html  Messagerie type chat (réponses simulées)
+- parametres.html  Paramètres : vérification du profil, compte, paiement, notifications
+- mon-profil.html  Profil éditable du freelance : photo, bio, compétences, services, portfolio, CV
+- profil-public.html  Profil public du freelance (aperçu de ce que voient les entreprises)
+  → accessible en cliquant sur son nom dans l'en-tête ; les services créés
+    dans "Modifier mon profil" y apparaissent automatiquement
+
+Parcours de démo complet :
+1. S'inscrire comme FREELANCE → remplir "Mon profil" (photo, bio 50+ caractères,
+   2 images de portfolio, CV, 1 service) → dans Paramètres > Vérification,
+   le badge "Freelance approuvé" s'active quand tous les critères sont remplis.
+2. Se déconnecter, s'inscrire comme ENTREPRISE → chercher un freelance,
+   commander, "payer" → valider la livraison dans le tableau de bord
+   → les fonds partent vers le Mobile Money du freelance.
+3. Côté freelance : le solde apparaît, retrait possible via Orange Money,
+   MTN MoMo, Wave ou Moov Money.
+4. Messagerie accessible via l'icône 💬 dans l'en-tête (connecté).
+
+Les données (compte, profil, photos, commandes, messages) sont stockées en
+local dans le navigateur (localStorage). Aucun paiement réel.

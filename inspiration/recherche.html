@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trouver un freelance — recrutefreelance.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <nav class="nav">
+        <a href="recherche.html">Trouver un freelance</a>
+        <a href="index.html#comment">Comment ça marche</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <div class="page-head">
+    <div class="container">
+      <h1>Trouver un freelance</h1>
+      <p style="font-size:.88rem;color:var(--gray-300)">Des talents vérifiés en Afrique francophone, prêts à travailler avec vous.</p>
+    </div>
+  </div>
+
+  <div class="container" style="padding-bottom:80px">
+    <div class="filters">
+      <input type="text" id="f-q" placeholder="Rechercher par nom, compétence, métier…" oninput="render()">
+      <select id="f-cat" onchange="render()">
+        <option value="">Toutes les catégories</option>
+        <option value="dev">Développement</option>
+        <option value="design">Design</option>
+        <option value="marketing">Marketing Digital</option>
+        <option value="video">Vidéo &amp; Animation</option>
+        <option value="ia">Services IA</option>
+      </select>
+      <select id="f-pays" onchange="render()">
+        <option value="">Tous les pays</option>
+      </select>
+      <select id="f-budget" onchange="render()">
+        <option value="">Tous les tarifs</option>
+        <option value="120">Jusqu'à 120 € / jour</option>
+        <option value="160">Jusqu'à 160 € / jour</option>
+        <option value="200">Jusqu'à 200 € / jour</option>
+      </select>
+      <select id="f-tri" onchange="render()">
+        <option value="note">Mieux notés</option>
+        <option value="prix-asc">Prix croissant</option>
+        <option value="prix-desc">Prix décroissant</option>
+      </select>
+    </div>
+
+    <div class="results-count" id="count"></div>
+    <div class="freelance-grid" id="results"></div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    // Pré-remplissage depuis l'URL (?q=, ?cat=)
+    const params = new URLSearchParams(location.search);
+    if (params.get('q')) document.getElementById('f-q').value = params.get('q');
+    if (params.get('cat')) document.getElementById('f-cat').value = params.get('cat');
+
+    // Liste des pays depuis les données
+    const paysSelect = document.getElementById('f-pays');
+    [...new Set(FREELANCES.map(f => f.pays))].sort().forEach(p => {
+      paysSelect.insertAdjacentHTML('beforeend', '<option>' + p + '</option>');
+    });
+
+    function render() {
+      const q = document.getElementById('f-q').value.toLowerCase().trim();
+      const cat = document.getElementById('f-cat').value;
+      const pays = document.getElementById('f-pays').value;
+      const budget = document.getElementById('f-budget').value;
+      const tri = document.getElementById('f-tri').value;
+
+      let list = FREELANCES.filter(f => {
+        const texte = (f.nom + ' ' + f.role + ' ' + f.skills.join(' ') + ' ' + CATEGORIES[f.cat]).toLowerCase();
+        if (q && !texte.includes(q)) return false;
+        if (cat && f.cat !== cat) return false;
+        if (pays && f.pays !== pays) return false;
+        if (budget && f.tarif > Number(budget)) return false;
+        return true;
+      });
+
+      if (tri === 'note') list.sort((a, b) => b.note - a.note);
+      if (tri === 'prix-asc') list.sort((a, b) => a.tarif - b.tarif);
+      if (tri === 'prix-desc') list.sort((a, b) => b.tarif - a.tarif);
+
+      document.getElementById('count').textContent =
+        list.length + ' freelance' + (list.length > 1 ? 's' : '') + ' disponible' + (list.length > 1 ? 's' : '');
+      document.getElementById('results').innerHTML =
+        list.length ? list.map(flCard).join('') :
+        '<div class="empty" style="grid-column:1/-1">Aucun freelance ne correspond à votre recherche.</div>';
+    }
+
+    render();
+  </script>
+</body>
+</html>

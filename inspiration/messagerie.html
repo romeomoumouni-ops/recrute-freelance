@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messagerie — recrutefreelance.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <nav class="nav">
+        <a href="recherche.html">Trouver un freelance</a>
+        <a href="dashboard.html">Tableau de bord</a>
+        <a href="messagerie.html">Messagerie</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="chat-layout vue-liste" id="chat-layout">
+      <div class="conv-list">
+        <div class="conv-list-head">Messages</div>
+        <div id="convs"></div>
+      </div>
+      <div class="chat-zone" id="chat-zone">
+        <div class="chat-vide">Sélectionnez une conversation</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const user = getUser();
+    if (!user) { location.href = 'connexion.html'; throw new Error('redirect'); }
+
+    /* Conversations en localStorage — amorcées avec 2 conversations de démo */
+    function seedConvs() {
+      let convs = store.get('convs', null);
+      if (!convs) {
+        convs = [
+          { id: 1, avec: 'Awa Diop', messages: [
+            { de: 'eux', txt: 'Bonjour ! Merci pour votre message. Pouvez-vous m\'en dire plus sur votre projet ?', heure: '09:14' },
+            { de: 'moi', txt: 'Bonjour Awa, je cherche à refondre mon site vitrine, environ 5 pages.', heure: '09:20' },
+            { de: 'eux', txt: 'Parfait, c\'est tout à fait dans mes cordes. Je peux vous livrer en 10 jours. Souhaitez-vous un devis détaillé ?', heure: '09:26' }
+          ]},
+          { id: 2, avec: 'Koffi Mensah', messages: [
+            { de: 'eux', txt: 'Bonjour, j\'ai bien reçu votre brief pour le design de l\'application. Je vous prépare les premières maquettes.', heure: 'Hier' }
+          ]}
+        ];
+        store.set('convs', convs);
+      }
+      return convs;
+    }
+
+    let convs = seedConvs();
+    let activeId = Number(new URLSearchParams(location.search).get('c')) || null;
+
+    const REPONSES = [
+      'Très bien, je note. Je reviens vers vous rapidement avec une proposition.',
+      'C\'est noté ! Je peux commencer dès cette semaine si vous validez.',
+      'Merci pour ces précisions. Je vous envoie un premier livrable sous 48h.',
+      'Parfait. N\'hésitez pas si vous avez d\'autres questions !'
+    ];
+
+    function renderConvs() {
+      document.getElementById('convs').innerHTML = convs.map(c => {
+        const dernier = c.messages[c.messages.length - 1];
+        return '<div class="conv' + (c.id === activeId ? ' active' : '') + '" onclick="openConv(' + c.id + ')">' +
+          '<div class="avatar">' + initiales(c.avec) + '</div>' +
+          '<div class="conv-info"><div class="nom">' + c.avec + '</div>' +
+          '<div class="apercu">' + dernier.txt + '</div></div>' +
+          '<div class="heure">' + dernier.heure + '</div></div>';
+      }).join('');
+    }
+
+    function openConv(id) {
+      activeId = id;
+      document.getElementById('chat-layout').classList.remove('vue-liste');
+      renderConvs();
+      renderChat();
+    }
+
+    function backToList() {
+      document.getElementById('chat-layout').classList.add('vue-liste');
+    }
+
+    function renderChat() {
+      const c = convs.find(x => x.id === activeId);
+      if (!c) return;
+      document.getElementById('chat-zone').innerHTML =
+        '<div class="chat-head">' +
+          '<button class="chat-back" onclick="backToList()">←</button>' +
+          '<div class="avatar">' + initiales(c.avec) + '</div>' +
+          '<div><div class="nom">' + c.avec + '</div><div class="statut-en-ligne">● En ligne</div></div>' +
+        '</div>' +
+        '<div class="chat-msgs" id="msgs">' +
+          c.messages.map(m =>
+            '<div class="msg ' + m.de + '">' + m.txt + '<span class="heure">' + m.heure + '</span></div>'
+          ).join('') +
+        '</div>' +
+        '<form class="chat-input" onsubmit="envoyer(event)">' +
+          '<input id="msg-input" type="text" placeholder="Écrivez votre message…" autocomplete="off">' +
+          '<button type="submit">Envoyer</button>' +
+        '</form>';
+      const msgs = document.getElementById('msgs');
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function heureNow() {
+      return new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function envoyer(e) {
+      e.preventDefault();
+      const input = document.getElementById('msg-input');
+      const txt = input.value.trim();
+      if (!txt) return;
+      const c = convs.find(x => x.id === activeId);
+      c.messages.push({ de: 'moi', txt: txt, heure: heureNow() });
+      store.set('convs', convs);
+      renderConvs(); renderChat();
+      // Réponse simulée
+      setTimeout(() => {
+        c.messages.push({ de: 'eux', txt: REPONSES[Math.floor(Math.random() * REPONSES.length)], heure: heureNow() });
+        store.set('convs', convs);
+        renderConvs();
+        if (activeId === c.id) renderChat();
+      }, 1400);
+    }
+
+    renderConvs();
+    // Sur desktop, ouvre la première conversation directement
+    if (window.innerWidth > 960) openConv(activeId || convs[0].id);
+    else if (activeId) openConv(activeId);
+  </script>
+</body>
+</html>

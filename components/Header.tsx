@@ -1,0 +1,184 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useState, useCallback } from 'react';
+import { useSession, signOut } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
+import { initiales } from '@/lib/utils';
+
+interface Me {
+  authenticated: boolean;
+  id?: string;
+  prenom?: string;
+  role?: 'CLIENT' | 'FREELANCE';
+  photoUrl?: string | null;
+  unread?: number;
+}
+
+export default function Header() {
+  const { status } = useSession();
+  const [me, setMe] = useState<Me | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  const load = useCallback(async () => {
+    try {
+      const res = await fetch('/api/me', { cache: 'no-store' });
+      const data = (await res.json()) as Me;
+      setMe(data);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      load();
+      const i = setInterval(load, 8000);
+      return () => clearInterval(i);
+    }
+    if (status === 'unauthenticated') setMe({ authenticated: false });
+  }, [status, load, pathname]);
+
+  // Ferme le menu mobile à chaque changement de page.
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  const logged = status === 'authenticated' && me?.authenticated;
+  const profileHref = me?.role === 'FREELANCE' ? `/freelance/${me?.id}` : '/dashboard';
+
+  return (
+    <header className="header">
+      <div className="container header-inner">
+        <Link className="logo" href="/">
+          recrute<span>freelance</span>
+        </Link>
+
+        <nav className="nav">
+          <Link href="/recherche">Trouver un freelance</Link>
+          <Link href="/#comment">Comment ça marche</Link>
+          {logged && <Link href="/dashboard">Tableau de bord</Link>}
+          {logged && <Link href="/messages">Messagerie</Link>}
+        </nav>
+
+        <div className="header-actions">
+          {status === 'loading' ? null : logged ? (
+            <>
+              <Link className="link-login icon-link" href="/messages" title="Messagerie">
+                💬
+                {!!me?.unread && <span className="badge-count">{me.unread}</span>}
+              </Link>
+              <Link className="link-login icon-link" href="/parametres" title="Paramètres">
+                ⚙️
+              </Link>
+              {me?.role === 'FREELANCE' && (
+                <Link className="link-login hide-sm" href="/mon-profil">
+                  Modifier mon profil
+                </Link>
+              )}
+              <Link
+                className="link-login"
+                href={profileHref}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+              >
+                {me?.photoUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={me.photoUrl}
+                    alt=""
+                    style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover' }}
+                  />
+                ) : (
+                  <span
+                    className="avatar"
+                    style={{ width: 34, height: 34, fontSize: '.7rem', display: 'inline-flex' }}
+                  >
+                    {initiales(me?.prenom || '?')}
+                  </span>
+                )}
+                <span className="hide-sm">{me?.prenom}</span>
+              </Link>
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => signOut({ callbackUrl: '/' })}
+              >
+                Déconnexion
+              </button>
+            </>
+          ) : (
+            <>
+              <Link className="link-login" href="/connexion">
+                Se connecter
+              </Link>
+              <Link className="btn btn-dark" href="/inscription">
+                S&apos;inscrire
+              </Link>
+            </>
+          )}
+        </div>
+
+        {/* Bouton menu mobile */}
+        <button
+          className="hamburger"
+          aria-label="Menu"
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
+      </div>
+
+      {/* Menu déroulant mobile */}
+      {menuOpen && (
+        <div className="mobile-menu">
+          <div className="container">
+            <Link href="/recherche" className="mm-link">
+              Trouver un freelance
+            </Link>
+            <Link href="/#comment" className="mm-link">
+              Comment ça marche
+            </Link>
+            {logged ? (
+              <>
+                <Link href="/dashboard" className="mm-link">
+                  Tableau de bord
+                </Link>
+                <Link href="/messages" className="mm-link">
+                  Messagerie {!!me?.unread && <span className="badge-count">{me.unread}</span>}
+                </Link>
+                {me?.role === 'FREELANCE' && (
+                  <Link href="/mon-profil" className="mm-link">
+                    Modifier mon profil
+                  </Link>
+                )}
+                <Link href={profileHref} className="mm-link">
+                  Mon profil
+                </Link>
+                <Link href="/parametres" className="mm-link">
+                  Paramètres
+                </Link>
+                <button
+                  className="btn btn-outline btn-block"
+                  style={{ marginTop: 8 }}
+                  onClick={() => signOut({ callbackUrl: '/' })}
+                >
+                  Déconnexion
+                </button>
+              </>
+            ) : (
+              <div style={{ display: 'grid', gap: 10, marginTop: 8 }}>
+                <Link className="btn btn-outline btn-block" href="/connexion">
+                  Se connecter
+                </Link>
+                <Link className="btn btn-dark btn-block" href="/inscription">
+                  S&apos;inscrire
+                </Link>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}

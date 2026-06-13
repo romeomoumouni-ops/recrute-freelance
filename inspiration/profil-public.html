@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mon profil public — recrutefreelance.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+  <style>
+    .preview-banner {
+      background: var(--black); color: var(--white); border-radius: var(--radius);
+      padding: 14px 20px; margin-top: 24px; display: flex; align-items: center;
+      justify-content: space-between; gap: 14px; flex-wrap: wrap; font-size: .82rem;
+    }
+    .photo-pub {
+      width: 96px; height: 96px; border-radius: 50%; background: var(--black);
+      color: var(--white); display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; font-weight: 700; overflow: hidden; flex-shrink: 0;
+    }
+    .photo-pub img { width: 100%; height: 100%; object-fit: cover; }
+    .badge-verifie { background: #e3f2e9; color: var(--green); border-color: #c4e4d2; }
+    .badge-attente { background: var(--off-white); color: var(--gray-500); }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <nav class="nav">
+        <a href="recherche.html">Trouver un freelance</a>
+        <a href="dashboard.html">Tableau de bord</a>
+        <a href="messagerie.html">Messagerie</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="preview-banner" id="preview-banner">
+      <span>👁 <strong>Aperçu de votre profil public</strong> — voici exactement ce que voient les entreprises.</span>
+      <a class="btn btn-light" href="mon-profil.html">Modifier mon profil</a>
+    </div>
+    <div class="profile-grid" id="profile"></div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const user = getUser();
+    if (!user) { location.href = 'connexion.html'; throw new Error('redirect'); }
+    const p = getProfil();
+    const verifie = isVerified();
+
+    function photoHTML() {
+      return '<div class="photo-pub">' + (p.photo ? '<img src="' + p.photo + '">' : initiales(user.prenom)) + '</div>';
+    }
+
+    function render() {
+      const badges =
+        (verifie
+          ? '<span class="badge badge-verifie">✓ Freelance approuvé</span>'
+          : '<span class="badge badge-attente">Vérification en cours</span>') +
+        (user.pays ? '<span class="badge">📍 ' + user.pays + '</span>' : '');
+
+      const services = p.services.length
+        ? p.services.map((s, i) =>
+            '<div class="service-item"><div><div class="titre">' + s.titre + '</div>' +
+            '<div class="desc">' + (s.desc || '') + '</div></div>' +
+            '<div style="text-align:right"><div class="prix">' + euros(s.prix) + '</div>' +
+            '<button class="btn btn-dark btn-sm" style="margin-top:8px" onclick="toast(\'Côté client, ce bouton lance la commande de ce service.\')">Commander</button></div></div>'
+          ).join('')
+        : '<p style="font-size:.83rem;color:var(--gray-500)">Aucun service publié pour le moment. <a href="mon-profil.html" style="font-weight:700;text-decoration:underline">Créez votre premier service</a> pour qu\'il apparaisse ici.</p>';
+
+      const portfolio = p.portfolio.length
+        ? '<div class="portfolio-grid">' + p.portfolio.map(img =>
+            '<div class="portfolio-item"><img src="' + img + '"></div>').join('') + '</div>'
+        : '<p style="font-size:.83rem;color:var(--gray-500)">Aucune réalisation ajoutée pour le moment.</p>';
+
+      const prixMin = p.services.length ? Math.min(...p.services.map(s => s.prix)) : null;
+
+      document.getElementById('profile').innerHTML =
+        '<div class="profile-main">' +
+          '<div class="fl-top">' + photoHTML() +
+            '<div><h1>' + user.prenom + '</h1>' +
+            '<div class="role">' + (p.titre || 'Titre professionnel à compléter') + '</div></div></div>' +
+          '<div class="fl-meta" style="margin-top:14px">' + badges + '</div>' +
+
+          '<div class="profile-section"><h2>À propos</h2><p>' +
+            (p.bio || 'Votre bio apparaîtra ici. Présentez votre parcours et vos spécialités dans « Modifier mon profil ».') + '</p></div>' +
+
+          '<div class="profile-section"><h2>Compétences</h2>' +
+            (p.skills.length
+              ? '<div class="skills">' + p.skills.map(s => '<span class="badge">' + s + '</span>').join('') + '</div>'
+              : '<p style="font-size:.83rem;color:var(--gray-500)">Aucune compétence ajoutée.</p>') + '</div>' +
+
+          '<div class="profile-section"><h2>Mes services</h2>' + services + '</div>' +
+
+          '<div class="profile-section"><h2>Portfolio</h2>' + portfolio + '</div>' +
+
+          (p.cv ? '<div class="profile-section"><h2>CV</h2><div class="cv-file" style="max-width:380px">📄 ' + p.cv + '</div></div>' : '') +
+        '</div>' +
+
+        '<div class="order-box">' +
+          (prixMin !== null
+            ? '<div class="price">À partir de ' + euros(prixMin) + '</div>'
+            : '<div class="price" style="font-size:1rem;color:var(--gray-500)">Tarifs à venir</div>') +
+          '<hr>' +
+          '<div class="order-line"><span>Statut</span><span>' + (verifie ? '✓ Vérifié' : 'En attente') + '</span></div>' +
+          '<div class="order-line"><span>Paiement</span><span>Mobile Money</span></div>' +
+          '<div class="order-line"><span>Langue</span><span>Français</span></div>' +
+          '<hr>' +
+          '<button class="btn btn-dark btn-block" onclick="toast(\'Côté client, ce bouton ouvre la messagerie avec vous.\')">Contacter</button>' +
+          '<a class="btn btn-outline btn-block" style="margin-top:10px" href="mon-profil.html">Modifier mon profil</a>' +
+        '</div>';
+    }
+
+    render();
+  </script>
+</body>
+</html>

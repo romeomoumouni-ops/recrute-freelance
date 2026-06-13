@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription — recrutefreelance.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <h1>Créer un compte</h1>
+      <p class="sub">Gratuit, en moins d'une minute.</p>
+
+      <div class="role-switch">
+        <button type="button" id="btn-client" onclick="setRole('client')">🏢 Je suis une entreprise</button>
+        <button type="button" id="btn-freelance" onclick="setRole('freelance')">💼 Je suis freelance</button>
+      </div>
+
+      <form onsubmit="register(event)">
+        <div class="field">
+          <label for="prenom">Prénom</label>
+          <input id="prenom" type="text" required placeholder="Ex : Romeo">
+        </div>
+        <div class="field">
+          <label for="email">Adresse e-mail</label>
+          <input id="email" type="email" required placeholder="vous@exemple.com">
+        </div>
+        <div class="field">
+          <label for="password">Mot de passe</label>
+          <input id="password" type="password" required minlength="6" placeholder="6 caractères minimum">
+        </div>
+
+        <div class="field" id="field-pays" style="display:none">
+          <label for="pays">Pays</label>
+          <select id="pays">
+            <option>Bénin</option><option>Burkina Faso</option><option>Cameroun</option>
+            <option>Côte d'Ivoire</option><option>Guinée</option><option>Mali</option>
+            <option>Niger</option><option>RD Congo</option><option>Sénégal</option><option>Togo</option>
+          </select>
+        </div>
+        <div class="field" id="field-momo" style="display:none">
+          <label for="momo">Numéro Mobile Money</label>
+          <input id="momo" type="tel" placeholder="+229 01 90 00 00 00">
+          <div class="hint">C'est sur ce numéro que vous recevrez vos paiements.</div>
+        </div>
+
+        <button class="btn btn-dark btn-block" type="submit">Créer mon compte</button>
+      </form>
+
+      <p class="auth-alt">Déjà inscrit ? <a href="connexion.html">Se connecter</a></p>
+    </div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    let role = new URLSearchParams(location.search).get('role') === 'freelance' ? 'freelance' : 'client';
+
+    function setRole(r) {
+      role = r;
+      document.getElementById('btn-client').classList.toggle('active', r === 'client');
+      document.getElementById('btn-freelance').classList.toggle('active', r === 'freelance');
+      document.getElementById('field-pays').style.display = r === 'freelance' ? 'block' : 'none';
+      document.getElementById('field-momo').style.display = r === 'freelance' ? 'block' : 'none';
+    }
+    setRole(role);
+
+    function register(e) {
+      e.preventDefault();
+      setUser({
+        prenom: document.getElementById('prenom').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        role: role,
+        pays: role === 'freelance' ? document.getElementById('pays').value : null,
+        momo: role === 'freelance' ? document.getElementById('momo').value.trim() : null
+      });
+      location.href = 'dashboard.html?bienvenue=1';
+    }
+  </script>
+</body>
+</html>

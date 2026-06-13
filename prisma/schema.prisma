@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// SQLite ne supporte pas les enums Prisma : les champs ci-dessous utilisent String
+// et sont validés côté serveur via Zod (cf. lib/constants.ts).
+// Role          : CLIENT | FREELANCE
+// OperateurMomo : ORANGE | MTN | WAVE | MOOV
+// OrderStatus   : EN_ATTENTE | EN_COURS | LIVREE | VALIDEE | PAYEE | ANNULEE
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String
+  prenom        String
+  role          String
+  pays          String?
+  telephoneMomo String?
+  operateurMomo String?
+  notifPrefs    String? // JSON
+  createdAt     DateTime @default(now())
+
+  profile           Profile?
+  ordersAsClient    Order[]        @relation("ClientOrders")
+  ordersAsFreelance Order[]        @relation("FreelanceOrders")
+  convsAsClient     Conversation[] @relation("ClientConvs")
+  convsAsFreelance  Conversation[] @relation("FreelanceConvs")
+  messages          Message[]
+  reviewsWritten    Review[]
+  withdrawals       Withdrawal[]
+}
+
+model Profile {
+  id              String          @id @default(cuid())
+  userId          String          @unique
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  photoUrl        String?
+  titre           String?
+  bio             String?
+  note            String? // petit mot / note affiché sur le profil public
+  cvUrl           String?
+  cvName          String?
+  skills          String          @default("[]") // JSON array of strings
+  estVerifie      Boolean         @default(false)
+  soldeDisponible Float           @default(0)
+  totalGagne      Float           @default(0)
+  cat             String? // categorie principale (dev, design, ...)
+  tarifJour       Float? // tarif indicatif / jour
+  services        Service[]
+  portfolio       PortfolioItem[]
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  titre       String
+  description String
+  prix        Float
+  delaiJours  Int      @default(7)
+  createdAt   DateTime @default(now())
+}
+
+model PortfolioItem {
+  id        String  @id @default(cuid())
+  profileId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  ordre     Int     @default(0)
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  clientId    String
+  client      User     @relation("ClientOrders", fields: [clientId], references: [id])
+  freelanceId String
+  freelance   User     @relation("FreelanceOrders", fields: [freelanceId], references: [id])
+  serviceId   String?
+  titre       String
+  description String?
+  jours       Int
+  montant     Float // montant net freelance
+  commission  Float // 10% payee par le client
+  statut      String   @default("EN_COURS")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  review      Review?
+}
+
+model Conversation {
+  id          String    @id @default(cuid())
+  clientId    String
+  client      User      @relation("ClientConvs", fields: [clientId], references: [id])
+  freelanceId String
+  freelance   User      @relation("FreelanceConvs", fields: [freelanceId], references: [id])
+  createdAt   DateTime  @default(now())
+  messages    Message[]
+
+  @@unique([clientId, freelanceId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  contenu        String
+  type           String       @default("TEXT") // TEXT | DEVIS
+  meta           String? // JSON (détails du devis : service, prix)
+  lu             Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  note        Int
+  commentaire String?
+  createdAt   DateTime @default(now())
+}
+
+model Withdrawal {
+  id          String   @id @default(cuid())
+  freelanceId String
+  freelance   User     @relation(fields: [freelanceId], references: [id])
+  montant     Float
+  operateur   String
+  numero      String
+  statut      String   @default("EFFECTUE")
+  createdAt   DateTime @default(now())
+}

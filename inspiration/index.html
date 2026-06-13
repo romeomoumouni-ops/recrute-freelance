@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>recrutefreelance.com — Les meilleurs freelances d'Afrique francophone</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <nav class="nav">
+        <a href="recherche.html">Trouver un freelance</a>
+        <a href="#entreprises">Pour les entreprises</a>
+        <a href="#freelances">Pour les freelances</a>
+        <a href="#comment">Comment ça marche</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <img class="hero-bg" src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=1800&q=80" alt="Freelance au travail">
+    <div class="hero-overlay"></div>
+    <div class="container">
+      <div class="hero-content">
+        <h1>Trouvez le freelance parfait pour vos besoins</h1>
+        <p class="sub">Connectez votre entreprise aux meilleurs talents d'Afrique francophone. Même langue, même fuseau horaire, tarifs jusqu'à 60&nbsp;% plus compétitifs.</p>
+        <form class="search" onsubmit="goSearch(event)">
+          <input type="text" id="home-search" placeholder="Rechercher un service, un freelance ou une catégorie">
+          <button type="submit">Rechercher</button>
+        </form>
+        <div class="chips">
+          <a class="chip" href="recherche.html?cat=design">Design de logo</a>
+          <a class="chip" href="recherche.html?cat=dev">Développement Web</a>
+          <a class="chip" href="recherche.html?cat=ia">Services IA</a>
+          <a class="chip" href="recherche.html?cat=marketing">Marketing Digital <span class="tag">Populaire</span></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="container stats-inner">
+      <div class="stat"><strong>Jusqu'à -60&nbsp;%</strong><span>par rapport aux tarifs du marché européen</span></div>
+      <div class="stat"><strong>Paiement Mobile Money</strong><span>les freelances sont payés directement, sans friction</span></div>
+      <div class="stat"><strong>100&nbsp;% francophone</strong><span>même langue, fuseaux horaires quasi identiques</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="services">
+    <div class="container">
+      <div class="section-head">
+        <h2>Services populaires</h2>
+        <a class="all-link" href="recherche.html">Tous les services</a>
+      </div>
+      <div class="cards">
+        <a class="card" href="recherche.html?cat=ia">
+          <div class="icon">🤖</div>
+          <h3>Services IA</h3>
+          <p>Automatisation, chatbots, data — les meilleurs experts IA d'Afrique francophone.</p>
+        </a>
+        <a class="card dark" href="recherche.html?cat=video">
+          <div class="icon">🎬</div>
+          <h3>Vidéo &amp; Animation</h3>
+          <p>Montage, motion design et animation pour vos contenus et campagnes.</p>
+        </a>
+        <a class="card" href="recherche.html?cat=dev">
+          <div class="icon">💻</div>
+          <h3>Développement Web &amp; Mobile</h3>
+          <p>Sites, applications et SaaS livrés par des développeurs confirmés.</p>
+        </a>
+        <a class="card" href="recherche.html?cat=marketing">
+          <div class="icon">📣</div>
+          <h3>Marketing Digital</h3>
+          <p>SEO, réseaux sociaux, publicité en ligne — boostez votre visibilité.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0">
+    <div class="container promise">
+      <div class="promise-card light" id="entreprises">
+        <div class="kicker">Pour les entreprises en Europe</div>
+        <h3>Des talents vérifiés, des budgets maîtrisés</h3>
+        <ul>
+          <li>Freelances sélectionnés et évalués sur leurs livrables</li>
+          <li>Tarifs nettement plus rentables qu'en Europe, à qualité égale</li>
+          <li>Collaboration fluide : même langue, fuseaux horaires proches</li>
+          <li>Paiement sécurisé, libéré uniquement à la livraison</li>
+        </ul>
+        <a class="btn btn-dark" href="recherche.html">Trouver un freelance</a>
+      </div>
+      <div class="promise-card dark" id="freelances">
+        <div class="kicker">Pour les freelances en Afrique</div>
+        <h3>Des clients européens, payés sur votre Mobile Money</h3>
+        <ul>
+          <li>Accédez à des missions d'entreprises européennes</li>
+          <li>Recevez vos paiements directement sur votre Mobile Money</li>
+          <li>Pas besoin de compte bancaire international</li>
+          <li>Construisez votre réputation avec des avis vérifiés</li>
+        </ul>
+        <a class="btn btn-light" href="inscription.html?role=freelance">Devenir freelance</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="comment" style="padding-top:0">
+    <div class="container">
+      <div class="section-head"><h2>Comment ça marche</h2></div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h3>Publiez votre besoin</h3>
+          <p>Décrivez votre projet en quelques minutes ou parcourez les profils des freelances vérifiés.</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h3>Choisissez votre freelance</h3>
+          <p>Comparez les propositions, échangez en français et sélectionnez le profil idéal, sans barrière de fuseau horaire.</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h3>Payez en toute sécurité</h3>
+          <p>Le paiement est sécurisé jusqu'à la livraison. Le freelance reçoit ses fonds directement sur son Mobile Money.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="container" style="padding-bottom:0">
+    <div class="cta">
+      <h2>Prêt à collaborer avec les meilleurs talents francophones&nbsp;?</h2>
+      <p>Rejoignez recrutefreelance.com dès aujourd'hui — l'inscription est gratuite, pour les entreprises comme pour les freelances.</p>
+      <div class="cta-actions">
+        <a class="btn btn-light" href="recherche.html">Je cherche un freelance</a>
+        <a class="btn btn-ghost" href="inscription.html?role=freelance">Je suis freelance</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <a class="logo" href="index.html">recrute<span>freelance</span></a>
+          <p class="tagline">La plateforme qui connecte les entreprises européennes aux freelances d'Afrique francophone.</p>
+        </div>
+        <div>
+          <h4>Plateforme</h4>
+          <ul>
+            <li><a href="recherche.html">Trouver un freelance</a></li>
+            <li><a href="#comment">Comment ça marche</a></li>
+            <li><a href="#">Tarifs</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Communauté</h4>
+          <ul>
+            <li><a href="#entreprises">Pour les entreprises</a></li>
+            <li><a href="#freelances">Pour les freelances</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4>Support</h4>
+          <ul>
+            <li><a href="#">Centre d'aide</a></li>
+            <li><a href="#">Contact</a></li>
+            <li><a href="#">Conditions d'utilisation</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 recrutefreelance.com — Tous droits réservés</span>
+        <span>🌍 FR</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+  <script>
+    function goSearch(e) {
+      e.preventDefault();
+      const q = document.getElementById('home-search').value.trim();
+      location.href = 'recherche.html' + (q ? '?q=' + encodeURIComponent(q) : '');
+    }
+  </script>
+</body>
+</html>

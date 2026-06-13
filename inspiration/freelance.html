@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil freelance — recrutefreelance.com</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="container header-inner">
+      <a class="logo" href="index.html">recrute<span>freelance</span></a>
+      <nav class="nav">
+        <a href="recherche.html">Trouver un freelance</a>
+        <a href="index.html#comment">Comment ça marche</a>
+      </nav>
+      <div class="header-actions" id="header-actions"></div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="profile-grid" id="profile"></div>
+  </div>
+
+  <!-- Modal commande / paiement -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" id="modal-content"></div>
+  </div>
+
+  <script src="assets/app.js"></script>
+  <script>
+    const id = Number(new URLSearchParams(location.search).get('id')) || 1;
+    const f = FREELANCES.find(x => x.id === id) || FREELANCES[0];
+    const COMMISSION = 0.10; // 10 % de commission plateforme
+    let jours = 5;
+
+    document.title = f.nom + ' — recrutefreelance.com';
+
+    function renderProfile() {
+      const total = f.tarif * jours;
+      const commission = Math.round(total * COMMISSION);
+      document.getElementById('profile').innerHTML =
+        '<div class="profile-main">' +
+          '<div class="fl-top"><div class="avatar">' + initiales(f.nom) + '</div>' +
+          '<div><h1>' + f.nom + '</h1><div class="role">' + f.role + ' · 📍 ' + f.pays + '</div></div></div>' +
+          '<div class="fl-meta" style="margin-top:14px"><span class="rating">★ ' + f.note.toFixed(1) + ' (' + f.avis + ' avis)</span>' +
+          '<span class="badge">' + CATEGORIES[f.cat] + '</span><span class="badge">✓ Profil vérifié</span></div>' +
+          '<div class="profile-section"><h2>À propos</h2><p>' + f.bio + '</p></div>' +
+          '<div class="profile-section"><h2>Compétences</h2><div class="skills">' +
+          f.skills.map(s => '<span class="badge">' + s + '</span>').join('') + '</div></div>' +
+          '<div class="profile-section"><h2>Paiement</h2><p>Reçoit ses paiements via <strong>' + f.momo + '</strong> — libérés automatiquement à la validation de la livraison.</p></div>' +
+        '</div>' +
+        '<div class="order-box">' +
+          '<div class="price">' + euros(f.tarif) + ' <small>/ jour</small></div>' +
+          '<hr>' +
+          '<div class="field"><label for="jours">Durée de la mission (jours)</label>' +
+          '<input id="jours" type="number" min="1" max="60" value="' + jours + '" onchange="updateJours(this.value)"></div>' +
+          '<div class="order-line"><span>' + euros(f.tarif) + ' × ' + jours + ' jour' + (jours > 1 ? 's' : '') + '</span><span>' + euros(total) + '</span></div>' +
+          '<div class="order-line"><span>Frais de service (10 %)</span><span>' + euros(commission) + '</span></div>' +
+          '<div class="order-line total"><span>Total</span><span>' + euros(total + commission) + '</span></div>' +
+          '<hr>' +
+          '<button class="btn btn-dark btn-block" onclick="openOrder()">Commander la mission</button>' +
+          '<p style="font-size:.7rem;color:var(--gray-500);text-align:center;margin-top:12px">🔒 Paiement sécurisé — fonds libérés à la livraison</p>' +
+        '</div>';
+    }
+
+    function updateJours(v) {
+      jours = Math.max(1, Math.min(60, Number(v) || 1));
+      renderProfile();
+    }
+
+    /* ----- Tunnel de commande (3 étapes) ----- */
+    function openOrder() {
+      const user = getUser();
+      if (!user) { location.href = 'connexion.html'; return; }
+      stepBrief();
+      document.getElementById('modal').classList.add('open');
+    }
+    function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+    function stepBrief() {
+      document.getElementById('modal-content').innerHTML =
+        '<button class="modal-close" onclick="closeModal()">✕</button>' +
+        '<h2>Décrivez votre mission</h2><p class="sub">Étape 1 sur 2 — ' + f.nom + ' recevra ce brief.</p>' +
+        '<div class="field"><label>Titre de la mission</label><input id="o-titre" type="text" placeholder="Ex : Refonte de mon site vitrine" required></div>' +
+        '<div class="field"><label>Description</label><textarea id="o-desc" rows="4" placeholder="Décrivez votre besoin, vos délais, vos attentes…"></textarea></div>' +
+        '<button class="btn btn-dark btn-block" onclick="stepPay()">Continuer vers le paiement</button>';
+    }
+
+    function stepPay() {
+      const titre = document.getElementById('o-titre').value.trim();
+      if (!titre) { toast('Donnez un titre à votre mission.'); return; }
+      window._titre = titre;
+      window._desc = document.getElementById('o-desc').value.trim();
+      const total = f.tarif * jours;
+      const commission = Math.round(total * COMMISSION);
+      document.getElementById('modal-content').innerHTML =
+        '<button class="modal-close" onclick="closeModal()">✕</button>' +
+        '<h2>Paiement sécurisé</h2><p class="sub">Étape 2 sur 2 — les fonds sont bloqués jusqu\'à la livraison.</p>' +
+        '<div class="order-line"><span>Mission</span><span>' + window._titre + '</span></div>' +
+        '<div class="order-line"><span>' + jours + ' jour' + (jours > 1 ? 's' : '') + ' × ' + euros(f.tarif) + '</span><span>' + euros(total) + '</span></div>' +
+        '<div class="order-line"><span>Frais de service</span><span>' + euros(commission) + '</span></div>' +
+        '<div class="order-line total"><span>Total à payer</span><span>' + euros(total + commission) + '</span></div>' +
+        '<hr style="border:none;border-top:1px solid var(--border);margin:18px 0">' +
+        '<div class="field"><label>Numéro de carte</label><input type="text" placeholder="4242 4242 4242 4242" value="4242 4242 4242 4242"></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+        '<div class="field"><label>Expiration</label><input type="text" placeholder="12/27" value="12/27"></div>' +
+        '<div class="field"><label>CVC</label><input type="text" placeholder="123" value="123"></div></div>' +
+        '<button class="btn btn-dark btn-block" onclick="paySuccess()">Payer ' + euros(total + commission) + '</button>' +
+        '<p style="font-size:.7rem;color:var(--gray-500);text-align:center;margin-top:12px">Prototype — aucun paiement réel n\'est effectué.</p>';
+    }
+
+    function paySuccess() {
+      const total = f.tarif * jours;
+      const orders = getOrders();
+      orders.push({
+        id: Date.now(), freelanceId: f.id, freelance: f.nom, momo: f.momo,
+        titre: window._titre, desc: window._desc, jours: jours,
+        montant: total, commission: Math.round(total * COMMISSION),
+        statut: 'encours', date: new Date().toLocaleDateString('fr-FR'),
+        client: getUser().prenom
+      });
+      setOrders(orders);
+      document.getElementById('modal-content').innerHTML =
+        '<div class="center"><div class="success-icon">✓</div>' +
+        '<h2>Paiement confirmé !</h2>' +
+        '<p class="sub" style="margin-top:8px">Les fonds sont sécurisés. ' + f.nom + ' a été notifié(e) et reçoit son paiement sur ' + f.momo + ' dès que vous validez la livraison.</p>' +
+        '<a class="btn btn-dark btn-block" href="dashboard.html">Suivre ma mission</a></div>';
+    }
+
+    renderProfile();
+  </script>
+</body>
+</html>

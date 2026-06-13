@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { initiales, euros } from '@/lib/utils';
 import { getVerifChecks } from '@/lib/verification';
 import { CATEGORIES_LIST } from '@/lib/constants';
@@ -41,6 +42,7 @@ export default function ProfilEditor({
   telephoneMomo: string | null;
   initial: Initial;
 }) {
+  const router = useRouter();
   const [photo, setPhoto] = useState(initial.photoUrl);
   const [titre, setTitre] = useState(initial.titre);
   const [bio, setBio] = useState(initial.bio);
@@ -86,6 +88,8 @@ export default function ProfilEditor({
         cat: next?.cat ?? cat,
       }),
     });
+    // Revalide les Server Components (profil public, aperçu, vérification) après écriture.
+    if (res.ok) router.refresh();
     return res.ok;
   }
 
@@ -110,6 +114,7 @@ export default function ProfilEditor({
         return toast(data.error || 'Échec de l’envoi.');
       }
       setPhoto(data.photoUrl);
+      router.refresh();
       toast('Photo de profil ajoutée ✓');
     } catch {
       setPhoto(prev);
@@ -120,7 +125,10 @@ export default function ProfilEditor({
   }
   async function supprPhoto() {
     const res = await fetch('/api/profile/photo', { method: 'DELETE' });
-    if (res.ok) setPhoto(null);
+    if (res.ok) {
+      setPhoto(null);
+      router.refresh();
+    }
   }
 
   // ----- Compétences -----
@@ -167,11 +175,15 @@ export default function ProfilEditor({
     setSDesc('');
     setSPrix('');
     setSDelai('');
+    router.refresh();
     toast('Service ajouté ✓');
   }
   async function removeService(id: string) {
     const res = await fetch(`/api/services?id=${id}`, { method: 'DELETE' });
-    if (res.ok) setServices(services.filter((s) => s.id !== id));
+    if (res.ok) {
+      setServices(services.filter((s) => s.id !== id));
+      router.refresh();
+    }
   }
 
   // ----- Portfolio -----
@@ -187,6 +199,7 @@ export default function ProfilEditor({
       const data = await res.json();
       if (!res.ok) return toast(data.error || 'Échec de l’envoi.');
       setPortfolio([...portfolio, ...data.items]);
+      router.refresh();
       toast('Image(s) ajoutée(s) au portfolio ✓');
     } catch {
       toast('Échec de l’envoi.');
@@ -194,7 +207,10 @@ export default function ProfilEditor({
   }
   async function removePf(id: string) {
     const res = await fetch(`/api/profile/portfolio?id=${id}`, { method: 'DELETE' });
-    if (res.ok) setPortfolio(portfolio.filter((p) => p.id !== id));
+    if (res.ok) {
+      setPortfolio(portfolio.filter((p) => p.id !== id));
+      router.refresh();
+    }
   }
 
   // ----- CV -----
@@ -206,11 +222,15 @@ export default function ProfilEditor({
     const data = await res.json();
     if (!res.ok) return toast(data.error || 'Échec de l’envoi.');
     setCvName(data.cvName);
+    router.refresh();
     toast('CV chargé ✓');
   }
   async function removeCV() {
     const res = await fetch('/api/profile/cv', { method: 'DELETE' });
-    if (res.ok) setCvName(null);
+    if (res.ok) {
+      setCvName(null);
+      router.refresh();
+    }
   }
 
   const bioLen = bio.length;

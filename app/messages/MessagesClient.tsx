@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Avatar from '@/components/Avatar';
 import type { ConversationSummary } from '@/lib/conversations';
 import { heureCourte, euros } from '@/lib/utils';
+import { TAUX_FCFA } from '@/lib/constants';
 import { toast } from '@/lib/toast';
 
 interface Msg {
@@ -43,6 +44,60 @@ function DevisCard({ m }: { m: Msg }) {
   );
 }
 
+function DevisOfferCard({
+  m,
+  onPay,
+  paying,
+}: {
+  m: Msg;
+  onPay: (id: string) => void;
+  paying: boolean;
+}) {
+  let amountEur = 0;
+  let description = '';
+  let status = 'pending';
+  try {
+    if (m.meta) {
+      const p = JSON.parse(m.meta);
+      amountEur = p.amountEur || 0;
+      description = p.description || '';
+      status = p.status || 'pending';
+    }
+  } catch {
+    /* ignore */
+  }
+  const fcfa = Math.round(amountEur * TAUX_FCFA);
+  const paid = status === 'paid';
+  return (
+    <div className={`devis-msg offer ${m.mine ? 'moi' : 'eux'}`}>
+      <div className="devis-msg-head">💼 Devis{paid ? ' · payé ✓' : ''}</div>
+      <div className="devis-msg-service">
+        <span>{description}</span>
+        <span className="devis-msg-prix">{euros(amountEur)}</span>
+      </div>
+      {paid ? (
+        <p className="devis-msg-body" style={{ color: 'var(--green)', fontWeight: 600 }}>
+          ✓ Payé
+        </p>
+      ) : m.mine ? (
+        <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
+          En attente de paiement…
+        </p>
+      ) : (
+        <button
+          className="btn btn-dark btn-block"
+          disabled={paying}
+          onClick={() => onPay(m.id)}
+          style={{ marginTop: 4 }}
+        >
+          {paying ? 'Redirection…' : `Payer par carte (${fcfa.toLocaleString('fr-FR')} FCFA)`}
+        </button>
+      )}
+      <span className="heure">{m.heure}</span>
+    </div>
+  );
+}
+
 export default function MessagesClient({
   initialConversations,
 }: {
@@ -55,6 +110,50 @@ export default function MessagesClient({
   const [draft, setDraft] = useState('');
   const [showList, setShowList] = useState(true); // mobile : liste vs conversation
   const msgsRef = useRef<HTMLDivElement>(null);
+
+  // Devis chiffré (payable par carte)
+  const [offerOpen, setOfferOpen] = useState(false);
+  const [offerAmount, setOfferAmount] = useState('');
+  const [offerDesc, setOfferDesc] = useState('');
+  const [offerSending, setOfferSending] = useState(false);
+  const [payingId, setPayingId] = useState<string | null>(null);
+
+  async function sendOffer() {
+    if (!activeId) return;
+    setOfferSending(true);
+    const res = await fetch('/api/devis/offer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        conversationId: activeId,
+        amountEur: Number(offerAmount),
+        description: offerDesc.trim(),
+      }),
+    });
+    const data = await res.json();
+    setOfferSending(false);
+    if (!res.ok) return toast(data.error || 'Envoi impossible.');
+    setMessages((m) => [...m, data.message]);
+    setOfferOpen(false);
+    setOfferAmount('');
+    setOfferDesc('');
+    scrollBottom();
+  }
+
+  async function payOffer(offerMessageId: string) {
+    setPayingId(offerMessageId);
+    const res = await fetch('/api/devis/pay', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offerMessageId }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setPayingId(null);
+      return toast(data.error || 'Paiement impossible.');
+    }
+    window.location.href = data.checkoutUrl; // redirection vers Chariow
+  }
 
   const active = convs.find((c) => c.id === activeId) ?? null;
 
@@ -196,6 +295,8 @@ export default function MessagesClient({
               {messages.map((m) =>
                 m.type === 'DEVIS' ? (
                   <DevisCard key={m.id} m={m} />
+                ) : m.type === 'DEVIS_OFFER' ? (
+                  <DevisOfferCard key={m.id} m={m} onPay={payOffer} paying={payingId === m.id} />
                 ) : (
                   <div key={m.id} className={`msg ${m.mine ? 'moi' : 'eux'}`}>
                     {m.contenu}
@@ -205,6 +306,14 @@ export default function MessagesClient({
               )}
             </div>
             <form className="chat-input" onSubmit={send}>
+              <button
+                type="button"
+                className="chat-devis-btn"
+                title="Envoyer un devis à payer"
+                onClick={() => setOfferOpen(true)}
+              >
+                💼
+              </button>
               <input
                 type="text"
                 placeholder="Écrivez votre message…"
@@ -218,6 +327,54 @@ export default function MessagesClient({
         ) : (
           <div className="chat-vide">Sélectionnez une conversation</div>
         )}
+      </div>
+
+      {/* Modal : envoyer un devis chiffré */}
+      <div
+        className={`modal-backdrop${offerOpen ? ' open' : ''}`}
+        onClick={() => setOfferOpen(false)}
+      >
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close" onClick={() => setOfferOpen(false)} aria-label="Fermer">
+            ✕
+          </button>
+          <h2>Envoyer un devis</h2>
+          <p className="sub">
+            Le destinataire pourra le payer par carte. Les fonds (moins 10 % de commission) seront
+            crédités sur votre solde.
+          </p>
+          <div className="field">
+            <label>Prestation</label>
+            <input
+              type="text"
+              placeholder="Ex : Refonte de la page d'accueil"
+              value={offerDesc}
+              onChange={(e) => setOfferDesc(e.target.value)}
+            />
+          </div>
+          <div className="field">
+            <label>Montant (€)</label>
+            <input
+              type="number"
+              min={8}
+              placeholder="Ex : 450"
+              value={offerAmount}
+              onChange={(e) => setOfferAmount(e.target.value)}
+            />
+            <div className="hint">
+              {offerAmount && Number(offerAmount) > 0
+                ? `Le client paiera ≈ ${Math.round(Number(offerAmount) * TAUX_FCFA).toLocaleString('fr-FR')} FCFA · minimum 8 €`
+                : 'Minimum 8 € (limite Chariow).'}
+            </div>
+          </div>
+          <button
+            className="btn btn-dark btn-block"
+            disabled={offerSending || !offerDesc.trim() || Number(offerAmount) < 8}
+            onClick={sendOffer}
+          >
+            {offerSending ? 'Envoi…' : 'Envoyer le devis'}
+          </button>
+        </div>
       </div>
     </div>
   );

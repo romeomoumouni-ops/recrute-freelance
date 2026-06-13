@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import { Suspense } from 'react';
 import './globals.css';
-import Providers from '@/components/Providers';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toaster from '@/components/Toaster';
@@ -27,14 +26,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={montserrat.className}>
       <body>
-        <Providers>
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <Suspense fallback={null}>
-            <Toaster />
-          </Suspense>
-        </Providers>
+        <Header />
+        <main>{children}</main>
+        <Footer />
+        <Suspense fallback={null}>
+          <Toaster />
+        </Suspense>
       </body>
     </html>
   );

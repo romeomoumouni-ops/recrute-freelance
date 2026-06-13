@@ -2,35 +2,49 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createBrowserSupabase } from '@/lib/supabase-browser';
 import PasswordInput from '@/components/PasswordInput';
+import { toast } from '@/lib/toast';
 
 export default function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const [supabase] = useState(() => createBrowserSupabase());
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [needsConfirm, setNeedsConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
+    setNeedsConfirm(false);
     setLoading(true);
-    const res = await signIn('credentials', {
-      email,
+    const { error: err } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
       password,
-      redirect: false,
     });
     setLoading(false);
-    if (res?.error) {
-      setError('E-mail ou mot de passe incorrect.');
+
+    if (err) {
+      if (err.message.toLowerCase().includes('not confirmed')) {
+        setNeedsConfirm(true);
+        setError("Votre e-mail n'est pas encore confirmé. Vérifiez votre boîte de réception.");
+      } else {
+        setError('E-mail ou mot de passe incorrect.');
+      }
       return;
     }
     const callbackUrl = params.get('callbackUrl') || '/dashboard';
     router.push(callbackUrl);
     router.refresh();
+  }
+
+  async function resend() {
+    const { error: err } = await supabase.auth.resend({ type: 'signup', email: email.trim() });
+    toast(err ? 'Impossible de renvoyer l’e-mail.' : 'E-mail de confirmation renvoyé ✓');
   }
 
   return (
@@ -40,6 +54,16 @@ export default function LoginForm() {
         <p className="sub">Heureux de vous revoir.</p>
 
         {error && <div className="form-error">{error}</div>}
+        {needsConfirm && (
+          <button
+            type="button"
+            className="btn btn-outline btn-block"
+            style={{ marginBottom: 18 }}
+            onClick={resend}
+          >
+            Renvoyer l&apos;e-mail de confirmation
+          </button>
+        )}
 
         <form onSubmit={submit} noValidate>
           <div className="field">
@@ -69,12 +93,6 @@ export default function LoginForm() {
             {loading ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
-
-        <p className="auth-alt" style={{ marginTop: 14 }}>
-          <span style={{ fontSize: '.72rem', color: 'var(--gray-500)' }}>
-            Comptes de démo : client@test.com · freelance@test.com (mot de passe : test1234)
-          </span>
-        </p>
 
         <p className="auth-alt">
           Pas encore de compte ? <Link href="/inscription">S&apos;inscrire gratuitement</Link>

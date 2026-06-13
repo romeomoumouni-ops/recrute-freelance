@@ -2,16 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { PAYS_AFRIQUE } from '@/lib/constants';
+import { createBrowserSupabase } from '@/lib/supabase-browser';
 import PasswordInput from '@/components/PasswordInput';
 
 type Role = 'CLIENT' | 'FREELANCE';
 
 export default function RegisterForm() {
-  const router = useRouter();
   const params = useSearchParams();
+  const [supabase] = useState(() => createBrowserSupabase());
   const [role, setRole] = useState<Role>(
     params.get('role') === 'freelance' ? 'FREELANCE' : 'CLIENT'
   );
@@ -22,44 +22,69 @@ export default function RegisterForm() {
   const [momo, setMomo] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
-    setLoading(true);
-    try {
-      const res = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          prenom,
-          email,
-          password,
-          role,
-          pays: role === 'FREELANCE' ? pays : undefined,
-          telephoneMomo: role === 'FREELANCE' ? momo : undefined,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Une erreur est survenue.');
-        setLoading(false);
-        return;
-      }
-      // Connexion automatique
-      const signin = await signIn('credentials', { email, password, redirect: false });
-      if (signin?.error) {
-        setError('Compte créé, mais connexion impossible. Connectez-vous manuellement.');
-        setLoading(false);
-        return;
-      }
-      const toast = encodeURIComponent(`Bienvenue ${prenom} ! Votre compte est créé. 🎉`);
-      router.push(`/dashboard?toast=${toast}`);
-      router.refresh();
-    } catch {
-      setError('Une erreur réseau est survenue.');
-      setLoading(false);
+    if (password.length < 6) {
+      setError('Le mot de passe doit faire au moins 6 caractères.');
+      return;
     }
+    setLoading(true);
+    const { data, error: err } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        data: {
+          prenom: prenom.trim(),
+          role,
+          pays: role === 'FREELANCE' ? pays : '',
+          telephoneMomo: role === 'FREELANCE' ? momo.trim() : '',
+        },
+      },
+    });
+    setLoading(false);
+
+    if (err) {
+      setError(
+        err.message.includes('already registered')
+          ? 'Un compte existe déjà avec cette adresse e-mail.'
+          : err.message
+      );
+      return;
+    }
+    // Email de confirmation envoyé (pas de session tant que non confirmé).
+    if (data.user && !data.session) {
+      setSent(true);
+      return;
+    }
+    // Cas où la confirmation serait désactivée : session immédiate.
+    window.location.href = '/dashboard';
+  }
+
+  if (sent) {
+    return (
+      <div className="auth-wrap">
+        <div className="auth-card center">
+          <div className="success-icon" style={{ background: 'var(--green)' }}>
+            ✉️
+          </div>
+          <h1>Vérifiez votre e-mail</h1>
+          <p className="sub" style={{ marginTop: 8 }}>
+            Un lien de confirmation a été envoyé à <strong>{email}</strong>. Cliquez dessus pour
+            activer votre compte, puis connectez-vous.
+          </p>
+          <Link className="btn btn-dark btn-block" href="/connexion" style={{ marginTop: 12 }}>
+            Aller à la connexion
+          </Link>
+          <p className="auth-alt" style={{ marginTop: 16 }}>
+            Pas reçu ? Vérifiez vos spams, ou réinscrivez-vous pour renvoyer le lien.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -2,9 +2,9 @@
 
 import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
-import { useSession, signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { initiales } from '@/lib/utils';
+import { createBrowserSupabase } from '@/lib/supabase-browser';
 
 interface Me {
   authenticated: boolean;
@@ -16,36 +16,39 @@ interface Me {
 }
 
 export default function Header() {
-  const { status } = useSession();
   const [me, setMe] = useState<Me | null>(null);
+  const [loaded, setLoaded] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
 
   const load = useCallback(async () => {
     try {
       const res = await fetch('/api/me', { cache: 'no-store' });
-      const data = (await res.json()) as Me;
-      setMe(data);
+      setMe((await res.json()) as Me);
     } catch {
       /* ignore */
+    } finally {
+      setLoaded(true);
     }
   }, []);
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      load();
-      const i = setInterval(load, 8000);
-      return () => clearInterval(i);
-    }
-    if (status === 'unauthenticated') setMe({ authenticated: false });
-  }, [status, load, pathname]);
+    load();
+    const i = setInterval(load, 8000);
+    return () => clearInterval(i);
+  }, [load, pathname]);
 
-  // Ferme le menu mobile à chaque changement de page.
   useEffect(() => {
     setMenuOpen(false);
   }, [pathname]);
 
-  const logged = status === 'authenticated' && me?.authenticated;
+  async function signOut() {
+    const supabase = createBrowserSupabase();
+    await supabase.auth.signOut();
+    window.location.href = '/';
+  }
+
+  const logged = loaded && me?.authenticated;
   const profileHref = me?.role === 'FREELANCE' ? `/freelance/${me?.id}` : '/dashboard';
 
   return (
@@ -63,7 +66,7 @@ export default function Header() {
         </nav>
 
         <div className="header-actions">
-          {status === 'loading' ? null : logged ? (
+          {!loaded ? null : logged ? (
             <>
               <Link className="link-login icon-link" href="/messages" title="Messagerie">
                 💬
@@ -99,10 +102,7 @@ export default function Header() {
                 )}
                 <span className="hide-sm">{me?.prenom}</span>
               </Link>
-              <button
-                className="btn btn-outline btn-sm"
-                onClick={() => signOut({ callbackUrl: '/' })}
-              >
+              <button className="btn btn-outline btn-sm" onClick={signOut}>
                 Déconnexion
               </button>
             </>
@@ -118,7 +118,6 @@ export default function Header() {
           )}
         </div>
 
-        {/* Bouton menu mobile */}
         <button
           className="hamburger"
           aria-label="Menu"
@@ -129,7 +128,6 @@ export default function Header() {
         </button>
       </div>
 
-      {/* Menu déroulant mobile */}
       {menuOpen && (
         <div className="mobile-menu">
           <div className="container">
@@ -161,7 +159,7 @@ export default function Header() {
                 <button
                   className="btn btn-outline btn-block"
                   style={{ marginTop: 8 }}
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={signOut}
                 >
                   Déconnexion
                 </button>

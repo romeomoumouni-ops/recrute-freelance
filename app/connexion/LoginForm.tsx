@@ -94,6 +94,9 @@ export default function LoginForm() {
           </button>
         </form>
 
+        <p className="auth-alt" style={{ marginTop: 14 }}>
+          <Link href="/mot-de-passe-oublie">Mot de passe oublié ?</Link>
+        </p>
         <p className="auth-alt">
           Pas encore de compte ? <Link href="/inscription">S&apos;inscrire gratuitement</Link>
         </p>

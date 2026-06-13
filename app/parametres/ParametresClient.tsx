@@ -21,7 +21,7 @@ export default function ParametresClient({
   role,
   compte,
   momo,
-  checks,
+  checks: initialChecks,
   notifs,
 }: {
   role: Role;
@@ -45,6 +45,24 @@ export default function ParametresClient({
         ];
   const [tab, setTab] = useState<Tab>(tabs[0][0]);
   const navRef = useRef<HTMLDivElement>(null);
+
+  // Checklist de vérification : on recalcule TOUJOURS l'état frais côté client
+  // (la page serveur peut être servie en cache et afficher une progression figée).
+  const [checks, setChecks] = useState<VerifCheck[]>(initialChecks);
+  const refreshChecks = () => {
+    if (role !== 'FREELANCE') return;
+    fetch('/api/verification', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d.checks) && d.checks.length) setChecks(d.checks);
+      })
+      .catch(() => {});
+  };
+  // Au montage + à chaque fois qu'on ouvre l'onglet Vérification.
+  useEffect(() => {
+    if (tab === 'verification') refreshChecks();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
 
   // Sur mobile, amène l'onglet actif dans le champ de vision.
   useEffect(() => {
@@ -91,6 +109,7 @@ export default function ParametresClient({
     const data = await res.json();
     if (!res.ok) return toast(data.error || 'Erreur.');
     toast('Numéro Mobile Money enregistré ✓');
+    refreshChecks();
     router.refresh();
   }
 

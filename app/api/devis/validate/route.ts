@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { euros } from '@/lib/utils';
 import { loadOffer, setOfferMeta, postSystemMessage } from '@/lib/devis-server';
+import { createNotification } from '@/lib/notifications';
 
 const schema = z.object({ offerMessageId: z.string().min(1) });
 
@@ -40,6 +41,15 @@ export async function POST(req: Request) {
     session.user.id,
     `✅ Commande validée. ${euros(data as number)} ont été versés sur le solde du freelance.`
   );
+
+  // Notifie le freelance que sa commande est validée et payée.
+  await createNotification({
+    userId: offer.senderId,
+    type: 'VALIDATION',
+    titre: '✅ Commande validée',
+    corps: `${session.user.prenom} a validé la commande. ${euros(data as number)} ajoutés à votre solde disponible.`,
+    lien: '/dashboard',
+  });
 
   return NextResponse.json({ ok: true, montant: data as number });
 }

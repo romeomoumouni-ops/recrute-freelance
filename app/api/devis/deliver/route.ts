@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { loadOffer, setOfferMeta, postSystemMessage } from '@/lib/devis-server';
+import { createNotification } from '@/lib/notifications';
 
 const schema = z.object({ offerMessageId: z.string().min(1) });
 
@@ -40,6 +41,17 @@ export async function POST(req: Request) {
     session.user.id,
     '📦 Le freelance a livré la commande. Vous pouvez la valider ou demander une retouche.'
   );
+
+  // Notifie le client que sa commande est livrée (à valider).
+  const clientId = offer.clientId === offer.senderId ? offer.freelanceId : offer.clientId;
+  const description = (offer.meta.description as string) || 'votre commande';
+  await createNotification({
+    userId: clientId,
+    type: 'LIVRAISON',
+    titre: '📦 Commande livrée',
+    corps: `Le freelance a livré « ${description} ». Validez la commande ou demandez une retouche.`,
+    lien: `/messages?c=${offer.conversationId}`,
+  });
 
   return NextResponse.json({ ok: true });
 }

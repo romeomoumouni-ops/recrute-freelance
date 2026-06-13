@@ -10,9 +10,14 @@ export async function GET() {
 
   const userId = session.user.id;
 
-  const [{ data: profile }, convs] = await Promise.all([
+  const [{ data: profile }, convs, { count: notifUnread }] = await Promise.all([
     supabaseAdmin().from('Profile').select('photoUrl').eq('userId', userId).maybeSingle(),
     getConversationsFor(userId),
+    supabaseAdmin()
+      .from('Notification')
+      .select('id', { count: 'exact', head: true })
+      .eq('userId', userId)
+      .eq('lu', false),
   ]);
 
   const unread = convs.reduce((s, c) => s + c.unread, 0);
@@ -24,5 +29,6 @@ export async function GET() {
     role: session.user.role,
     photoUrl: profile?.photoUrl ?? null,
     unread,
+    notifUnread: notifUnread ?? 0,
   });
 }

@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { initiales } from '@/lib/utils';
 import { createBrowserSupabase } from '@/lib/supabase-browser';
+import NotificationBell from './NotificationBell';
 
 interface Me {
   authenticated: boolean;
@@ -13,6 +14,7 @@ interface Me {
   role?: 'CLIENT' | 'FREELANCE';
   photoUrl?: string | null;
   unread?: number;
+  notifUnread?: number;
 }
 
 export default function Header() {
@@ -117,6 +119,8 @@ export default function Header() {
             </>
           )}
         </div>
+
+        {logged && <NotificationBell count={me?.notifUnread || 0} onRead={load} />}
 
         <button
           className="hamburger"

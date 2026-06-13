@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { euros } from '@/lib/utils';
+import { createNotification } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -174,6 +175,17 @@ async function handleSale(payload: any) {
     contenu:
       `✅ Paiement reçu (${euros(r.montantEur)}). Les fonds sont sécurisés par ` +
       `recrutefreelance.com et seront versés au freelance une fois la commande livrée et validée par vos soins.`,
+  });
+
+  // Notifie le freelance qu'un paiement a été reçu.
+  const { data: payer } = await sb.from('User').select('prenom').eq('id', r.payerId).maybeSingle();
+  const payerPrenom = (payer as { prenom: string } | null)?.prenom ?? 'Un client';
+  await createNotification({
+    userId: r.freelanceId,
+    type: 'PAIEMENT',
+    titre: '💳 Paiement reçu',
+    corps: `${payerPrenom} a payé votre commande « ${description} » (${euros(r.montantEur)}). Livrez-la pour débloquer les fonds.`,
+    lien: `/messages?c=${r.conversationId}`,
   });
 }
 

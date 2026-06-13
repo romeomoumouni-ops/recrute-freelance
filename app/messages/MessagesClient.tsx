@@ -498,7 +498,7 @@ export default function MessagesClient({
           </button>
           <h2>Envoyer un devis</h2>
           <p className="sub">
-            Le destinataire pourra le payer par carte. Les fonds (moins 10 % de commission) sont
+            Le destinataire pourra le payer par carte. Les fonds (moins 20 % de commission) sont
             sécurisés, puis versés sur votre solde une fois la commande livrée et validée.
           </p>
           <div className="field">

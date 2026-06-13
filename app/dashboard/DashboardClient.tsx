@@ -272,7 +272,7 @@ export default function DashboardClient(props: Props) {
           <div className="label">En attente de validation</div>
           <div className="value">{euros(enAttente)}</div>
           <div className="hint" style={{ marginTop: 6, fontSize: '.72rem', color: 'var(--gray-500)' }}>
-            Débloqué dès que le client valide.
+            Montant net (devis − 20 % de commission). Débloqué dès que le client valide.
           </div>
         </div>
         <div className="dash-stat">

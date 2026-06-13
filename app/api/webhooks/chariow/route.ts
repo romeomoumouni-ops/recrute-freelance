@@ -52,7 +52,8 @@ async function handleSale(payload: any) {
     .maybeSingle();
   if (already) return;
 
-  // Réconciliation : d'abord par ref (dans l'URL de checkout), sinon par email + ancienneté.
+  // Réconciliation, par ordre de fiabilité décroissante.
+  // 1) ref (notre id de paiement, passé dans l'URL de checkout / metadata)
   let ref: string | null = payload?.sale?.custom_metadata?.ref ?? null;
   if (!ref && typeof payload?.checkout?.url === 'string') {
     try {
@@ -61,6 +62,13 @@ async function handleSale(payload: any) {
       /* ignore */
     }
   }
+  // 2) productId : produit Chariow à prix fixe acheté (palier connu)
+  const productId: string | null =
+    payload?.product?.id ??
+    payload?.product?.public_id ??
+    payload?.sale?.product_id ??
+    payload?.product?.product_id ??
+    null;
 
   let pendingId: string | null = null;
   if (ref) {
@@ -72,6 +80,32 @@ async function handleSale(payload: any) {
       .maybeSingle();
     if (data) pendingId = (data as { id: string }).id;
   }
+  // productId + email : très fiable (palier fixe + bon payeur)
+  if (!pendingId && productId && email) {
+    const { data } = await sb
+      .from('DevisPayment')
+      .select('id')
+      .eq('productId', productId)
+      .eq('payerEmail', email)
+      .eq('status', 'awaiting')
+      .order('createdAt', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) pendingId = (data as { id: string }).id;
+  }
+  // productId seul (à défaut d'email exploitable)
+  if (!pendingId && productId) {
+    const { data } = await sb
+      .from('DevisPayment')
+      .select('id')
+      .eq('productId', productId)
+      .eq('status', 'awaiting')
+      .order('createdAt', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (data) pendingId = (data as { id: string }).id;
+  }
+  // email seul (dernier recours)
   if (!pendingId && email) {
     const { data } = await sb
       .from('DevisPayment')

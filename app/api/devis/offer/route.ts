@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { assertMember } from '@/lib/conversations';
-import { CHARIOW_MIN_EUR } from '@/lib/chariow';
+import { tierForAmount, TIER_AMOUNTS } from '@/lib/chariow-products';
 import { heureCourte } from '@/lib/utils';
 
 const offerSchema = z.object({
@@ -27,9 +27,9 @@ export async function POST(req: Request) {
   }
   const { conversationId, amountEur, description } = parsed.data;
 
-  if (amountEur < CHARIOW_MIN_EUR) {
+  if (!tierForAmount(amountEur)) {
     return NextResponse.json(
-      { error: `Le montant minimum est de ${CHARIOW_MIN_EUR} €.` },
+      { error: `Montant non disponible. Choisissez l'un des paliers : ${TIER_AMOUNTS.join(', ')} €.` },
       { status: 400 }
     );
   }

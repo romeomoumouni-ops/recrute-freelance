@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Avatar from '@/components/Avatar';
 import type { ConversationSummary } from '@/lib/conversations';
 import { heureCourte, euros } from '@/lib/utils';
-import { TAUX_FCFA } from '@/lib/constants';
+import { TIER_AMOUNTS } from '@/lib/chariow-products';
 import { toast } from '@/lib/toast';
 
 interface Msg {
@@ -79,7 +79,6 @@ function DevisOfferCard({
   } catch {
     /* ignore */
   }
-  const fcfa = Math.round(amountEur * TAUX_FCFA);
   const mine = m.mine; // true = freelance émetteur du devis
 
   return (
@@ -103,7 +102,7 @@ function DevisOfferCard({
             onClick={() => onPay(m.id)}
             style={{ marginTop: 4 }}
           >
-            {busy ? 'Redirection…' : `Payer par carte (${fcfa.toLocaleString('fr-FR')} FCFA)`}
+            {busy ? 'Redirection…' : `Payer ${euros(amountEur)} par carte`}
           </button>
         ))}
 
@@ -512,23 +511,24 @@ export default function MessagesClient({
             />
           </div>
           <div className="field">
-            <label>Montant (€)</label>
-            <input
-              type="number"
-              min={8}
-              placeholder="Ex : 450"
-              value={offerAmount}
-              onChange={(e) => setOfferAmount(e.target.value)}
-            />
+            <label>Montant</label>
+            <select value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)}>
+              <option value="">Choisir un montant…</option>
+              {TIER_AMOUNTS.map((a) => (
+                <option key={a} value={a}>
+                  {euros(a)}
+                </option>
+              ))}
+            </select>
             <div className="hint">
-              {offerAmount && Number(offerAmount) > 0
-                ? `Le client paiera ≈ ${Math.round(Number(offerAmount) * TAUX_FCFA).toLocaleString('fr-FR')} FCFA · minimum 8 €`
-                : 'Minimum 8 € (limite Chariow).'}
+              {offerAmount
+                ? `Le client paiera ${euros(Number(offerAmount))} par carte.`
+                : 'Montants disponibles au paiement par carte.'}
             </div>
           </div>
           <button
             className="btn btn-dark btn-block"
-            disabled={offerSending || !offerDesc.trim() || Number(offerAmount) < 8}
+            disabled={offerSending || !offerDesc.trim() || !TIER_AMOUNTS.includes(Number(offerAmount))}
             onClick={sendOffer}
           >
             {offerSending ? 'Envoi…' : 'Envoyer le devis'}

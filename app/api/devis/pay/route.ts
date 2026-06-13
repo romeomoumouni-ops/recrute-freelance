@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
-import { buildChariowCheckoutUrl, eurToFcfa } from '@/lib/chariow';
+import { buildTierCheckoutUrl, eurToFcfa } from '@/lib/chariow';
+import { tierForAmount } from '@/lib/chariow-products';
 
 const paySchema = z.object({ offerMessageId: z.string().min(1) });
 
@@ -48,6 +49,10 @@ export async function POST(req: Request) {
   }
 
   const montantEur = meta.amountEur;
+  const tier = tierForAmount(montantEur);
+  if (!tier) {
+    return NextResponse.json({ error: 'Ce montant n’est plus disponible au paiement.' }, { status: 400 });
+  }
   const montantFcfa = eurToFcfa(montantEur);
 
   // Email/prénom du payeur (pré-remplissage + clé de réconciliation).
@@ -69,16 +74,17 @@ export async function POST(req: Request) {
       payerEmail,
       montantEur,
       montantFcfa,
+      productId: tier.productId,
       status: 'awaiting',
     })
     .select('id')
     .single();
   if (error || !pending) return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
 
-  const checkoutUrl = buildChariowCheckoutUrl({
+  const checkoutUrl = buildTierCheckoutUrl({
+    checkoutUrl: tier.checkoutUrl,
     email: payerEmail,
     prenom: payerPrenom,
-    montantFcfa,
     ref: (pending as { id: string }).id,
   });
 

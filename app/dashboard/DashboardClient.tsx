@@ -41,6 +41,7 @@ type Props =
       prenom: string;
       freelanceOrders: FreelanceOrder[];
       solde: number;
+      enAttente: number;
       gagne: number;
       momo: { numero: string; operateur: string };
     };
@@ -245,7 +246,7 @@ export default function DashboardClient(props: Props) {
   }
 
   // ================= VUE FREELANCE =================
-  const { freelanceOrders: orders, solde, gagne, momo, prenom } = props;
+  const { freelanceOrders: orders, solde, enAttente, gagne, momo, prenom } = props;
   return (
     <div className="container dash">
       <h1>Bonjour {prenom} 👋</h1>
@@ -255,7 +256,7 @@ export default function DashboardClient(props: Props) {
 
       <div className="dash-stats">
         <div className="dash-stat dark">
-          <div className="label">Solde disponible</div>
+          <div className="label">Solde disponible pour retrait</div>
           <div className="value">{euros(solde)}</div>
           {solde > 0 && (
             <button
@@ -268,12 +269,15 @@ export default function DashboardClient(props: Props) {
           )}
         </div>
         <div className="dash-stat">
-          <div className="label">Total gagné</div>
-          <div className="value">{euros(gagne)}</div>
+          <div className="label">En attente de validation</div>
+          <div className="value">{euros(enAttente)}</div>
+          <div className="hint" style={{ marginTop: 6, fontSize: '.72rem', color: 'var(--gray-500)' }}>
+            Débloqué dès que le client valide.
+          </div>
         </div>
         <div className="dash-stat">
-          <div className="label">Missions reçues</div>
-          <div className="value">{orders.length}</div>
+          <div className="label">Total gagné</div>
+          <div className="value">{euros(gagne)}</div>
         </div>
       </div>
 

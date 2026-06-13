@@ -383,8 +383,18 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 /* bouton "envoyer un devis" dans la messagerie + carte devis chiffré */
 .chat-devis-btn { background: var(--off-white); border: 1.5px solid var(--border); border-radius: 999px; width: 44px; flex-shrink: 0; font-size: 1.05rem; line-height: 1; }
 .chat-devis-btn:hover { border-color: var(--black); }
+.chat-devis-btn:disabled { opacity: .5; cursor: default; }
 .devis-msg.offer { border-color: var(--green); }
 .devis-msg.offer .devis-msg-prix { color: var(--green); }
+
+/* Message fichier (livraison) */
+.msg.file { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; max-width: 78%; }
+.msg.file.moi { align-self: flex-end; background: var(--black); color: var(--white); }
+.msg.file.eux { align-self: flex-start; background: var(--off-white); color: var(--black); border: 1px solid var(--border); }
+.msg.file .file-ic { font-size: 1.1rem; }
+.msg.file .file-name { font-weight: 600; font-size: .82rem; word-break: break-all; }
+.msg.file .file-size { font-size: .68rem; opacity: .6; white-space: nowrap; }
+.msg.file .heure { width: 100%; }
 
 /* ---------- Responsive ---------- */
 @media (max-width: 960px) {

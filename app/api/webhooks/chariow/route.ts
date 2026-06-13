@@ -93,42 +93,53 @@ async function handleSale(payload: any) {
   const r = Array.isArray(settled) ? settled[0] : settled;
   if (!r) return; // déjà réglé
 
-  // Met le devis à "payé".
+  // Récupère la description du devis (pour le titre de la commande).
   const { data: offerMsg } = await sb
     .from('Message')
     .select('meta')
     .eq('id', r.offerMessageId)
     .maybeSingle();
   let description = 'Devis';
+  let meta: Record<string, unknown> = {};
   if (offerMsg?.meta) {
     try {
-      const meta = JSON.parse(offerMsg.meta as string);
-      description = meta.description || description;
-      meta.status = 'paid';
-      await sb.from('Message').update({ meta: JSON.stringify(meta) }).eq('id', r.offerMessageId);
+      meta = JSON.parse(offerMsg.meta as string);
+      description = (meta.description as string) || description;
     } catch {
       /* ignore */
     }
   }
 
-  // Trace dans le tableau de bord (mission validée).
-  await sb.from('Order').insert({
-    clientId: r.payerId,
-    freelanceId: r.freelanceId,
-    titre: description,
-    description: 'Devis payé par carte',
-    jours: 1,
-    montant: r.net,
-    commission: r.commission,
-    statut: 'VALIDEE',
-  });
+  // Crée la commande en SÉQUESTRE : statut EN_COURS, fonds non encore versés.
+  // Ils seront libérés vers le solde du freelance quand le client validera.
+  const { data: order } = await sb
+    .from('Order')
+    .insert({
+      clientId: r.payerId,
+      freelanceId: r.freelanceId,
+      titre: description,
+      description: 'Commande payée par carte',
+      jours: 1,
+      montant: r.net,
+      commission: r.commission,
+      statut: 'EN_COURS',
+    })
+    .select('id')
+    .single();
 
-  // Message de confirmation dans la discussion.
+  // Le devis devient une commande "payée / en cours" : on garde le suivi dans le chat.
+  meta.status = 'paid';
+  if (order) meta.orderId = (order as { id: string }).id;
+  await sb.from('Message').update({ meta: JSON.stringify(meta) }).eq('id', r.offerMessageId);
+
+  // Message de confirmation qui explique le séquestre au client.
   await sb.from('Message').insert({
     conversationId: r.conversationId,
     senderId: r.payerId,
     type: 'TEXT',
-    contenu: `✅ Devis payé par carte (${euros(r.montantEur)}). Les fonds sont crédités au freelance.`,
+    contenu:
+      `✅ Paiement reçu (${euros(r.montantEur)}). Les fonds sont sécurisés par ` +
+      `recrutefreelance.com et seront versés au freelance une fois la commande livrée et validée par vos soins.`,
   });
 }
 

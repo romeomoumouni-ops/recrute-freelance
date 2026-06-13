@@ -44,14 +44,27 @@ function DevisCard({ m }: { m: Msg }) {
   );
 }
 
+const STATUT_LABELS: Record<string, string> = {
+  pending: 'en attente de paiement',
+  paid: 'payée · en cours',
+  delivered: 'livrée · à valider',
+  validated: 'validée ✓',
+};
+
 function DevisOfferCard({
   m,
   onPay,
-  paying,
+  onDeliver,
+  onValidate,
+  onRevise,
+  busy,
 }: {
   m: Msg;
   onPay: (id: string) => void;
-  paying: boolean;
+  onDeliver: (id: string) => void;
+  onValidate: (id: string) => void;
+  onRevise: (id: string) => void;
+  busy: boolean;
 }) {
   let amountEur = 0;
   let description = '';
@@ -67,34 +80,118 @@ function DevisOfferCard({
     /* ignore */
   }
   const fcfa = Math.round(amountEur * TAUX_FCFA);
-  const paid = status === 'paid';
+  const mine = m.mine; // true = freelance émetteur du devis
+
   return (
-    <div className={`devis-msg offer ${m.mine ? 'moi' : 'eux'}`}>
-      <div className="devis-msg-head">💼 Devis{paid ? ' · payé ✓' : ''}</div>
+    <div className={`devis-msg offer ${mine ? 'moi' : 'eux'}`}>
+      <div className="devis-msg-head">💼 Commande · {STATUT_LABELS[status] ?? status}</div>
       <div className="devis-msg-service">
         <span>{description}</span>
         <span className="devis-msg-prix">{euros(amountEur)}</span>
       </div>
-      {paid ? (
+
+      {/* En attente de paiement */}
+      {status === 'pending' &&
+        (mine ? (
+          <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
+            En attente de paiement…
+          </p>
+        ) : (
+          <button
+            className="btn btn-dark btn-block"
+            disabled={busy}
+            onClick={() => onPay(m.id)}
+            style={{ marginTop: 4 }}
+          >
+            {busy ? 'Redirection…' : `Payer par carte (${fcfa.toLocaleString('fr-FR')} FCFA)`}
+          </button>
+        ))}
+
+      {/* Payée — en cours (séquestre) */}
+      {status === 'paid' &&
+        (mine ? (
+          <>
+            <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
+              💰 Paiement reçu (séquestré). Joignez votre travail via 📎 puis livrez.
+            </p>
+            <button
+              className="btn btn-dark btn-block"
+              disabled={busy}
+              onClick={() => onDeliver(m.id)}
+              style={{ marginTop: 4 }}
+            >
+              {busy ? '…' : 'Livrer la commande'}
+            </button>
+          </>
+        ) : (
+          <p className="devis-msg-body" style={{ color: 'var(--green)', fontWeight: 600 }}>
+            ✅ Paiement effectué — fonds sécurisés. En attente de la livraison du freelance.
+          </p>
+        ))}
+
+      {/* Livrée — à valider */}
+      {status === 'delivered' &&
+        (mine ? (
+          <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
+            📦 Livré — en attente de validation du client.
+          </p>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+            <button className="btn btn-dark" disabled={busy} onClick={() => onValidate(m.id)}>
+              {busy ? '…' : 'Valider la commande'}
+            </button>
+            <button className="btn btn-outline" disabled={busy} onClick={() => onRevise(m.id)}>
+              Demander une retouche
+            </button>
+          </div>
+        ))}
+
+      {/* Validée */}
+      {status === 'validated' && (
         <p className="devis-msg-body" style={{ color: 'var(--green)', fontWeight: 600 }}>
-          ✓ Payé
+          ✅ Commande validée — fonds versés au freelance.
         </p>
-      ) : m.mine ? (
-        <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
-          En attente de paiement…
-        </p>
-      ) : (
-        <button
-          className="btn btn-dark btn-block"
-          disabled={paying}
-          onClick={() => onPay(m.id)}
-          style={{ marginTop: 4 }}
-        >
-          {paying ? 'Redirection…' : `Payer par carte (${fcfa.toLocaleString('fr-FR')} FCFA)`}
-        </button>
       )}
+
       <span className="heure">{m.heure}</span>
     </div>
+  );
+}
+
+function formatSize(bytes: number): string {
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} o`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} Ko`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+}
+
+function FileCard({ m }: { m: Msg }) {
+  let url = '';
+  let name = 'fichier';
+  let size = 0;
+  try {
+    if (m.meta) {
+      const p = JSON.parse(m.meta);
+      url = p.url || '';
+      name = p.name || name;
+      size = p.size || 0;
+    }
+  } catch {
+    /* ignore */
+  }
+  return (
+    <a
+      className={`msg file ${m.mine ? 'moi' : 'eux'}`}
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      download
+    >
+      <span className="file-ic">📎</span>
+      <span className="file-name">{name}</span>
+      {size > 0 && <span className="file-size">{formatSize(size)}</span>}
+      <span className="heure">{m.heure}</span>
+    </a>
   );
 }
 
@@ -153,6 +250,43 @@ export default function MessagesClient({
       return toast(data.error || 'Paiement impossible.');
     }
     window.location.href = data.checkoutUrl; // redirection vers Chariow
+  }
+
+  // Actions sur une commande (livrer / valider / retouche).
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
+
+  async function orderAction(offerMessageId: string, endpoint: string, okMsg: string) {
+    setBusyId(offerMessageId);
+    const res = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ offerMessageId }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setBusyId(null);
+    if (!res.ok) return toast(data.error || 'Action impossible.');
+    toast(okMsg);
+    if (activeId) loadMessages(activeId);
+  }
+  const deliverOrder = (id: string) => orderAction(id, '/api/devis/deliver', 'Commande livrée ✓');
+  const validateOrder = (id: string) => orderAction(id, '/api/devis/validate', 'Commande validée ✓');
+  const requestRevision = (id: string) =>
+    orderAction(id, '/api/devis/revision', 'Retouche demandée');
+
+  async function sendFile(file: File) {
+    if (!activeId) return;
+    setBusyId('file');
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('conversationId', activeId);
+    const res = await fetch('/api/messages/file', { method: 'POST', body: fd });
+    const data = await res.json().catch(() => ({}));
+    setBusyId(null);
+    if (fileInput.current) fileInput.current.value = '';
+    if (!res.ok) return toast(data.error || 'Envoi du fichier impossible.');
+    setMessages((m) => [...m, data.message]);
+    scrollBottom();
   }
 
   const active = convs.find((c) => c.id === activeId) ?? null;
@@ -296,7 +430,17 @@ export default function MessagesClient({
                 m.type === 'DEVIS' ? (
                   <DevisCard key={m.id} m={m} />
                 ) : m.type === 'DEVIS_OFFER' ? (
-                  <DevisOfferCard key={m.id} m={m} onPay={payOffer} paying={payingId === m.id} />
+                  <DevisOfferCard
+                    key={m.id}
+                    m={m}
+                    onPay={payOffer}
+                    onDeliver={deliverOrder}
+                    onValidate={validateOrder}
+                    onRevise={requestRevision}
+                    busy={payingId === m.id || busyId === m.id}
+                  />
+                ) : m.type === 'FILE' ? (
+                  <FileCard key={m.id} m={m} />
                 ) : (
                   <div key={m.id} className={`msg ${m.mine ? 'moi' : 'eux'}`}>
                     {m.contenu}
@@ -313,6 +457,21 @@ export default function MessagesClient({
                 onClick={() => setOfferOpen(true)}
               >
                 💼
+              </button>
+              <input
+                ref={fileInput}
+                type="file"
+                hidden
+                onChange={(e) => e.target.files?.[0] && sendFile(e.target.files[0])}
+              />
+              <button
+                type="button"
+                className="chat-devis-btn"
+                title="Joindre un fichier (livraison)"
+                disabled={busyId === 'file'}
+                onClick={() => fileInput.current?.click()}
+              >
+                {busyId === 'file' ? '⏳' : '📎'}
               </button>
               <input
                 type="text"
@@ -340,8 +499,8 @@ export default function MessagesClient({
           </button>
           <h2>Envoyer un devis</h2>
           <p className="sub">
-            Le destinataire pourra le payer par carte. Les fonds (moins 10 % de commission) seront
-            crédités sur votre solde.
+            Le destinataire pourra le payer par carte. Les fonds (moins 10 % de commission) sont
+            sécurisés, puis versés sur votre solde une fois la commande livrée et validée.
           </p>
           <div className="field">
             <label>Prestation</label>

@@ -4,6 +4,9 @@ import { supabaseAdmin } from './supabase';
 
 const BUCKET = 'uploads';
 export const MAX_FILE_MB = 5;
+// Limite des fichiers de livraison (chat) : sous le plafond de 4,5 Mo des
+// fonctions serverless Vercel.
+export const MAX_DELIVERY_MB = 4;
 
 // Stockage des fichiers dans Supabase Storage (fonctionne sur Vercel, contrairement au
 // système de fichiers local en lecture seule). Renvoie l'URL publique.
@@ -39,6 +42,14 @@ function guessExt(mime: string): string {
 export function validateImage(file: File): string | null {
   if (!file.type.startsWith('image/')) return 'Le fichier doit être une image.';
   if (file.size > MAX_FILE_MB * 1024 * 1024) return `Image trop volumineuse (max ${MAX_FILE_MB} Mo).`;
+  return null;
+}
+
+// Livraison dans le chat : tout type de fichier accepté, taille limitée.
+export function validateAnyFile(file: File): string | null {
+  if (file.size === 0) return 'Fichier vide.';
+  if (file.size > MAX_DELIVERY_MB * 1024 * 1024)
+    return `Fichier trop volumineux (max ${MAX_DELIVERY_MB} Mo).`;
   return null;
 }
 

@@ -9,7 +9,8 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const tokenHash = searchParams.get('token_hash');
   const type = searchParams.get('type') as EmailOtpType | null;
-  const next = searchParams.get('next') || '/dashboard';
+  const next = searchParams.get('next') || '';
+  const isReset = next.includes('reset') || type === 'recovery';
 
   const supabase = createServerSupabase();
   let ok = false;
@@ -22,16 +23,21 @@ export async function GET(request: Request) {
     ok = !error;
   }
 
-  if (ok) {
-    const msg = next.includes('reset')
-      ? 'E-mail vérifié ✓ Choisissez un nouveau mot de passe.'
-      : 'E-mail confirmé ✓ Bienvenue !';
-    return NextResponse.redirect(`${origin}${next}?toast=${encodeURIComponent(msg)}`);
+  if (!ok) {
+    return NextResponse.redirect(
+      `${origin}/connexion?toast=${encodeURIComponent(
+        'Lien invalide ou expiré. Réessayez ou demandez un nouveau lien.'
+      )}`
+    );
   }
 
-  return NextResponse.redirect(
-    `${origin}/connexion?toast=${encodeURIComponent(
-      'Lien invalide ou expiré. Réessayez ou demandez un nouveau lien.'
-    )}`
-  );
+  // Réinitialisation : on garde la session de récupération pour choisir le nouveau mot de passe.
+  if (isReset) {
+    return NextResponse.redirect(`${origin}/reset-password`);
+  }
+
+  // Confirmation d'inscription : l'e-mail est validé → on déconnecte pour que la personne
+  // se connecte explicitement avec ses identifiants, puis page de confirmation dédiée.
+  await supabase.auth.signOut();
+  return NextResponse.redirect(`${origin}/inscription-confirmee`);
 }

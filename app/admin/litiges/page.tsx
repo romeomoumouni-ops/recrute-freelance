@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase';
 import { euros, dateCourte } from '@/lib/utils';
 import AdminButton from '@/components/admin/AdminButton';
+import AdminOrdersTable from '@/components/admin/AdminOrdersTable';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,23 +59,17 @@ export default async function AdminLitiges() {
       )}
 
       <h2 className="admin-h2">Toutes les commandes</h2>
-      <div className="table-wrap">
-        <table>
-          <thead><tr><th>Mission</th><th>Client</th><th>Freelance</th><th>Net</th><th>Statut</th><th>Date</th></tr></thead>
-          <tbody>
-            {list.map((o) => (
-              <tr key={o.id}>
-                <td data-label="Mission"><strong>{o.titre}</strong></td>
-                <td data-label="Client">{byId.get(o.clientId) ?? '—'}</td>
-                <td data-label="Freelance">{byId.get(o.freelanceId) ?? '—'}</td>
-                <td data-label="Net">{euros(o.montant)}</td>
-                <td data-label="Statut"><span className="status gray">{o.statut}</span></td>
-                <td data-label="Date">{dateCourte(o.createdAt)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AdminOrdersTable
+        orders={list.map((o) => ({
+          id: o.id,
+          titre: o.titre,
+          montant: o.montant,
+          statut: o.statut,
+          createdAt: o.createdAt,
+          client: byId.get(o.clientId) ?? '—',
+          freelance: byId.get(o.freelanceId) ?? '—',
+        }))}
+      />
     </>
   );
 }

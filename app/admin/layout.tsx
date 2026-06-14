@@ -11,6 +11,7 @@ const TABS: [string, string][] = [
   ['/admin/retraits', 'Retraits'],
   ['/admin/litiges', 'Commandes & litiges'],
   ['/admin/moderation', 'Modération'],
+  ['/admin/avis', 'Avis'],
   ['/admin/utilisateurs', 'Utilisateurs'],
 ];
 

@@ -524,3 +524,21 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
   .admin-card-actions { justify-content: stretch; }
   .admin-card-actions .btn { flex: 1; }
 }
+
+/* Admin — Tier 2 (recherche, filtres, fiche détaillée) */
+.admin-toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.admin-search { flex: 1; min-width: 220px; border: 1.5px solid var(--border); border-radius: 999px; padding: 10px 18px; font-size: .85rem; outline: none; }
+.admin-search:focus { border-color: var(--black); }
+.admin-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.admin-filters button { background: var(--off-white); border: 1px solid var(--border); border-radius: 999px; padding: 7px 14px; font-size: .78rem; font-weight: 600; color: var(--gray-700); }
+.admin-filters button.active { background: var(--black); color: #fff; border-color: var(--black); }
+.admin-link { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.admin-link:hover { color: var(--green); }
+.admin-back { display: inline-block; font-size: .8rem; color: var(--gray-500); margin-bottom: 12px; }
+.admin-back:hover { color: var(--black); }
+.admin-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 8px; }
+.admin-panel { border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; background: #fff; }
+.admin-kv { display: flex; justify-content: space-between; gap: 14px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: .84rem; }
+.admin-kv:last-child { border-bottom: none; }
+.admin-kv span { color: var(--gray-500); }
+@media (max-width: 760px) { .admin-detail-grid { grid-template-columns: 1fr; } }

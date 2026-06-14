@@ -17,16 +17,30 @@ const STATUTS = ['TOUS', 'EN_COURS', 'LIVREE', 'VALIDEE', 'ANNULEE'];
 
 export default function AdminOrdersTable({ orders }: { orders: AdminOrderRow[] }) {
   const [statut, setStatut] = useState('TOUS');
-  const list = statut === 'TOUS' ? orders : orders.filter((o) => o.statut === statut);
+  const [q, setQ] = useState('');
+  const term = q.trim().toLowerCase();
+  const list = orders.filter((o) => {
+    if (statut !== 'TOUS' && o.statut !== statut) return false;
+    if (!term) return true;
+    return (
+      o.titre.toLowerCase().includes(term) ||
+      o.client.toLowerCase().includes(term) ||
+      o.freelance.toLowerCase().includes(term)
+    );
+  });
 
   return (
     <>
-      <div className="admin-filters" style={{ marginBottom: 14 }}>
-        {STATUTS.map((s) => (
-          <button key={s} className={statut === s ? 'active' : ''} onClick={() => setStatut(s)}>
-            {s === 'TOUS' ? 'Toutes' : s}
-          </button>
-        ))}
+      <div className="admin-toolbar">
+        <input className="admin-search" type="search" placeholder="Rechercher une mission, un client, un freelance…"
+          value={q} onChange={(e) => setQ(e.target.value)} />
+        <div className="admin-filters">
+          {STATUTS.map((s) => (
+            <button key={s} className={statut === s ? 'active' : ''} onClick={() => setStatut(s)}>
+              {s === 'TOUS' ? 'Toutes' : s}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="table-wrap">
         <table>

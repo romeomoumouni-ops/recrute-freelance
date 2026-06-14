@@ -482,12 +482,13 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .status.red { background: #fdecea; color: #c0392b; }
 
 .admin-topbar { background: #0d0d0d; color: #fff; position: sticky; top: 0; z-index: 60; }
-.admin-topbar-inner { display: flex; align-items: center; gap: 20px; height: 60px; }
+.admin-topbar-inner { display: flex; align-items: center; gap: 16px; min-height: 60px; flex-wrap: wrap; padding: 8px 0; }
 .admin-logo { font-weight: 800; font-size: .95rem; white-space: nowrap; }
-.admin-nav { display: flex; gap: 6px; flex: 1; overflow-x: auto; }
-.admin-nav a { color: #d4d4d4; text-decoration: none; font-size: .82rem; font-weight: 600; padding: 7px 12px; border-radius: 999px; white-space: nowrap; }
-.admin-nav a:hover { background: rgba(255,255,255,.1); color: #fff; }
+.admin-nav { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
+.admin-nav a { color: #d4d4d4; text-decoration: none; font-size: .82rem; font-weight: 600; padding: 8px 13px; border-radius: 999px; white-space: nowrap; background: rgba(255,255,255,.06); }
+.admin-nav a:hover { background: rgba(255,255,255,.18); color: #fff; }
 .admin-exit { color: #9ca3af; text-decoration: none; font-size: .78rem; white-space: nowrap; }
+.admin-hint-inline { font-size: .72rem; font-weight: 500; color: var(--gray-500); }
 .admin-content { padding: 28px 24px 60px; }
 .admin-h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 4px; }
 .admin-h2 { font-size: 1rem; font-weight: 700; margin: 30px 0 14px; }
@@ -502,7 +503,9 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .admin-alert .l { font-size: .78rem; color: var(--gray-500); line-height: 1.35; }
 
 .admin-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.admin-kpi { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; background: #fff; }
+.admin-kpi { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; background: #fff; display: block; color: inherit; }
+.admin-kpi.link { transition: border-color .15s ease, transform .15s ease; }
+.admin-kpi.link:hover { border-color: var(--black); transform: translateY(-2px); }
 .admin-kpi .v { font-size: 1.4rem; font-weight: 800; }
 .admin-kpi .k { font-size: .74rem; color: var(--gray-500); margin-top: 4px; }
 

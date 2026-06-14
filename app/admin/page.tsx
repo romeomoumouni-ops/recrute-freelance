@@ -38,18 +38,18 @@ export default async function AdminHome() {
 
       <h2 className="admin-h2">Finances</h2>
       <div className="admin-kpis">
-        <div className="admin-kpi"><div className="v">{euros(s.revenus ?? 0)}</div><div className="k">Revenus (commission)</div></div>
-        <div className="admin-kpi"><div className="v">{euros(s.gmv ?? 0)}</div><div className="k">Volume validé (GMV)</div></div>
-        <div className="admin-kpi"><div className="v">{euros(s.sequestre ?? 0)}</div><div className="k">En séquestre</div></div>
-        <div className="admin-kpi"><div className="v">{s.cmd_validees ?? 0}</div><div className="k">Commandes validées</div></div>
+        <Link href="/admin/litiges" className="admin-kpi link"><div className="v">{euros(s.revenus ?? 0)}</div><div className="k">Revenus (commission) →</div></Link>
+        <Link href="/admin/litiges" className="admin-kpi link"><div className="v">{euros(s.gmv ?? 0)}</div><div className="k">Volume validé (GMV) →</div></Link>
+        <Link href="/admin/litiges" className="admin-kpi link"><div className="v">{euros(s.sequestre ?? 0)}</div><div className="k">En séquestre →</div></Link>
+        <Link href="/admin/litiges" className="admin-kpi link"><div className="v">{s.cmd_validees ?? 0}</div><div className="k">Commandes validées →</div></Link>
       </div>
 
-      <h2 className="admin-h2">Communauté</h2>
+      <h2 className="admin-h2">Communauté <span className="admin-hint-inline">(clique pour voir les données)</span></h2>
       <div className="admin-kpis">
-        <div className="admin-kpi"><div className="v">{s.clients ?? 0}</div><div className="k">Clients</div></div>
-        <div className="admin-kpi"><div className="v">{s.freelances ?? 0}</div><div className="k">Freelances</div></div>
-        <div className="admin-kpi"><div className="v">{s.avis ?? 0}</div><div className="k">Avis</div></div>
-        <div className="admin-kpi"><div className="v">{s.bannis ?? 0}</div><div className="k">Comptes bannis</div></div>
+        <Link href="/admin/utilisateurs" className="admin-kpi link"><div className="v">{s.clients ?? 0}</div><div className="k">Clients →</div></Link>
+        <Link href="/admin/utilisateurs" className="admin-kpi link"><div className="v">{s.freelances ?? 0}</div><div className="k">Freelances →</div></Link>
+        <Link href="/admin/avis" className="admin-kpi link"><div className="v">{s.avis ?? 0}</div><div className="k">Avis →</div></Link>
+        <Link href="/admin/utilisateurs" className="admin-kpi link"><div className="v">{s.bannis ?? 0}</div><div className="k">Comptes bannis →</div></Link>
       </div>
     </>
   );

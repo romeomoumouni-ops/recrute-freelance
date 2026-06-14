@@ -11,6 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function ParametresPage() {
   const session = await auth();
   if (!session) redirect('/connexion?callbackUrl=/parametres');
+  if (session.user.banni) redirect('/compte-suspendu');
 
   const { data: user } = await supabaseAdmin()
     .from('User')

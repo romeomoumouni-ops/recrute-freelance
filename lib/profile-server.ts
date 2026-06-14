@@ -8,11 +8,16 @@ export async function recomputeVerification(userId: string): Promise<boolean> {
   const { data: profile } = await sb
     .from('Profile')
     .select(
-      'id, photoUrl, titre, bio, skills, cvUrl, user:User(telephoneMomo), services:Service(id), portfolio:PortfolioItem(id)'
+      'id, photoUrl, titre, bio, skills, cvUrl, estVerifie, verifManuel, user:User(telephoneMomo), services:Service(id), portfolio:PortfolioItem(id)'
     )
     .eq('userId', userId)
     .maybeSingle();
   if (!profile) return false;
+
+  // Vérification figée par l'admin : on ne recalcule pas (l'admin décide).
+  if ((profile as { verifManuel?: boolean }).verifManuel) {
+    return (profile as { estVerifie?: boolean }).estVerifie === true;
+  }
 
   const user = profile.user as unknown as { telephoneMomo: string | null } | null;
   const verifie = isVerified({

@@ -1,46 +1,34 @@
 type IconProps = { size?: number; className?: string };
 
-/**
- * Monogramme « R » + flèche verte ascendante.
- * Noir #0d0d0d (jambage + boucle), vert émeraude #1a7f4e (flèche/progression).
- */
+/** Monogramme « R » noir (#0d0d0d). */
 export function BrandIcon({ size = 30, className }: IconProps) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="0 0 64 64"
+      viewBox="0 0 512 512"
       fill="none"
       aria-hidden="true"
       focusable="false"
       className={className}
       style={{ display: 'block', flexShrink: 0 }}
     >
-      <g stroke="#0d0d0d" strokeWidth={9} strokeLinecap="round" strokeLinejoin="round">
-        {/* jambage vertical */}
-        <path d="M18 12 V52" />
-        {/* boucle haute du R */}
-        <path d="M18 12 H33 C47 12 47 35 33 35 H25" />
-      </g>
-      {/* flèche verte ascendante = jambe du R */}
       <path
-        d="M20 52 L32.5 32 L45 52"
-        stroke="#1a7f4e"
-        strokeWidth={9}
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        fill="#0d0d0d"
+        d="M120 80h150c68 0 122 54 122 122 0 48-27 89-67 109l67 121h-92l-58-105h-38v105h-84V80zm84 75v97h61c26 0 47-22 47-49s-21-48-47-48h-61z"
       />
+      <path fill="#0d0d0d" d="M118 432l117-117 59 59-117 58z" />
     </svg>
   );
 }
 
-/** Lockup complet : icône + « Recrute Freelance ». À placer dans un lien .brand. */
+/** Lockup : icône + wordmark « recrutefreelance ». À placer dans un lien .brand. */
 export default function Logo({ iconSize = 30 }: { iconSize?: number }) {
   return (
     <>
       <BrandIcon size={iconSize} className="brand-icon" />
       <span className="brand-word">
-        <b>Recrute</b> Freelance
+        recrute<span>freelance</span>
       </span>
     </>
   );

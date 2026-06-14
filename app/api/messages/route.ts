@@ -67,6 +67,7 @@ export async function POST(req: Request) {
     );
   }
   const { conversationId, contenu } = parsed.data;
+  if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
 
   const conv = await assertMember(conversationId, session.user.id);
   if (!conv) return NextResponse.json({ error: 'Conversation introuvable.' }, { status: 404 });

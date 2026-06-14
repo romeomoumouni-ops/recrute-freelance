@@ -10,6 +10,7 @@ import { heureCourte } from '@/lib/utils';
 export async function POST(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
 
   const form = await req.formData();
   const file = form.get('file');

@@ -3,7 +3,7 @@ import { supabaseAdmin } from './supabase';
 import type { Role } from './constants';
 
 export interface Session {
-  user: { id: string; email: string; role: Role; prenom: string };
+  user: { id: string; email: string; role: Role; prenom: string; admin: boolean; banni: boolean };
 }
 
 // Renvoie l'utilisateur connecté (via Supabase Auth) ou null.
@@ -18,7 +18,7 @@ export async function auth(): Promise<Session | null> {
 
   const { data: row } = await supabaseAdmin()
     .from('User')
-    .select('role, prenom')
+    .select('role, prenom, admin, banni')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -28,6 +28,8 @@ export async function auth(): Promise<Session | null> {
       email: user.email ?? '',
       role: ((row?.role as Role) ?? 'CLIENT') as Role,
       prenom: row?.prenom ?? user.email?.split('@')[0] ?? '',
+      admin: row?.admin === true,
+      banni: row?.banni === true,
     },
   };
 }

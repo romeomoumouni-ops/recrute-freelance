@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { withdrawalSchema } from '@/lib/validations';
-import { payoutProvider } from '@/lib/payments';
 import { TAUX_FCFA } from '@/lib/constants';
 
 // Retrait Mobile Money (freelance) : RPC atomique (débite le solde + enregistre le retrait).
@@ -12,6 +11,7 @@ export async function POST(req: Request) {
   if (session.user.role !== 'FREELANCE') {
     return NextResponse.json({ error: 'Réservé aux freelances.' }, { status: 403 });
   }
+  if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
 
   const body = await req.json().catch(() => null);
   const parsed = withdrawalSchema.safeParse(body);
@@ -23,12 +23,8 @@ export async function POST(req: Request) {
   }
   const { montant, operateur, numero } = parsed.data;
 
-  // Versement Mobile Money simulé (avant le débit ; le débit reste atomique côté DB).
-  const payout = await payoutProvider.payout(montant, operateur, numero);
-  if (!payout.success) {
-    return NextResponse.json({ error: 'Le retrait a échoué.' }, { status: 402 });
-  }
-
+  // Le retrait est enregistré "en attente" : l'admin envoie le Mobile Money à la
+  // main puis le marque "effectué". Le débit du solde reste atomique côté DB.
   const { data, error } = await supabaseAdmin().rpc('withdraw', {
     actor_id: session.user.id,
     amount: montant,

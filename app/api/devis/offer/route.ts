@@ -22,6 +22,7 @@ export async function POST(req: Request) {
       { status: 403 }
     );
   }
+  if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
 
   const body = await req.json().catch(() => null);
   const parsed = offerSchema.safeParse(body);

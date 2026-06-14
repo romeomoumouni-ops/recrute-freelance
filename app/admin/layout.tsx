@@ -2,22 +2,10 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { requireAdmin } from '@/lib/admin';
+import AdminNav from '@/components/admin/AdminNav';
 
 export const metadata: Metadata = { title: 'Admin', robots: { index: false, follow: false } };
 export const dynamic = 'force-dynamic';
-
-const TABS: [string, string][] = [
-  ['/admin', 'Tableau de bord'],
-  ['/admin/retraits', 'Retraits'],
-  ['/admin/litiges', 'Commandes & litiges'],
-  ['/admin/moderation', 'Modération'],
-  ['/admin/avis', 'Avis'],
-  ['/admin/utilisateurs', 'Utilisateurs'],
-  ['/admin/communication', 'Communication'],
-  ['/admin/export', 'Export'],
-  ['/admin/reglages', 'Réglages'],
-  ['/admin/journal', 'Journal'],
-];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   // Invisible et inaccessible aux non-admins : 404 pur (aucun indice que ça existe).
@@ -28,14 +16,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="admin-shell">
       <div className="admin-topbar">
         <div className="container admin-topbar-inner">
-          <span className="admin-logo">⚡ Admin · recrutefreelance</span>
-          <nav className="admin-nav">
-            {TABS.map(([href, label]) => (
-              <Link key={href} href={href}>
-                {label}
-              </Link>
-            ))}
-          </nav>
+          <span className="admin-logo">⚡ Admin</span>
+          <AdminNav />
           <Link href="/" className="admin-exit">
             ← Retour au site
           </Link>

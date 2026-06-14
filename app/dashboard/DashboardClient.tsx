@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Star, X, Check, Clock } from 'lucide-react';
 import { euros, fcfa, dateCourte } from '@/lib/utils';
 import {
   STATUTS_LABEL,
@@ -111,7 +112,7 @@ export default function DashboardClient(props: Props) {
 
     return (
       <div className="container dash">
-        <h1>Bonjour {props.prenom} 👋</h1>
+        <h1>Bonjour {props.prenom}</h1>
         <p className="sub">Voici l&apos;état de vos missions.</p>
 
         <div className="dash-stats">
@@ -166,7 +167,7 @@ export default function DashboardClient(props: Props) {
                       ) : o.statut === 'VALIDEE' || o.statut === 'PAYEE' ? (
                         o.hasReview ? (
                           <span style={{ fontSize: '.72rem', color: 'var(--green)' }}>
-                            ✓ Fonds envoyés · avis laissé
+                            <Check size={12} /> Fonds envoyés · avis laissé
                           </span>
                         ) : (
                           <button
@@ -203,7 +204,7 @@ export default function DashboardClient(props: Props) {
             {reviewOrder && (
               <>
                 <button className="modal-close" onClick={() => setReviewOrder(null)}>
-                  ✕
+                  <X size={18} />
                 </button>
                 <h2>Laisser un avis</h2>
                 <p className="sub">
@@ -217,7 +218,7 @@ export default function DashboardClient(props: Props) {
                       onClick={() => setNote(n)}
                       aria-label={`${n} étoile${n > 1 ? 's' : ''}`}
                     >
-                      ★
+                      <Star size={26} fill={n <= note ? 'currentColor' : 'none'} />
                     </button>
                   ))}
                 </div>
@@ -249,7 +250,7 @@ export default function DashboardClient(props: Props) {
   const { freelanceOrders: orders, solde, enAttente, gagne, momo, prenom } = props;
   return (
     <div className="container dash">
-      <h1>Bonjour {prenom} 👋</h1>
+      <h1>Bonjour {prenom}</h1>
       <p className="sub">
         Vos missions et vos gains{momo.numero ? ` — Mobile Money : ${momo.numero}` : ''}.
       </p>
@@ -321,7 +322,7 @@ export default function DashboardClient(props: Props) {
                       </span>
                     ) : o.statut === 'VALIDEE' || o.statut === 'PAYEE' ? (
                       <span style={{ fontSize: '.72rem', color: 'var(--green)' }}>
-                        ✓ Payée sur Mobile Money
+                        <Check size={12} /> Payée sur Mobile Money
                       </span>
                     ) : null}
                   </td>
@@ -412,7 +413,7 @@ function RetraitModal({
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         {done ? (
           <div className="center">
-            <div className="success-icon pending">⏳</div>
+            <div className="success-icon pending"><Clock size={30} /></div>
             <h2>Retrait en cours</h2>
             <p className="sub" style={{ marginTop: 8 }}>
               {euros(done.montant)} (≈ {fcfa(done.fcfa)}) en cours d&apos;envoi via{' '}
@@ -427,7 +428,7 @@ function RetraitModal({
         ) : (
           <>
             <button className="modal-close" onClick={onClose}>
-              ✕
+              <X size={18} />
             </button>
             <h2>Retirer mes gains</h2>
             <p className="sub">

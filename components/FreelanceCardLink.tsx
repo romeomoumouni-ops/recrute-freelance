@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { MapPin, Star } from 'lucide-react';
 import Avatar from './Avatar';
 import { CATEGORIES } from '@/lib/constants';
 import { euros } from '@/lib/utils';
@@ -15,7 +16,7 @@ export default function FreelanceCardLink({ f }: { f: FreelanceCard }) {
         </div>
       </div>
       <div className="fl-meta">
-        {f.pays && <span>📍 {f.pays}</span>}
+        {f.pays && <span className="fl-pays"><MapPin size={13} /> {f.pays}</span>}
         {f.cat && <span className="badge">{CATEGORIES[f.cat] ?? f.cat}</span>}
       </div>
       <div className="skills">
@@ -38,7 +39,7 @@ export default function FreelanceCardLink({ f }: { f: FreelanceCard }) {
         <span className="rating">
           {f.avis > 0 ? (
             <>
-              ★ {f.note.toFixed(1)} <small>({f.avis})</small>
+              <Star size={14} fill="currentColor" /> {f.note.toFixed(1)} <small>({f.avis})</small>
             </>
           ) : (
             <small style={{ color: 'var(--gray-500)' }}>Nouveau</small>

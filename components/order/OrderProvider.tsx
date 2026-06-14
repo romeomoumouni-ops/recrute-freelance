@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { X, Check } from 'lucide-react';
 import { COMMISSION } from '@/lib/constants';
 import { euros } from '@/lib/utils';
 import { toast } from '@/lib/toast';
@@ -169,7 +170,7 @@ export default function OrderProvider({
           {step === 'brief' && draft && (
             <>
               <button className="modal-close" onClick={close} aria-label="Fermer">
-                ✕
+                <X size={18} />
               </button>
               <h2>Décrivez votre mission</h2>
               <p className="sub">Étape 1 sur 2 — {freelanceNom} recevra ce brief.</p>
@@ -219,7 +220,7 @@ export default function OrderProvider({
           {step === 'pay' && draft && (
             <>
               <button className="modal-close" onClick={close} aria-label="Fermer">
-                ✕
+                <X size={18} />
               </button>
               <h2>Paiement sécurisé</h2>
               <p className="sub">Étape 2 sur 2 — les fonds sont bloqués jusqu&apos;à la livraison.</p>
@@ -269,7 +270,7 @@ export default function OrderProvider({
 
           {step === 'success' && draft && (
             <div className="center">
-              <div className="success-icon">✓</div>
+              <div className="success-icon"><Check size={30} /></div>
               <h2>Paiement confirmé !</h2>
               <p className="sub" style={{ marginTop: 8 }}>
                 Les fonds sont sécurisés. {freelanceNom} a été notifié(e) et reçoit son paiement sur

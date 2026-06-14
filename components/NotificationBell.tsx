@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Bell } from 'lucide-react';
 
 interface Notif {
   id: string;
@@ -64,7 +65,7 @@ export default function NotificationBell({
         aria-label="Notifications"
         onClick={() => (open ? setOpen(false) : openPanel())}
       >
-        🔔
+        <Bell size={21} strokeWidth={1.75} />
         {count > 0 && <span className="badge-count">{count}</span>}
       </button>
       {open && (

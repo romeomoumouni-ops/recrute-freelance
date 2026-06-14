@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { X, ClipboardList } from 'lucide-react';
 import { euros } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 
@@ -83,7 +84,7 @@ export default function DevisProvider({
       <div className={`modal-backdrop${open ? ' open' : ''}`} onClick={() => setOpen(false)}>
         <div className="modal" onClick={(e) => e.stopPropagation()}>
           <button className="modal-close" onClick={() => setOpen(false)} aria-label="Fermer">
-            ✕
+            <X size={18} />
           </button>
           <h2>Demander un devis</h2>
           <p className="sub">
@@ -91,7 +92,7 @@ export default function DevisProvider({
           </p>
           {service && (
             <div className="devis-recap">
-              <span className="devis-recap-titre">📋 {service.titre}</span>
+              <span className="devis-recap-titre"><ClipboardList size={15} /> {service.titre}</span>
               <span className="devis-recap-prix">À partir de {euros(service.prix)}</span>
             </div>
           )}

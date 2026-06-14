@@ -2,6 +2,18 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
+import {
+  ClipboardList,
+  Briefcase,
+  Wallet,
+  Paperclip,
+  CheckCircle2,
+  Package,
+  ArrowLeft,
+  AlertTriangle,
+  X,
+  Loader2,
+} from 'lucide-react';
 import Avatar from '@/components/Avatar';
 import type { ConversationSummary } from '@/lib/conversations';
 import { heureCourte, euros } from '@/lib/utils';
@@ -32,7 +44,7 @@ function DevisCard({ m }: { m: Msg }) {
   return (
     <div className={`devis-msg ${m.mine ? 'moi' : 'eux'}`}>
       <div className="devis-msg-head">
-        📋 Demande de devis {m.mine ? 'envoyée' : 'reçue'}
+        <ClipboardList size={14} /> Demande de devis {m.mine ? 'envoyée' : 'reçue'}
       </div>
       {serviceTitre && (
         <div className="devis-msg-service">
@@ -85,7 +97,7 @@ function DevisOfferCard({
 
   return (
     <div className={`devis-msg offer ${mine ? 'moi' : 'eux'}`}>
-      <div className="devis-msg-head">💼 Commande · {STATUT_LABELS[status] ?? status}</div>
+      <div className="devis-msg-head"><Briefcase size={14} /> Commande · {STATUT_LABELS[status] ?? status}</div>
       <div className="devis-msg-service">
         <span>{description}</span>
         <span className="devis-msg-prix">{euros(amountEur)}</span>
@@ -113,7 +125,8 @@ function DevisOfferCard({
         (mine ? (
           <>
             <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
-              💰 Paiement reçu (séquestré). Joignez votre travail via 📎 puis livrez.
+              <Wallet size={14} /> Paiement reçu (séquestré). Joignez votre travail via{' '}
+              <Paperclip size={13} /> puis livrez.
             </p>
             <button
               className="btn btn-dark btn-block"
@@ -126,7 +139,7 @@ function DevisOfferCard({
           </>
         ) : (
           <p className="devis-msg-body" style={{ color: 'var(--green)', fontWeight: 600 }}>
-            ✅ Paiement effectué — fonds sécurisés. En attente de la livraison du freelance.
+            <CheckCircle2 size={15} /> Paiement effectué — fonds sécurisés. En attente de la livraison du freelance.
           </p>
         ))}
 
@@ -134,7 +147,7 @@ function DevisOfferCard({
       {status === 'delivered' &&
         (mine ? (
           <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
-            📦 Livré — en attente de validation du client.
+            <Package size={15} /> Livré — en attente de validation du client.
           </p>
         ) : (
           <div style={{ display: 'flex', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
@@ -150,7 +163,7 @@ function DevisOfferCard({
       {/* Validée */}
       {status === 'validated' && (
         <p className="devis-msg-body" style={{ color: 'var(--green)', fontWeight: 600 }}>
-          ✅ Commande validée — fonds versés au freelance.
+          <CheckCircle2 size={15} /> Commande validée — fonds versés au freelance.
         </p>
       )}
 
@@ -188,7 +201,7 @@ function FileCard({ m }: { m: Msg }) {
       rel="noopener noreferrer"
       download
     >
-      <span className="file-ic">📎</span>
+      <span className="file-ic"><Paperclip size={16} /></span>
       <span className="file-name">{name}</span>
       {size > 0 && <span className="file-size">{formatSize(size)}</span>}
       <span className="heure">{m.heure}</span>
@@ -465,7 +478,7 @@ export default function MessagesClient({
           <>
             <div className="chat-head">
               <button className="chat-back" onClick={() => setShowList(true)} aria-label="Retour">
-                ←
+                <ArrowLeft size={20} />
               </button>
               <Avatar nom={active.avecNom} photoUrl={active.avecPhoto} />
               <div>
@@ -473,7 +486,7 @@ export default function MessagesClient({
                 <div className="statut-en-ligne">● En ligne</div>
               </div>
             </div>
-            <div className="chat-safety">⚠️ {banner}</div>
+            <div className="chat-safety"><AlertTriangle size={14} /> <span>{banner}</span></div>
             <div className="chat-msgs" ref={msgsRef}>
               {messages.map((m) =>
                 m.type === 'DEVIS' ? (
@@ -510,7 +523,7 @@ export default function MessagesClient({
                 title="Envoyer un devis à payer"
                 onClick={() => setOfferOpen(true)}
               >
-                💼
+                <Briefcase size={18} />
               </button>
               <input
                 ref={fileInput}
@@ -525,7 +538,7 @@ export default function MessagesClient({
                 disabled={busyId === 'file'}
                 onClick={() => fileInput.current?.click()}
               >
-                {busyId === 'file' ? '⏳' : '📎'}
+                {busyId === 'file' ? <Loader2 size={18} className="spin" /> : <Paperclip size={18} />}
               </button>
               <input
                 type="text"
@@ -549,7 +562,7 @@ export default function MessagesClient({
       >
         <div className="modal" onClick={(e) => e.stopPropagation()}>
           <button className="modal-close" onClick={() => setOfferOpen(false)} aria-label="Fermer">
-            ✕
+            <X size={18} />
           </button>
           <h2>Envoyer un devis</h2>
           <p className="sub">
@@ -609,7 +622,7 @@ export default function MessagesClient({
               }}
               aria-label="Fermer"
             >
-              ✕
+              <X size={18} />
             </button>
             <h2>Paiement sécurisé</h2>
             <p className="sub">

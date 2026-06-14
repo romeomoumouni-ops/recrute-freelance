@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Mail, Building2, Briefcase } from 'lucide-react';
 import { PAYS_AFRIQUE } from '@/lib/constants';
 import { createBrowserSupabase } from '@/lib/supabase-browser';
 import PasswordInput from '@/components/PasswordInput';
@@ -69,7 +70,7 @@ export default function RegisterForm() {
       <div className="auth-wrap">
         <div className="auth-card center">
           <div className="success-icon" style={{ background: 'var(--green)' }}>
-            ✉️
+            <Mail size={30} />
           </div>
           <h1>Vérifiez votre e-mail</h1>
           <p className="sub" style={{ marginTop: 8 }}>
@@ -99,14 +100,14 @@ export default function RegisterForm() {
             className={role === 'CLIENT' ? 'active' : ''}
             onClick={() => setRole('CLIENT')}
           >
-            🏢 Je suis une entreprise
+            <Building2 size={16} /> Je suis une entreprise
           </button>
           <button
             type="button"
             className={role === 'FREELANCE' ? 'active' : ''}
             onClick={() => setRole('FREELANCE')}
           >
-            💼 Je suis freelance
+            <Briefcase size={16} /> Je suis freelance
           </button>
         </div>
 

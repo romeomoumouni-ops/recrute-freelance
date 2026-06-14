@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Check, Clock, ArrowRight } from 'lucide-react';
 import type { VerifCheck } from '@/lib/verification';
 import { OPERATEURS_MOMO, OPERATEUR_CODE, OPERATEUR_LABEL, PAYS_AFRIQUE } from '@/lib/constants';
 import { toast } from '@/lib/toast';
@@ -144,7 +145,7 @@ export default function ParametresClient({
             </p>
             {verifie ? (
               <div className="verif-banner ok">
-                <span className="big">✓</span>
+                <span className="big"><Check size={22} /></span>
                 <span>
                   Votre profil est <strong>vérifié par recrutefreelance.com</strong>. Le badge
                   « Freelance approuvé » est visible sur votre profil.
@@ -152,7 +153,7 @@ export default function ParametresClient({
               </div>
             ) : (
               <div className="verif-banner pending">
-                <span className="big">⏳</span>
+                <span className="big"><Clock size={22} /></span>
                 <span>
                   Profil <strong>en attente de vérification</strong> — {faits} / {checks.length}{' '}
                   critères remplis.
@@ -165,12 +166,12 @@ export default function ParametresClient({
             <div className="check-list">
               {checks.map((c) => (
                 <div className="check-item" key={c.key}>
-                  <div className={`check-icon ${c.ok ? 'done' : 'todo'}`}>{c.ok ? '✓' : '•'}</div>
+                  <div className={`check-icon ${c.ok ? 'done' : 'todo'}`}>{c.ok ? <Check size={14} /> : '•'}</div>
                   <div className="txt">
                     <div className="titre">{c.titre}</div>
                     <div className="desc">{c.desc}</div>
                   </div>
-                  {!c.ok && <Link href={c.lien}>Compléter →</Link>}
+                  {!c.ok && <Link href={c.lien} className="inline-ic">Compléter <ArrowRight size={13} /></Link>}
                 </div>
               ))}
             </div>

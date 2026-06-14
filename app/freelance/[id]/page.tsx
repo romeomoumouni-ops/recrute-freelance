@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { MapPin, Star, Check, FileText, Quote, Eye } from 'lucide-react';
 import { auth } from '@/lib/auth';
 import { getFreelanceProfile } from '@/lib/freelancers';
 import { CATEGORIES } from '@/lib/constants';
@@ -44,7 +45,11 @@ export default async function FreelancePage({ params }: Props) {
           <h1>{f.nom}</h1>
           <div className="role">
             {f.titre}
-            {f.pays ? ` · 📍 ${f.pays}` : ''}
+            {f.pays && (
+              <span className="role-pays">
+                {' · '}<MapPin size={13} /> {f.pays}
+              </span>
+            )}
           </div>
         </div>
       </div>
@@ -52,7 +57,7 @@ export default async function FreelancePage({ params }: Props) {
       <div className="fl-meta" style={{ marginTop: 14 }}>
         {f.avis > 0 ? (
           <span className="rating">
-            ★ {f.note.toFixed(1)} ({f.avis} avis)
+            <Star size={14} fill="currentColor" /> {f.note.toFixed(1)} ({f.avis} avis)
           </span>
         ) : (
           <span className="rating" style={{ color: 'var(--gray-500)' }}>
@@ -61,7 +66,7 @@ export default async function FreelancePage({ params }: Props) {
         )}
         {f.cat && <span className="badge">{CATEGORIES[f.cat] ?? f.cat}</span>}
         {f.estVerifie ? (
-          <span className="badge badge-verifie">✓ Freelance approuvé</span>
+          <span className="badge badge-verifie"><Check size={13} /> Freelance approuvé</span>
         ) : (
           <span className="badge badge-attente">Vérification en cours</span>
         )}
@@ -69,7 +74,7 @@ export default async function FreelancePage({ params }: Props) {
 
       {f.mot && (
         <div className="profile-note">
-          <span className="quote">💬</span>
+          <span className="quote"><Quote size={18} /></span>
           <span>{f.mot}</span>
         </div>
       )}
@@ -145,7 +150,7 @@ export default async function FreelancePage({ params }: Props) {
         <div className="profile-section">
           <h2>CV</h2>
           <div className="cv-file" style={{ maxWidth: 380 }}>
-            📄 {f.cvName}
+            <FileText size={15} /> {f.cvName}
           </div>
         </div>
       )}
@@ -156,7 +161,11 @@ export default async function FreelancePage({ params }: Props) {
           {f.reviews.map((r) => (
             <div className="review-item" key={r.id}>
               <div className="review-head">
-                <span className="review-stars">{'★'.repeat(r.note)}{'☆'.repeat(5 - r.note)}</span>
+                <span className="review-stars">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star key={n} size={13} fill={n <= r.note ? 'currentColor' : 'none'} />
+                  ))}
+                </span>
                 <span className="nom">{r.author}</span>
                 <span className="date">· {new Date(r.date).toLocaleDateString('fr-FR')}</span>
               </div>
@@ -174,8 +183,8 @@ export default async function FreelancePage({ params }: Props) {
       <div className="container">
         <div className="preview-banner">
           <span>
-            👁 <strong>Aperçu de votre profil public</strong> — voici exactement ce que voient les
-            entreprises.
+            <Eye size={16} /> <strong>Aperçu de votre profil public</strong> — voici exactement ce que
+            voient les entreprises.
           </span>
           <Link className="btn btn-light" href="/mon-profil">
             Modifier mon profil
@@ -194,7 +203,7 @@ export default async function FreelancePage({ params }: Props) {
             <hr />
             <div className="order-line">
               <span>Statut</span>
-              <span>{f.estVerifie ? '✓ Vérifié' : 'En attente'}</span>
+              <span>{f.estVerifie ? <span className="inline-ic"><Check size={13} /> Vérifié</span> : 'En attente'}</span>
             </div>
             <div className="order-line">
               <span>Langue</span>
@@ -234,7 +243,7 @@ export default async function FreelancePage({ params }: Props) {
             <hr />
             <div className="order-line">
               <span>Statut</span>
-              <span>{f.estVerifie ? '✓ Vérifié' : 'En attente'}</span>
+              <span>{f.estVerifie ? <span className="inline-ic"><Check size={13} /> Vérifié</span> : 'En attente'}</span>
             </div>
             <div className="order-line">
               <span>Langue</span>

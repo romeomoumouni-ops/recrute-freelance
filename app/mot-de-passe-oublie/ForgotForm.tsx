@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Mail } from 'lucide-react';
 import { createBrowserSupabase } from '@/lib/supabase-browser';
 
 export default function ForgotForm() {
@@ -31,7 +32,7 @@ export default function ForgotForm() {
       <div className="auth-wrap">
         <div className="auth-card center">
           <div className="success-icon" style={{ background: 'var(--green)' }}>
-            ✉️
+            <Mail size={30} />
           </div>
           <h1>Vérifiez votre e-mail</h1>
           <p className="sub" style={{ marginTop: 8 }}>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function PasswordInput({
   id,
@@ -39,7 +40,7 @@ export default function PasswordInput({
         aria-label={show ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
         title={show ? 'Masquer' : 'Afficher'}
       >
-        {show ? '🙈' : '👁️'}
+        {show ? <EyeOff size={18} /> : <Eye size={18} />}
       </button>
     </div>
   );

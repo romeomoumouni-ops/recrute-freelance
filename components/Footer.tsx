@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Globe } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -59,7 +60,7 @@ export default function Footer() {
         </div>
         <div className="footer-bottom">
           <span>© 2026 recrutefreelance.com — Tous droits réservés</span>
-          <span>🌍 FR</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><Globe size={15} /> FR</span>
         </div>
       </div>
     </footer>

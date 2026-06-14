@@ -555,3 +555,23 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .admin-kv:last-child { border-bottom: none; }
 .admin-kv span { color: var(--gray-500); }
 @media (max-width: 760px) { .admin-detail-grid { grid-template-columns: 1fr; } }
+
+/* ============ Icônes SVG (lucide) — alignement ============ */
+.lucide { vertical-align: middle; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin 1s linear infinite; }
+/* Boutons/cercles icône-seule : centrage */
+.icon-link, .chat-back, .hamburger, .pw-toggle,
+.success-icon, .check-icon, .verif-banner .big, .card .icon, .modal-close {
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.success-icon, .card .icon, .verif-banner .big { display: flex; }
+/* Icône + texte alignés */
+.devis-msg-head, .rating, .fl-pays, .role-pays, .cv-file, .badge-verifie,
+.review-stars, .inline-ic, .chat-safety, .preview-banner span,
+.role-switch button, .devis-recap-titre, .fl-meta > span {
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.chat-safety { display: flex; justify-content: center; }
+.review-stars { color: #f5a623; gap: 1px; }
+.role-switch button { justify-content: center; }

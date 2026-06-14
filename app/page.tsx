@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Bot, Clapperboard, Code2, Megaphone } from 'lucide-react';
 import HomeSearch from '@/components/HomeSearch';
 
 export default function HomePage() {
@@ -65,22 +66,22 @@ export default function HomePage() {
           </div>
           <div className="cards">
             <Link className="card" href="/recherche?cat=ia">
-              <div className="icon">🤖</div>
+              <div className="icon"><Bot size={24} /></div>
               <h3>Services IA</h3>
               <p>Automatisation, chatbots, data — les meilleurs experts IA d&apos;Afrique francophone.</p>
             </Link>
             <Link className="card dark" href="/recherche?cat=video">
-              <div className="icon">🎬</div>
+              <div className="icon"><Clapperboard size={24} /></div>
               <h3>Vidéo &amp; Animation</h3>
               <p>Montage, motion design et animation pour vos contenus et campagnes.</p>
             </Link>
             <Link className="card" href="/recherche?cat=dev">
-              <div className="icon">💻</div>
+              <div className="icon"><Code2 size={24} /></div>
               <h3>Développement Web &amp; Mobile</h3>
               <p>Sites, applications et SaaS livrés par des développeurs confirmés.</p>
             </Link>
             <Link className="card" href="/recherche?cat=marketing">
-              <div className="icon">📣</div>
+              <div className="icon"><Megaphone size={24} /></div>
               <h3>Marketing Digital</h3>
               <p>SEO, réseaux sociaux, publicité en ligne — boostez votre visibilité.</p>
             </Link>

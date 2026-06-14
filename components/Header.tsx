@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
+import { MessageCircle, Settings, Menu, X } from 'lucide-react';
 import { initiales } from '@/lib/utils';
 import { createBrowserSupabase } from '@/lib/supabase-browser';
 import NotificationBell from './NotificationBell';
@@ -71,11 +72,11 @@ export default function Header() {
           {!loaded ? null : logged ? (
             <>
               <Link className="link-login icon-link" href="/messages" title="Messagerie">
-                💬
+                <MessageCircle size={20} strokeWidth={1.75} />
                 {!!me?.unread && <span className="badge-count">{me.unread}</span>}
               </Link>
               <Link className="link-login icon-link" href="/parametres" title="Paramètres">
-                ⚙️
+                <Settings size={20} strokeWidth={1.75} />
               </Link>
               {me?.role === 'FREELANCE' && (
                 <Link className="link-login hide-sm" href="/mon-profil">
@@ -128,7 +129,7 @@ export default function Header() {
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((v) => !v)}
         >
-          {menuOpen ? '✕' : '☰'}
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 

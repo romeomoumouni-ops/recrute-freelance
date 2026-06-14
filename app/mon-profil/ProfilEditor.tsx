@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { FolderUp, FileText, X } from 'lucide-react';
 import { initiales, euros } from '@/lib/utils';
 import { getVerifChecks } from '@/lib/verification';
 import { CATEGORIES_LIST } from '@/lib/constants';
@@ -353,7 +354,7 @@ export default function ProfilEditor({
           {skills.length ? (
             skills.map((s, i) => (
               <span className="badge" key={`${s}-${i}`}>
-                {s} <button onClick={() => removeSkill(i)}>✕</button>
+                {s} <button onClick={() => removeSkill(i)}><X size={13} /></button>
               </span>
             ))
           ) : (
@@ -440,7 +441,7 @@ export default function ProfilEditor({
           onChange={(e) => e.target.files?.length && uploadPortfolio(e.target.files)}
         />
         <div className="upload-zone" onClick={() => pfInput.current?.click()}>
-          📁 <strong>Cliquez pour ajouter des images</strong>
+          <FolderUp size={26} /> <strong>Cliquez pour ajouter des images</strong>
           <br />
           de vos réalisations (2 minimum pour la vérification)
         </div>
@@ -451,7 +452,7 @@ export default function ProfilEditor({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={p.imageUrl} alt="" />
                 <button onClick={() => removePf(p.id)} aria-label="Supprimer">
-                  ✕
+                  <X size={14} />
                 </button>
               </div>
             ))}
@@ -470,15 +471,15 @@ export default function ProfilEditor({
           onChange={(e) => e.target.files?.[0] && uploadCV(e.target.files[0])}
         />
         <div className="upload-zone" onClick={() => cvInput.current?.click()}>
-          📄 <strong>Cliquez pour charger votre CV</strong>
+          <FileText size={26} /> <strong>Cliquez pour charger votre CV</strong>
           <br />
           PDF ou Word
         </div>
         {cvName && (
           <div className="cv-file">
-            📄 {cvName}
+            <FileText size={15} /> {cvName}
             <button onClick={removeCV} aria-label="Supprimer">
-              ✕
+              <X size={14} />
             </button>
           </div>
         )}

@@ -14,7 +14,6 @@ const SELECT =
 export default async function MonProfilPage() {
   const session = await auth();
   if (!session) redirect('/connexion?callbackUrl=/mon-profil');
-  if (session.user.banni) redirect('/compte-suspendu');
   if (session.user.role !== 'FREELANCE') redirect('/dashboard');
   const sb = supabaseAdmin();
   const userId = session.user.id;

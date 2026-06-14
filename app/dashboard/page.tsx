@@ -16,7 +16,6 @@ function hasReview(r: unknown): boolean {
 export default async function DashboardPage() {
   const session = await auth();
   if (!session) redirect('/connexion?callbackUrl=/dashboard');
-  if (session.user.banni) redirect('/compte-suspendu');
   const userId = session.user.id;
   const sb = supabaseAdmin();
 

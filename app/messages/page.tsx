@@ -12,7 +12,6 @@ export const dynamic = 'force-dynamic';
 export default async function MessagesPage() {
   const session = await auth();
   if (!session) redirect('/connexion?callbackUrl=/messages');
-  if (session.user.banni) redirect('/compte-suspendu');
 
   const [conversations, banner] = await Promise.all([
     getConversationsFor(session.user.id),

@@ -3,54 +3,114 @@
 import { useState } from 'react';
 import { toast } from '@/lib/toast';
 
-export default function AdminBroadcastForm() {
+type Audience = 'all' | 'CLIENT' | 'FREELANCE';
+
+export default function AdminBroadcastForm({
+  adminEmail,
+  counts,
+}: {
+  adminEmail: string;
+  counts: { all: number; CLIENT: number; FREELANCE: number };
+}) {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
-  const [audience, setAudience] = useState<'all' | 'CLIENT' | 'FREELANCE'>('all');
-  const [busy, setBusy] = useState(false);
+  const [audience, setAudience] = useState<Audience>('all');
+  const [busy, setBusy] = useState<null | 'test' | 'send'>(null);
   const [result, setResult] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  async function send() {
+  const audienceLabel =
+    audience === 'all' ? 'tous les utilisateurs' : audience === 'CLIENT' ? 'tous les clients' : 'tous les freelances';
+  const target = counts[audience];
+
+  async function post(test: boolean) {
     if (subject.trim().length < 2 || message.trim().length < 2) {
-      return toast('Sujet et message requis.');
+      toast('Sujet et message requis.');
+      return;
     }
-    if (!window.confirm(`Envoyer cet e-mail à : ${audience === 'all' ? 'tous les utilisateurs' : audience === 'CLIENT' ? 'tous les clients' : 'tous les freelances'} ?`)) return;
-    setBusy(true);
+    if (!test && !window.confirm(`Envoyer cet e-mail à ${audienceLabel} (${target} destinataire${target > 1 ? 's' : ''}) ?`))
+      return;
+
+    setBusy(test ? 'test' : 'send');
     setResult(null);
-    const res = await fetch('/api/admin/broadcast', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ subject: subject.trim(), message: message.trim(), audience }),
-    });
-    const data = await res.json().catch(() => ({}));
-    setBusy(false);
-    if (!res.ok) return toast(data.error || 'Erreur.');
-    setResult(`✅ Envoyé à ${data.sent} / ${data.total} destinataires.`);
-    toast('Communication envoyée ✓');
+    setError(null);
+    try {
+      const res = await fetch('/api/admin/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject: subject.trim(), message: message.trim(), audience, test }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setError(data.error || 'Erreur lors de l’envoi.');
+        toast('Échec de l’envoi.');
+        return;
+      }
+      if (test) {
+        setResult(`Test envoyé à ${data.to}. Vérifie ta boîte mail (et les spams).`);
+        toast('Test envoyé ✓');
+      } else {
+        const failedNote = data.failed ? ` · ${data.failed} échec(s)` : '';
+        setResult(`Envoyé à ${data.sent} / ${data.total} destinataires${failedNote}.`);
+        toast('Communication envoyée ✓');
+      }
+    } catch {
+      setError('Erreur réseau.');
+    } finally {
+      setBusy(null);
+    }
   }
 
   return (
     <div className="admin-panel" style={{ maxWidth: 620 }}>
       <div className="field">
         <label>Destinataires</label>
-        <select value={audience} onChange={(e) => setAudience(e.target.value as 'all' | 'CLIENT' | 'FREELANCE')}>
-          <option value="all">Tous les utilisateurs</option>
-          <option value="CLIENT">Clients uniquement</option>
-          <option value="FREELANCE">Freelances uniquement</option>
+        <select value={audience} onChange={(e) => setAudience(e.target.value as Audience)}>
+          <option value="all">Tous les utilisateurs ({counts.all})</option>
+          <option value="CLIENT">Clients uniquement ({counts.CLIENT})</option>
+          <option value="FREELANCE">Freelances uniquement ({counts.FREELANCE})</option>
         </select>
       </div>
       <div className="field">
         <label>Sujet</label>
-        <input type="text" maxLength={150} value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Ex : Nouveauté sur la plateforme" />
+        <input
+          type="text"
+          maxLength={150}
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="Ex : Nouveauté sur la plateforme"
+        />
       </div>
       <div className="field">
         <label>Message</label>
-        <textarea rows={7} maxLength={5000} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Votre message… (les sauts de ligne sont conservés)" />
+        <textarea
+          rows={7}
+          maxLength={5000}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Votre message… (les sauts de ligne sont conservés)"
+        />
       </div>
-      <button className="btn btn-dark" disabled={busy} onClick={send}>
-        {busy ? 'Envoi en cours…' : 'Envoyer la communication'}
-      </button>
-      {result && <p className="hint" style={{ marginTop: 12, color: 'var(--green)' }}>{result}</p>}
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+        <button className="btn btn-outline btn-sm" disabled={busy !== null} onClick={() => post(true)}>
+          {busy === 'test' ? 'Envoi du test…' : `Envoyer un test à moi (${adminEmail})`}
+        </button>
+        <button className="btn btn-dark" disabled={busy !== null} onClick={() => post(false)}>
+          {busy === 'send' ? 'Envoi en cours…' : `Envoyer à ${audienceLabel} (${target})`}
+        </button>
+      </div>
+
+      <p className="hint" style={{ marginTop: 10 }}>
+        Conseil : commence toujours par un <strong>test</strong> pour vérifier le rendu avant l’envoi global.
+      </p>
+
+      {result && (
+        <p className="hint" style={{ marginTop: 12, color: 'var(--green)', fontWeight: 600 }}>✅ {result}</p>
+      )}
+      {error && (
+        <p className="hint" style={{ marginTop: 12, color: '#c0392b', fontWeight: 600 }}>⛔ {error}</p>
+      )}
     </div>
   );
 }

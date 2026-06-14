@@ -487,10 +487,10 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .status.red { background: #fdecea; color: #c0392b; }
 
 .admin-topbar { background: #0d0d0d; color: #fff; position: sticky; top: 0; z-index: 60; }
-.admin-topbar-inner { display: flex; align-items: center; gap: 14px; height: 58px; }
+.admin-topbar-inner { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 16px; min-height: 58px; padding: 9px 0; }
 .admin-logo { font-weight: 800; font-size: .95rem; white-space: nowrap; }
-.admin-nav-desktop { display: flex; gap: 6px; flex: 1; flex-wrap: wrap; }
-.admin-nav-desktop a { color: #d4d4d4; text-decoration: none; font-size: .82rem; font-weight: 600; padding: 8px 13px; border-radius: 999px; white-space: nowrap; background: rgba(255,255,255,.06); }
+.admin-nav-desktop { display: flex; gap: 6px; flex-wrap: wrap; }
+.admin-nav-desktop a { color: #d4d4d4; text-decoration: none; font-size: .8rem; font-weight: 600; padding: 7px 12px; border-radius: 999px; white-space: nowrap; background: rgba(255,255,255,.06); transition: background .12s ease; }
 .admin-nav-desktop a:hover, .admin-nav-desktop a.active { background: rgba(255,255,255,.18); color: #fff; }
 .admin-nav-mobile { display: none; flex: 1; position: relative; }
 .admin-nav-toggle { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; max-width: 300px; background: rgba(255,255,255,.12); color: #fff; border: none; border-radius: 999px; padding: 10px 18px; font-size: .85rem; font-weight: 700; }
@@ -499,7 +499,14 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .admin-nav-dropdown a { color: #d4d4d4; text-decoration: none; font-size: .86rem; font-weight: 600; padding: 11px 16px; border-radius: 9px; }
 .admin-nav-dropdown a:hover, .admin-nav-dropdown a.active { background: rgba(255,255,255,.14); color: #fff; }
 .admin-exit { color: #9ca3af; text-decoration: none; font-size: .78rem; white-space: nowrap; }
+.admin-exit:hover { color: #fff; }
 .admin-hint-inline { font-size: .72rem; font-weight: 500; color: var(--gray-500); }
+/* Desktop : "Admin" + "Retour au site" sur la 1re ligne, onglets sur la 2e (pleine largeur). */
+@media (min-width: 901px) {
+  .admin-logo { order: 1; }
+  .admin-exit { order: 2; margin-left: auto; }
+  .admin-nav-desktop { order: 3; flex-basis: 100%; }
+}
 @media (max-width: 900px) {
   .admin-nav-desktop { display: none; }
   .admin-nav-mobile { display: block; }
@@ -509,6 +516,21 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .admin-h2 { font-size: 1rem; font-weight: 700; margin: 30px 0 14px; }
 .admin-sub { color: var(--gray-500); font-size: .85rem; margin-bottom: 20px; max-width: 720px; }
 .admin-empty { padding: 30px; text-align: center; color: var(--gray-500); border: 1px dashed var(--border); border-radius: var(--radius); }
+
+/* Lecteur de chat admin (lecture seule) */
+.admin-chat { display: flex; flex-direction: column; gap: 12px; max-width: 760px; }
+.admin-chat-system { align-self: center; font-size: .74rem; color: var(--gray-500); background: var(--off-white); border: 1px solid var(--border); border-radius: 999px; padding: 5px 14px; text-align: center; }
+.admin-msg { max-width: 80%; display: flex; flex-direction: column; gap: 3px; }
+.admin-msg.left { align-self: flex-start; align-items: flex-start; }
+.admin-msg.right { align-self: flex-end; align-items: flex-end; }
+.admin-msg-head { font-size: .72rem; color: var(--gray-500); display: flex; gap: 8px; }
+.admin-msg-head strong { color: var(--black); }
+.admin-msg-body { background: var(--off-white); border: 1px solid var(--border); border-radius: 14px; padding: 9px 13px; font-size: .88rem; line-height: 1.45; white-space: pre-wrap; word-break: break-word; }
+.admin-msg.right .admin-msg-body { background: #0d0d0d; color: #fff; border-color: #0d0d0d; }
+.admin-msg-body.flagged { border-color: #f59e0b; box-shadow: 0 0 0 1px #f59e0b inset; }
+.admin-msg-file { color: inherit; text-decoration: underline; font-weight: 600; }
+.admin-msg-flag { display: block; margin-top: 5px; font-size: .72rem; color: #c0392b; font-weight: 600; }
+.admin-msg.right .admin-msg-flag { color: #fca5a5; }
 
 .admin-alerts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .admin-alert { display: flex; align-items: center; gap: 14px; padding: 18px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; text-decoration: none; color: inherit; }

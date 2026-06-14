@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { dateCourte } from '@/lib/utils';
 import AdminButton from './AdminButton';
 
@@ -13,6 +14,7 @@ export interface AdminFlagRow {
   senderPrenom: string;
   senderEmail: string;
   senderBanni: boolean;
+  conversationId: string | null;
 }
 
 export default function AdminModerationView({ flags }: { flags: AdminFlagRow[] }) {
@@ -50,6 +52,11 @@ export default function AdminModerationView({ flags }: { flags: AdminFlagRow[] }
                 <div className="admin-quote">« {m.contenu} »</div>
               </div>
               <div className="admin-card-actions">
+                {m.conversationId && (
+                  <Link href={`/admin/conversations/${m.conversationId}`} className="btn btn-outline btn-sm">
+                    Voir la conversation
+                  </Link>
+                )}
                 <AdminButton endpoint="/api/admin/message" body={{ id: m.id, action: 'dismiss' }}
                   label="✓ Traité" className="btn btn-outline btn-sm" successMsg="Retiré de la file." />
                 {!m.senderBanni && (

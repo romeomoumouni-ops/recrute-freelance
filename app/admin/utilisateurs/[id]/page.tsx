@@ -1,9 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { supabaseAdmin } from '@/lib/supabase';
-import { euros, dateCourte } from '@/lib/utils';
+import { euros, dateCourte, heureCourte } from '@/lib/utils';
 import { OPERATEUR_LABEL } from '@/lib/constants';
 import AdminButton from '@/components/admin/AdminButton';
+import { getConversationsForUser } from '@/lib/admin-conversations';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,8 @@ export default async function AdminUserDetail({ params }: { params: { id: string
   const orders = [...((asClient as O[]) ?? []), ...((asFreelance as O[]) ?? [])];
   type W = { id: string; montant: number; statut: string; createdAt: string; numero: string };
   const wds = (withdrawals as W[]) ?? [];
+
+  const conversations = await getConversationsForUser(id);
 
   return (
     <>
@@ -104,6 +107,31 @@ export default async function AdminUserDetail({ params }: { params: { id: string
             ))}</tbody>
           </table></div>
         </>
+      )}
+
+      <h2 className="admin-h2">Conversations ({conversations.length})</h2>
+      {conversations.length === 0 ? (
+        <div className="admin-empty">Aucune conversation.</div>
+      ) : (
+        <div className="admin-cards">
+          {conversations.map((c) => (
+            <Link key={c.id} href={`/admin/conversations/${c.id}`} className={`admin-card${c.flaggedCount ? ' hot' : ''}`}>
+              <div className="admin-card-main">
+                <strong>Avec {c.withName}</strong>{' '}
+                <span className="admin-meta">({c.withEmail})</span>
+                <div className="admin-meta" style={{ marginTop: 4 }}>
+                  « {c.lastContenu.length > 90 ? c.lastContenu.slice(0, 90) + '…' : c.lastContenu} »
+                </div>
+                <div className="admin-meta" style={{ marginTop: 2 }}>
+                  {c.total} message{c.total > 1 ? 's' : ''}
+                  {c.flaggedCount > 0 && <> · <strong style={{ color: '#c0392b' }}>{c.flaggedCount} signalé{c.flaggedCount > 1 ? 's' : ''}</strong></>}
+                  {c.lastAt && <> · {dateCourte(c.lastAt)} {heureCourte(c.lastAt)}</>}
+                </div>
+              </div>
+              <span className="btn btn-outline btn-sm">Lire le chat →</span>
+            </Link>
+          ))}
+        </div>
       )}
 
       <h2 className="admin-h2">Commandes ({orders.length})</h2>

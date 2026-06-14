@@ -7,12 +7,12 @@ export default async function AdminModeration() {
   const sb = supabaseAdmin();
   const { data: rows } = await sb
     .from('Message')
-    .select('id, contenu, flagReason, createdAt, senderId')
+    .select('id, contenu, flagReason, createdAt, senderId, conversationId')
     .eq('flagged', true)
     .order('createdAt', { ascending: false })
     .limit(200);
 
-  type M = { id: string; contenu: string; flagReason: string | null; createdAt: string; senderId: string };
+  type M = { id: string; contenu: string; flagReason: string | null; createdAt: string; senderId: string; conversationId: string | null };
   const list = (rows as M[]) ?? [];
   const ids = [...new Set(list.map((m) => m.senderId))];
   const { data: users } = ids.length ? await sb.from('User').select('id, prenom, email, banni').in('id', ids) : { data: [] };
@@ -24,6 +24,7 @@ export default async function AdminModeration() {
     senderPrenom: byId.get(m.senderId)?.prenom ?? '—',
     senderEmail: byId.get(m.senderId)?.email ?? '',
     senderBanni: byId.get(m.senderId)?.banni ?? false,
+    conversationId: m.conversationId,
   }));
 
   return (

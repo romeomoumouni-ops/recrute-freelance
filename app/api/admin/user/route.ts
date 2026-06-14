@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/admin';
 import { supabaseAdmin } from '@/lib/supabase';
+import { logAdminAction } from '@/lib/admin-log';
 
 const schema = z.object({ id: z.string().min(1), action: z.enum(['ban', 'unban', 'verify', 'unverify']) });
 
@@ -26,5 +27,7 @@ export async function POST(req: Request) {
   } else {
     await sb.from('Profile').update({ estVerifie: action === 'verify' }).eq('userId', id);
   }
+  const labels: Record<string, string> = { ban: 'Utilisateur banni', unban: 'Utilisateur débanni', verify: 'Freelance vérifié', unverify: 'Badge vérifié retiré' };
+  await logAdminAction(session, labels[action], `utilisateur ${id}`);
   return NextResponse.json({ ok: true });
 }

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/admin';
 import { supabaseAdmin } from '@/lib/supabase';
+import { logAdminAction } from '@/lib/admin-log';
 
 const schema = z.object({ id: z.string().min(1), action: z.enum(['settle', 'reject']) });
 
@@ -18,5 +19,6 @@ export async function POST(req: Request) {
   const { data, error } = await supabaseAdmin().rpc(fn, { p_id: parsed.data.id });
   if (error) return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   if (data !== true) return NextResponse.json({ error: 'Retrait déjà traité.' }, { status: 400 });
+  await logAdminAction(session, parsed.data.action === 'settle' ? 'Retrait envoyé' : 'Retrait rejeté (remboursé)', `retrait ${parsed.data.id}`);
   return NextResponse.json({ ok: true });
 }

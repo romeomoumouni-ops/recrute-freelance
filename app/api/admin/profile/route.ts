@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { requireAdmin } from '@/lib/admin';
 import { supabaseAdmin } from '@/lib/supabase';
+import { logAdminAction } from '@/lib/admin-log';
 
 const schema = z.object({
   userId: z.string().min(1),
@@ -24,5 +25,6 @@ export async function POST(req: Request) {
         ? { bio: null }
         : { note: null };
   await supabaseAdmin().from('Profile').update(patch).eq('userId', parsed.data.userId);
+  await logAdminAction(session, `Profil modéré (${parsed.data.action})`, `utilisateur ${parsed.data.userId}`);
   return NextResponse.json({ ok: true });
 }

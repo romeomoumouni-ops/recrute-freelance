@@ -13,6 +13,10 @@ const TABS: [string, string][] = [
   ['/admin/moderation', 'Modération'],
   ['/admin/avis', 'Avis'],
   ['/admin/utilisateurs', 'Utilisateurs'],
+  ['/admin/communication', 'Communication'],
+  ['/admin/export', 'Export'],
+  ['/admin/reglages', 'Réglages'],
+  ['/admin/journal', 'Journal'],
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

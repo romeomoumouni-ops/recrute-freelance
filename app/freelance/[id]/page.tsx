@@ -31,6 +31,9 @@ export default async function FreelancePage({ params }: Props) {
   const session = await auth();
   const isOwner = session?.user.id === f.id;
   const isLogged = !!session;
+  // Seuls les clients (ou visiteurs non connectés → invités à se connecter)
+  // peuvent contacter un freelance. Un freelance ne contacte pas un autre freelance.
+  const canContact = !isOwner && (!session || session.user.role === 'CLIENT');
 
   // ----- Colonne principale -----
   const main = (
@@ -101,7 +104,7 @@ export default async function FreelancePage({ params }: Props) {
               </div>
               <div style={{ textAlign: 'right' }}>
                 <div className="prix">dès {euros(s.prix)}</div>
-                {!isOwner && (
+                {canContact && (
                   <div style={{ marginTop: 8 }}>
                     <DevisButton
                       service={{ id: s.id, titre: s.titre, prix: s.prix }}
@@ -241,19 +244,34 @@ export default async function FreelancePage({ params }: Props) {
             <a className="btn btn-outline btn-block" href="#portfolio">
               Voir le portfolio
             </a>
-            <div style={{ marginTop: 10 }}>
-              <DevisButton className="btn btn-dark btn-block" label="Demander un devis" />
-            </div>
-            <p
-              style={{
-                fontSize: '.7rem',
-                color: 'var(--gray-500)',
-                textAlign: 'center',
-                marginTop: 12,
-              }}
-            >
-              Réponse rapide — échangez directement dans la messagerie.
-            </p>
+            {canContact ? (
+              <>
+                <div style={{ marginTop: 10 }}>
+                  <DevisButton className="btn btn-dark btn-block" label="Demander un devis" />
+                </div>
+                <p
+                  style={{
+                    fontSize: '.7rem',
+                    color: 'var(--gray-500)',
+                    textAlign: 'center',
+                    marginTop: 12,
+                  }}
+                >
+                  Réponse rapide — échangez directement dans la messagerie.
+                </p>
+              </>
+            ) : (
+              <p
+                style={{
+                  fontSize: '.72rem',
+                  color: 'var(--gray-500)',
+                  textAlign: 'center',
+                  marginTop: 14,
+                }}
+              >
+                Seuls les comptes client peuvent contacter un freelance.
+              </p>
+            )}
           </div>
         </div>
       </div>

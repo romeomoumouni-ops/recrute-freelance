@@ -11,6 +11,12 @@ const paySchema = z.object({ offerMessageId: z.string().min(1) });
 export async function POST(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  if (session.user.role !== 'CLIENT') {
+    return NextResponse.json(
+      { error: 'Seuls les comptes client peuvent payer un freelance.' },
+      { status: 403 }
+    );
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = paySchema.safeParse(body);

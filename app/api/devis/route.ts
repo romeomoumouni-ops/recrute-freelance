@@ -11,10 +11,16 @@ const devisSchema = z.object({
 });
 
 // Demande de devis : crée/retrouve la conversation et y poste un message de type DEVIS.
-// Ouvert aux clients ET aux freelances (un freelance peut solliciter un autre freelance).
+// Réservé aux CLIENTS : un freelance ne peut pas contacter / solliciter un autre freelance.
 export async function POST(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  if (session.user.role !== 'CLIENT') {
+    return NextResponse.json(
+      { error: 'Seuls les comptes client peuvent contacter un freelance.' },
+      { status: 403 }
+    );
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = devisSchema.safeParse(body);

@@ -471,6 +471,10 @@ export default function MessagesClient({
                 <div className="statut-en-ligne">● En ligne</div>
               </div>
             </div>
+            <div className="chat-safety">
+              ⚠️ Pour votre sécurité, n&apos;échangez aucune coordonnée hors de la plateforme
+              (mail, WhatsApp, Instagram, etc.) — au risque d&apos;être totalement banni.
+            </div>
             <div className="chat-msgs" ref={msgsRef}>
               {messages.map((m) =>
                 m.type === 'DEVIS' ? (

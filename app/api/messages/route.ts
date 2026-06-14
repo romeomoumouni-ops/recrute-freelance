@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { assertMember } from '@/lib/conversations';
 import { messageSchema } from '@/lib/validations';
 import { heureCourte } from '@/lib/utils';
+import { detectOffPlatform } from '@/lib/moderation';
 
 interface MsgRow {
   id: string;
@@ -70,9 +71,18 @@ export async function POST(req: Request) {
   const conv = await assertMember(conversationId, session.user.id);
   if (!conv) return NextResponse.json({ error: 'Conversation introuvable.' }, { status: 404 });
 
+  // Modération : on flague (sans bloquer) toute tentative de contact hors plateforme.
+  const reasons = detectOffPlatform(contenu);
+
   const { data: msg, error } = await supabaseAdmin()
     .from('Message')
-    .insert({ conversationId, senderId: session.user.id, contenu })
+    .insert({
+      conversationId,
+      senderId: session.user.id,
+      contenu,
+      flagged: reasons.length > 0,
+      flagReason: reasons.length ? reasons.join(', ') : null,
+    })
     .select('id, contenu, createdAt')
     .single();
   if (error || !msg) return NextResponse.json({ error: 'Envoi impossible.' }, { status: 500 });

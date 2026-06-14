@@ -12,10 +12,16 @@ const offerSchema = z.object({
   description: z.string().trim().min(1, 'Décrivez la prestation.').max(500),
 });
 
-// Le freelance (ou tout participant) envoie un DEVIS chiffré, payable par carte.
+// Le FREELANCE envoie un devis chiffré (payable par carte par le client).
 export async function POST(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  if (session.user.role !== 'FREELANCE') {
+    return NextResponse.json(
+      { error: 'Seuls les freelances peuvent envoyer un devis à payer.' },
+      { status: 403 }
+    );
+  }
 
   const body = await req.json().catch(() => null);
   const parsed = offerSchema.safeParse(body);

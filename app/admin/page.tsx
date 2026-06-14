@@ -9,7 +9,7 @@ interface Stats {
   cmd_en_cours: number; cmd_validees: number;
   sequestre: number; gmv: number; revenus: number;
   retraits_attente_n: number; retraits_attente_montant: number;
-  flagues: number; avis: number;
+  flagues: number; avis: number; support_unread: number;
 }
 
 export default async function AdminHome() {
@@ -25,6 +25,10 @@ export default async function AdminHome() {
         <Link href="/admin/retraits" className={`admin-alert${s.retraits_attente_n ? ' hot' : ''}`}>
           <div className="n">{s.retraits_attente_n ?? 0}</div>
           <div className="l">Retraits à envoyer<br /><strong>{euros(s.retraits_attente_montant ?? 0)}</strong></div>
+        </Link>
+        <Link href="/admin/support" className={`admin-alert${s.support_unread ? ' hot' : ''}`}>
+          <div className="n">{s.support_unread ?? 0}</div>
+          <div className="l">Messages de support<br />non lus</div>
         </Link>
         <Link href="/admin/moderation" className={`admin-alert${s.flagues ? ' hot' : ''}`}>
           <div className="n">{s.flagues ?? 0}</div>

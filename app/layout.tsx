@@ -5,6 +5,7 @@ import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toaster from '@/components/Toaster';
+import SupportWidget from '@/components/SupportWidget';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -29,6 +30,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main>{children}</main>
         <Footer />
+        <Suspense fallback={null}>
+          <SupportWidget />
+        </Suspense>
         <Suspense fallback={null}>
           <Toaster />
         </Suspense>

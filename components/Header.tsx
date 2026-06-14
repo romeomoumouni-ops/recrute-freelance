@@ -93,12 +93,22 @@ export default function Header() {
                   <img
                     src={me.photoUrl}
                     alt=""
-                    style={{ width: 34, height: 34, borderRadius: '50%', objectFit: 'cover' }}
+                    style={{
+                      width: 34,
+                      height: 34,
+                      minWidth: 34,
+                      minHeight: 34,
+                      flexShrink: 0,
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      display: 'block',
+                      aspectRatio: '1 / 1',
+                    }}
                   />
                 ) : (
                   <span
                     className="avatar"
-                    style={{ width: 34, height: 34, fontSize: '.7rem', display: 'inline-flex' }}
+                    style={{ width: 34, height: 34, minWidth: 34, flexShrink: 0, fontSize: '.7rem', display: 'inline-flex' }}
                   >
                     {initiales(me?.prenom || '?')}
                   </span>

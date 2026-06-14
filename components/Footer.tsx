@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Globe } from 'lucide-react';
+import Logo from './Logo';
 
 export default function Footer() {
   return (
@@ -7,8 +8,8 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <Link className="logo" href="/">
-              recrute<span>freelance</span>
+            <Link className="brand" href="/" aria-label="Recrute Freelance — accueil">
+              <Logo />
             </Link>
             <p className="tagline">
               La plateforme qui connecte les entreprises européennes aux freelances d&apos;Afrique

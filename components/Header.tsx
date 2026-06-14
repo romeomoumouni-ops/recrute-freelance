@@ -7,6 +7,7 @@ import { MessageCircle, Settings, Menu, X } from 'lucide-react';
 import { initiales } from '@/lib/utils';
 import { createBrowserSupabase } from '@/lib/supabase-browser';
 import NotificationBell from './NotificationBell';
+import Logo from './Logo';
 
 interface Me {
   authenticated: boolean;
@@ -57,8 +58,8 @@ export default function Header() {
   return (
     <header className="header">
       <div className="container header-inner">
-        <Link className="logo" href="/">
-          recrute<span>freelance</span>
+        <Link className="brand" href="/" aria-label="Recrute Freelance — accueil">
+          <Logo />
         </Link>
 
         <nav className="nav">

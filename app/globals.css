@@ -36,6 +36,11 @@ input, select, textarea { font-family: inherit; }
 .header-inner { display: flex; align-items: center; justify-content: space-between; height: 72px; gap: 24px; }
 .logo { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; border-bottom: 3px solid var(--black); padding-bottom: 2px; white-space: nowrap; }
 .logo span { font-weight: 400; }
+.brand { display: inline-flex; align-items: center; gap: 9px; line-height: 1; }
+.brand-icon { flex-shrink: 0; }
+.brand-word { font-size: 1.2rem; font-weight: 400; letter-spacing: -0.02em; color: var(--black); white-space: nowrap; }
+.brand-word b { font-weight: 800; }
+@media (max-width: 560px) { .brand-word { font-size: 1.05rem; } }
 .nav { display: flex; gap: 28px; font-size: 0.85rem; font-weight: 500; color: var(--gray-700); }
 .nav a:hover { color: var(--black); }
 .header-actions { display: flex; align-items: center; gap: 18px; }
@@ -140,6 +145,7 @@ input, select, textarea { font-family: inherit; }
 .footer { border-top: 1px solid var(--border); padding: 56px 0 40px; margin-top: 90px; }
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 48px; }
 .footer .logo { display: inline-block; margin-bottom: 14px; }
+.footer .brand { margin-bottom: 14px; }
 .footer p.tagline { font-size: .82rem; color: var(--gray-500); line-height: 1.6; max-width: 280px; }
 .footer h4 { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 16px; }
 .footer ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }

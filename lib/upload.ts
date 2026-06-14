@@ -20,8 +20,14 @@ export async function saveUpload(file: File): Promise<string> {
 
   const buffer = Buffer.from(await file.arrayBuffer());
   const sb = supabaseAdmin();
+  // Sécurité : le bucket est public. On ne sert en inline QUE les types image sûrs
+  // (jamais SVG/HTML/XML, qui pourraient exécuter du JS). Tout le reste est servi
+  // en application/octet-stream → le navigateur télécharge le fichier au lieu de
+  // l'exécuter. Empêche le XSS stocké via un Content-Type contrôlé par l'uploadeur.
+  const SAFE_INLINE = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+  const contentType = SAFE_INLINE.includes(file.type) ? file.type : 'application/octet-stream';
   const { error } = await sb.storage.from(BUCKET).upload(filename, buffer, {
-    contentType: file.type || 'application/octet-stream',
+    contentType,
     upsert: false,
   });
   if (error) throw new Error(`Upload échoué : ${error.message}`);
@@ -29,6 +35,8 @@ export async function saveUpload(file: File): Promise<string> {
   const { data } = sb.storage.from(BUCKET).getPublicUrl(filename);
   return data.publicUrl;
 }
+
+const SAFE_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
 
 function guessExt(mime: string): string {
   if (mime === 'image/png') return '.png';
@@ -40,7 +48,8 @@ function guessExt(mime: string): string {
 }
 
 export function validateImage(file: File): string | null {
-  if (!file.type.startsWith('image/')) return 'Le fichier doit être une image.';
+  // Whitelist stricte (pas de SVG : peut contenir du JavaScript).
+  if (!SAFE_IMAGE_TYPES.includes(file.type)) return 'Image invalide (JPG, PNG, WEBP ou GIF).';
   if (file.size > MAX_FILE_MB * 1024 * 1024) return `Image trop volumineuse (max ${MAX_FILE_MB} Mo).`;
   return null;
 }

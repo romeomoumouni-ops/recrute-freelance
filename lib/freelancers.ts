@@ -27,8 +27,6 @@ interface CardRow {
   bio: string | null;
   mot: string | null;
   cvName: string | null;
-  telephoneMomo: string | null;
-  operateurMomo: string | null;
   prixMin: number | null;
   note: number;
   avis: number;
@@ -59,8 +57,6 @@ export async function getFreelanceCards(): Promise<FreelanceCard[]> {
 export interface FreelanceFull extends FreelanceCard {
   bio: string;
   mot: string | null;
-  operateurMomo: string | null;
-  telephoneMomo: string | null;
   cvName: string | null;
   services: { id: string; titre: string; description: string; prix: number; delaiJours: number }[];
   portfolio: { id: string; imageUrl: string }[];
@@ -115,8 +111,6 @@ export async function getFreelanceProfile(id: string): Promise<FreelanceFull | n
     ...toCard(r),
     bio: r.bio ?? '',
     mot: r.mot ?? null,
-    operateurMomo: r.operateurMomo,
-    telephoneMomo: r.telephoneMomo,
     cvName: r.cvName,
     prixMin: r.prixMin,
     services,

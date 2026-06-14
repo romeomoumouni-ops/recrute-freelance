@@ -31,12 +31,15 @@ export async function POST(req: Request) {
   const { data: users } = await query;
   const list = (users as { email: string; prenom: string }[] ?? []).filter((u) => u.email);
 
+  const esc = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const corps = esc(message).replace(/\n/g, '<br>');
   const html = (prenom: string) =>
     `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto">
       <div style="background:#0d0d0d;padding:18px 24px"><span style="color:#fff;font-weight:700;font-size:17px">RecruteFreelance</span></div>
       <div style="padding:24px;color:#222;font-size:14px;line-height:1.6">
-        <p>Bonjour ${prenom || ''},</p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
+        <p>Bonjour ${esc(prenom || '')},</p>
+        <p>${corps}</p>
         <p style="margin-top:20px;color:#888;font-size:12px">— L'équipe recrutefreelance.com</p>
       </div>
     </div>`;

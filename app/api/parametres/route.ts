@@ -7,6 +7,7 @@ import { recomputeVerification } from '@/lib/profile-server';
 export async function PATCH(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
+  if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
   const userId = session.user.id;
   const sb = supabaseAdmin();
 

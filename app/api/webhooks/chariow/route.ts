@@ -18,16 +18,17 @@ export async function POST(req: Request) {
     payload = { _raw: raw };
   }
 
+  // Sécurité : on ne TRAITE que si le secret est bon (mais on répond 200 pour éviter les retries).
+  // On ne journalise QUE les requêtes authentifiées (sinon n'importe qui pourrait
+  // injecter du JSON / des données perso dans WebhookLog sans connaître le secret).
+  if (!secretOk) return NextResponse.json({ received: true });
+
   const sb = supabaseAdmin();
-  // On garde une trace (utile pour le debug / la réconciliation manuelle).
   try {
-    await sb.from('WebhookLog').insert({ source: 'chariow', payload, headers: { secretOk } });
+    await sb.from('WebhookLog').insert({ source: 'chariow', payload, headers: { secretOk: true } });
   } catch {
     /* ignore */
   }
-
-  // Sécurité : on ne TRAITE que si le secret est bon (mais on répond 200 pour éviter les retries).
-  if (!secretOk) return NextResponse.json({ received: true });
 
   if (payload?.event === 'successful.sale' && payload?.sale?.id) {
     try {
@@ -106,19 +107,11 @@ async function handleSale(payload: any) {
       .maybeSingle();
     if (data) pendingId = (data as { id: string }).id;
   }
-  // email seul (dernier recours)
-  if (!pendingId && email) {
-    const { data } = await sb
-      .from('DevisPayment')
-      .select('id')
-      .eq('payerEmail', email)
-      .eq('status', 'awaiting')
-      .order('createdAt', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (data) pendingId = (data as { id: string }).id;
-  }
-  if (!pendingId) return; // paiement non rattaché — visible dans WebhookLog pour réconciliation manuelle
+  // NB : on NE rattache PAS par e-mail seul. Sans productId/ref concordant, le
+  // paiement reste « non rattaché » et part en réconciliation manuelle (WebhookLog).
+  // Cela empêche qu'une vente d'un palier règle par erreur un paiement d'un autre
+  // montant (le productId garantit que le palier/montant correspond).
+  if (!pendingId) return;
 
   // Règlement atomique (marque payé + crédite le freelance).
   const { data: settled } = await sb.rpc('settle_devis_payment', {

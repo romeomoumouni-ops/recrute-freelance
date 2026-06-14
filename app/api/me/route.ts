@@ -34,6 +34,7 @@ export async function GET() {
     prenom: session.user.prenom,
     role: session.user.role,
     photoUrl: profile?.photoUrl ?? null,
+    banni: session.user.banni,
     unread,
     notifUnread: notifUnread ?? 0,
     supportUnread: supportUnread ?? 0,

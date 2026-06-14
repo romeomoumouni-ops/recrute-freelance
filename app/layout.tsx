@@ -6,6 +6,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import Toaster from '@/components/Toaster';
 import SupportWidget from '@/components/SupportWidget';
+import BannedOverlay from '@/components/BannedOverlay';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -35,6 +36,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </Suspense>
         <Suspense fallback={null}>
           <Toaster />
+        </Suspense>
+        <Suspense fallback={null}>
+          <BannedOverlay />
         </Suspense>
       </body>
     </html>

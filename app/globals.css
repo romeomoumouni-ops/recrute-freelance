@@ -616,3 +616,13 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
   .support-threads { max-height: 240px; }
   .support-conv { height: 62vh; }
 }
+
+/* ============ Overlay compte suspendu (banni) ============ */
+.banned-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(247,247,245,.97); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.banned-card { max-width: 460px; text-align: center; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 40px 32px; box-shadow: 0 24px 60px rgba(0,0,0,.18); }
+.banned-ic { display: flex; justify-content: center; color: #c0392b; margin-bottom: 14px; }
+.banned-card h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 12px; }
+.banned-card p { color: var(--gray-700); font-size: .9rem; line-height: 1.6; margin-bottom: 12px; }
+.banned-contact { font-size: .82rem; color: var(--gray-500); }
+.banned-contact a { text-decoration: underline; }
+.banned-card .btn { margin-top: 16px; }

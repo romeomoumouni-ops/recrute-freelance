@@ -32,7 +32,7 @@ export default function HomePage() {
                 Services IA
               </Link>
               <Link className="chip" href="/recherche?cat=marketing">
-                Marketing Digital <span className="tag">Populaire</span>
+                Marketing Digital
               </Link>
               <Link className="chip" href="/recherche?cat=audiovisuel">
                 Audiovisuel

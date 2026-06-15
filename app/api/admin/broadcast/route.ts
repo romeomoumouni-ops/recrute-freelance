@@ -18,10 +18,15 @@ const schema = z.object({
 const esc = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+const LOGO_URL = 'https://www.recrutefreelance.com/email-logo.png';
+
 function buildHtml(prenom: string, message: string): string {
   const corps = esc(message).replace(/\n/g, '<br>');
-  return `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto">
-      <div style="background:#0d0d0d;padding:18px 24px"><span style="color:#fff;font-weight:700;font-size:17px">RecruteFreelance</span></div>
+  return `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;border:1px solid #ececea;border-radius:14px;overflow:hidden">
+      <div style="background:#ffffff;padding:26px 24px 20px;text-align:center;border-bottom:1px solid #f0f0ef">
+        <img src="${LOGO_URL}" width="60" height="60" alt="recrutefreelance" style="display:inline-block;border-radius:14px" />
+        <div style="font-weight:800;font-size:16px;color:#0d0d0d;margin-top:8px;letter-spacing:-.02em">recrutefreelance</div>
+      </div>
       <div style="padding:24px;color:#222;font-size:14px;line-height:1.6">
         <p>Bonjour ${esc(prenom || '')},</p>
         <p>${corps}</p>

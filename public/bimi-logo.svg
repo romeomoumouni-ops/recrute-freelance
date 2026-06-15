@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny-ps" viewBox="0 0 256 256">
+  <title>RecruteFreelance</title>
+  <rect width="256" height="256" fill="#ffffff"/>
+  <g fill="none" stroke="#0D0D0D" stroke-width="14.4" stroke-linecap="round">
+    <circle cx="66.8" cy="128" r="21.6"/>
+    <circle cx="189.2" cy="128" r="21.6"/>
+    <path d="M88.4 128 C111.8 128 128 142.4 144.2 142.4 C160.4 142.4 167.6 128 167.6 128"/>
+  </g>
+</svg>

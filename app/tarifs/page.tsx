@@ -58,7 +58,7 @@ export default async function TarifsPage() {
               <li><Check size={15} /> Vous gardez <strong>{part}%</strong> de chaque mission</li>
               <li><Check size={15} /> Paiement sur Mobile Money sous 3 à 5 jours après validation</li>
             </ul>
-            <Link href="/inscription" className="btn btn-dark btn-block">Créer mon profil freelance</Link>
+            <Link href="/inscription?role=freelance" className="btn btn-dark btn-block">Créer mon profil freelance</Link>
           </div>
         </div>
 
@@ -160,7 +160,7 @@ export default async function TarifsPage() {
         <div className="tarifs-cta">
           <h2>Prêt à recevoir des missions d&apos;entreprises européennes ?</h2>
           <p>Inscription gratuite. Vous ne payez que quand vous gagnez.</p>
-          <Link href="/inscription" className="btn btn-dark">Créer mon profil freelance</Link>
+          <Link href="/inscription?role=freelance" className="btn btn-dark">Créer mon profil freelance</Link>
         </div>
       </div>
     </>

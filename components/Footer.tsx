@@ -42,7 +42,7 @@ export default function Footer() {
                 <a href={WHATSAPP_CHANNEL} target="_blank" rel="noopener noreferrer">Pour les freelances</a>
               </li>
               <li>
-                <Link href="/#">Blog</Link>
+                <Link href="/blog">Blog</Link>
               </li>
             </ul>
           </div>

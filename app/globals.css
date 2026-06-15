@@ -703,3 +703,23 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .legal ul { padding-left: 20px; margin: 6px 0 10px; display: flex; flex-direction: column; gap: 7px; }
 .legal li { font-size: .9rem; line-height: 1.6; color: var(--gray-700); }
 .legal a { text-decoration: underline; }
+
+/* ---------- Blog ---------- */
+.blog-list { max-width: 820px; padding-top: 32px; padding-bottom: 80px; display: grid; gap: 16px; }
+.blog-card { display: block; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 22px 24px; background: #fff; color: inherit; transition: border-color .15s ease, transform .15s ease; }
+.blog-card:hover { border-color: var(--black); transform: translateY(-2px); }
+.blog-cat { display: inline-block; font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--green); margin-bottom: 8px; }
+.blog-cat.light { color: var(--gray-300); }
+.blog-card h2 { font-size: 1.12rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 6px; }
+.blog-card p { font-size: .88rem; color: var(--gray-700); line-height: 1.55; margin-bottom: 14px; }
+.blog-meta { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; color: var(--gray-500); }
+.blog-meta span { display: inline-flex; align-items: center; gap: 5px; }
+.blog-read { font-weight: 700; color: var(--black); }
+.blog-article { max-width: 720px; }
+.blog-back { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; font-weight: 600; margin-bottom: 6px; text-decoration: none !important; }
+.blog-cta { margin-top: 36px; padding: 26px 24px; text-align: center; background: var(--off-white); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+.blog-cta p { font-size: 1rem; font-weight: 700; color: var(--black); margin-bottom: 14px; }
+.blog-more { display: grid; gap: 10px; }
+.blog-more-link { display: block; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; color: inherit; }
+.blog-more-link:hover { border-color: var(--black); }
+.blog-more-link strong { display: block; font-size: .92rem; margin-top: 2px; }

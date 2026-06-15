@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { euros, dateCourte, heureCourte } from '@/lib/utils';
 import { OPERATEUR_LABEL } from '@/lib/constants';
 import AdminButton from '@/components/admin/AdminButton';
+import AdminValidationActions from '@/components/admin/AdminValidationActions';
 import { getConversationsForUser } from '@/lib/admin-conversations';
 
 export const dynamic = 'force-dynamic';
@@ -26,7 +27,7 @@ export default async function AdminUserDetail({ params }: { params: { id: string
 
   const [{ data: profile }, { data: asClient }, { data: asFreelance }, { data: withdrawals }] = await Promise.all([
     isFreelance
-      ? sb.from('Profile').select('titre, bio, note, photoUrl, estVerifie, soldeDisponible, totalGagne').eq('userId', id).maybeSingle()
+      ? sb.from('Profile').select('titre, bio, note, photoUrl, estVerifie, statutValidation, motifRejet, soldeDisponible, totalGagne').eq('userId', id).maybeSingle()
       : Promise.resolve({ data: null }),
     sb.from('Order').select('id, titre, montant, statut, createdAt').eq('clientId', id).order('createdAt', { ascending: false }).limit(30),
     isFreelance
@@ -37,7 +38,7 @@ export default async function AdminUserDetail({ params }: { params: { id: string
       : Promise.resolve({ data: [] }),
   ]);
 
-  const p = profile as { titre: string | null; bio: string | null; note: string | null; photoUrl: string | null; estVerifie: boolean; soldeDisponible: number; totalGagne: number } | null;
+  const p = profile as { titre: string | null; bio: string | null; note: string | null; photoUrl: string | null; estVerifie: boolean; statutValidation: string | null; motifRejet: string | null; soldeDisponible: number; totalGagne: number } | null;
   type O = { id: string; titre: string; montant: number; statut: string; createdAt: string };
   const orders = [...((asClient as O[]) ?? []), ...((asFreelance as O[]) ?? [])];
   type W = { id: string; montant: number; statut: string; createdAt: string; numero: string };
@@ -51,7 +52,9 @@ export default async function AdminUserDetail({ params }: { params: { id: string
       <h1 className="admin-h1">
         {u.prenom}{' '}
         {u.banni && <span className="status red">banni</span>}{' '}
-        {isFreelance && p?.estVerifie && <span className="status green">vérifié</span>}
+        {isFreelance && p?.statutValidation === 'APPROUVE' && <span className="status green">approuvé</span>}
+        {isFreelance && p?.statutValidation === 'EN_ATTENTE' && <span className="status">validation en attente</span>}
+        {isFreelance && p?.statutValidation === 'REJETE' && <span className="status red">validation refusée</span>}
       </h1>
       <p className="admin-sub">{u.role === 'FREELANCE' ? 'Freelance' : 'Client'} · inscrit le {dateCourte(u.createdAt)}</p>
 
@@ -72,6 +75,12 @@ export default async function AdminUserDetail({ params }: { params: { id: string
 
         <div className="admin-panel">
           <h2 className="admin-h2" style={{ marginTop: 0 }}>Actions</h2>
+          {isFreelance && p?.statutValidation === 'EN_ATTENTE' && (
+            <div style={{ marginBottom: 12 }}>
+              <div className="admin-meta" style={{ marginBottom: 6 }}>Demande de validation en attente :</div>
+              <AdminValidationActions userId={u.id} prenom={u.prenom} />
+            </div>
+          )}
           <div className="admin-card-actions" style={{ flexDirection: 'column', alignItems: 'stretch' }}>
             <AdminButton endpoint="/api/admin/user" body={{ id: u.id, action: u.banni ? 'unban' : 'ban' }}
               label={u.banni ? 'Débannir le compte' : '🚫 Bannir le compte'}

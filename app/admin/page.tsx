@@ -13,8 +13,13 @@ interface Stats {
 }
 
 export default async function AdminHome() {
-  const { data } = await supabaseAdmin().rpc('admin_stats');
+  const sb = supabaseAdmin();
+  const [{ data }, validations] = await Promise.all([
+    sb.rpc('admin_stats'),
+    sb.from('Profile').select('userId', { count: 'exact', head: true }).eq('statutValidation', 'EN_ATTENTE'),
+  ]);
   const s = (data as Stats) ?? ({} as Stats);
+  const validationsEnAttente = validations.count ?? 0;
 
   return (
     <>
@@ -22,6 +27,10 @@ export default async function AdminHome() {
 
       {/* Alertes : ce qui demande une action */}
       <div className="admin-alerts">
+        <Link href="/admin/validations" className={`admin-alert${validationsEnAttente ? ' hot' : ''}`}>
+          <div className="n">{validationsEnAttente}</div>
+          <div className="l">Demandes de validation<br />à traiter</div>
+        </Link>
         <Link href="/admin/retraits" className={`admin-alert${s.retraits_attente_n ? ' hot' : ''}`}>
           <div className="n">{s.retraits_attente_n ?? 0}</div>
           <div className="l">Retraits à envoyer<br /><strong>{euros(s.retraits_attente_montant ?? 0)}</strong></div>

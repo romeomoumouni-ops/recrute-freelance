@@ -3,9 +3,10 @@
 import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FolderUp, FileText, X } from 'lucide-react';
+import { FolderUp, FileText, X, Check, Clock, ShieldCheck } from 'lucide-react';
 import { initiales, euros } from '@/lib/utils';
 import { getVerifChecks } from '@/lib/verification';
+import type { ValidationStatus } from '@/lib/validation';
 import { CATEGORIES_LIST } from '@/lib/constants';
 import { toast } from '@/lib/toast';
 import { compressImage } from '@/lib/image-compress';
@@ -37,13 +38,18 @@ interface Initial {
 export default function ProfilEditor({
   prenom,
   telephoneMomo,
+  statutValidation,
+  motifRejet,
   initial,
 }: {
   prenom: string;
   telephoneMomo: string | null;
+  statutValidation: ValidationStatus;
+  motifRejet: string | null;
   initial: Initial;
 }) {
   const router = useRouter();
+  const [submitting, setSubmitting] = useState(false);
   const [photo, setPhoto] = useState(initial.photoUrl);
   const [titre, setTitre] = useState(initial.titre);
   const [bio, setBio] = useState(initial.bio);
@@ -97,6 +103,19 @@ export default function ProfilEditor({
   async function saveAll() {
     const ok = await persistProfile();
     toast(ok ? 'Profil enregistré ✓' : 'Erreur lors de l’enregistrement.');
+  }
+
+  // ----- Demande de validation -----
+  async function submitValidation() {
+    setSubmitting(true);
+    // On enregistre d'abord le texte courant pour ne rien perdre.
+    await persistProfile();
+    const res = await fetch('/api/profile/submit-validation', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    setSubmitting(false);
+    if (!res.ok) return toast(data.error || 'Soumission impossible.');
+    toast('Demande de validation envoyée ✓');
+    router.refresh();
   }
 
   // ----- Photo -----
@@ -485,20 +504,77 @@ export default function ProfilEditor({
         )}
       </div>
 
+      {/* Vérification & demande de validation */}
+      <div className="edit-card verif-card">
+        <h2>Validation du profil</h2>
+        <p className="hint" style={{ marginTop: -4, marginBottom: 14 }}>
+          Complétez les {checks.length} critères ci-dessous, puis envoyez votre demande. Votre profil
+          n’apparaît auprès des clients qu’une fois <strong>approuvé par notre équipe</strong>.
+        </p>
+
+        <div className="progress-bar" style={{ marginBottom: 14 }}>
+          <div style={{ width: `${Math.round((faits / checks.length) * 100)}%` }} />
+        </div>
+
+        <div className="check-list">
+          {checks.map((c) => (
+            <div className="check-item" key={c.key}>
+              <div className={`check-icon ${c.ok ? 'done' : 'todo'}`}>
+                {c.ok ? <Check size={14} /> : '•'}
+              </div>
+              <div className="txt">
+                <div className="titre">{c.titre}</div>
+                <div className="desc">{c.desc}</div>
+              </div>
+              {!c.ok && (
+                c.lien === '/parametres'
+                  ? <Link href="/parametres" className="inline-ic">Compléter</Link>
+                  : <span className="inline-ic" style={{ opacity: .6 }}>À faire ci-dessus</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Bannière de statut + action */}
+        {statutValidation === 'APPROUVE' ? (
+          <div className="verif-banner ok" style={{ marginTop: 16 }}>
+            <span className="big"><ShieldCheck size={22} /></span>
+            <span>Profil <strong>approuvé</strong> ✓ — vous êtes visible par les clients dans « Trouver un freelance ».</span>
+          </div>
+        ) : statutValidation === 'EN_ATTENTE' ? (
+          <div className="verif-banner pending" style={{ marginTop: 16 }}>
+            <span className="big"><Clock size={22} /></span>
+            <span>Demande <strong>envoyée</strong> — en attente de validation par notre équipe. Vous serez notifié.</span>
+          </div>
+        ) : (
+          <div style={{ marginTop: 16 }}>
+            {statutValidation === 'REJETE' && (
+              <div className="verif-banner" style={{ background: '#fdecea', color: '#c0392b', marginBottom: 12 }}>
+                <span className="big"><X size={20} /></span>
+                <span>
+                  Demande précédente <strong>refusée</strong>{motifRejet ? ` : ${motifRejet}` : ''}. Corrigez puis renvoyez.
+                </span>
+              </div>
+            )}
+            {faits === checks.length ? (
+              <button className="btn btn-dark" disabled={submitting} onClick={submitValidation}>
+                {submitting ? 'Envoi…' : 'Demander la validation de mon profil'}
+              </button>
+            ) : (
+              <div className="verif-banner pending">
+                <span className="big"><Clock size={22} /></span>
+                <span>
+                  <strong>{faits} / {checks.length}</strong> critères remplis — complétez tout pour pouvoir
+                  soumettre votre demande.
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="save-bar">
-        <span>
-          {faits === checks.length ? (
-            <>
-              ✓ Profil complet —{' '}
-              <Link href="/parametres">vérifié</Link>
-            </>
-          ) : (
-            <>
-              {faits} / {checks.length} critères de <Link href="/parametres">vérification</Link>{' '}
-              remplis
-            </>
-          )}
-        </span>
+        <span>Pensez à enregistrer vos modifications de texte.</span>
         <button className="btn btn-light" onClick={saveAll}>
           Enregistrer mon profil
         </button>

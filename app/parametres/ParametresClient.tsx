@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, Clock, ArrowRight } from 'lucide-react';
+import { Check, Clock, ArrowRight, ShieldCheck, X } from 'lucide-react';
 import type { VerifCheck } from '@/lib/verification';
+import type { ValidationStatus } from '@/lib/validation';
 import { OPERATEURS_MOMO, OPERATEUR_CODE, OPERATEUR_LABEL, PAYS_AFRIQUE } from '@/lib/constants';
 import { toast } from '@/lib/toast';
 
@@ -23,15 +24,21 @@ export default function ParametresClient({
   compte,
   momo,
   checks: initialChecks,
+  statutValidation,
+  motifRejet,
   notifs,
 }: {
   role: Role;
   compte: { prenom: string; email: string; pays: string };
   momo: { telephoneMomo: string; operateurMomo: string };
   checks: VerifCheck[];
+  statutValidation: ValidationStatus;
+  motifRejet: string | null;
   notifs: NotifPrefs;
 }) {
   const router = useRouter();
+  const [statut, setStatut] = useState<ValidationStatus>(statutValidation);
+  const [submitting, setSubmitting] = useState(false);
   const tabs: [Tab, string][] =
     role === 'FREELANCE'
       ? [
@@ -114,6 +121,17 @@ export default function ParametresClient({
     router.refresh();
   }
 
+  async function submitValidation() {
+    setSubmitting(true);
+    const res = await fetch('/api/profile/submit-validation', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    setSubmitting(false);
+    if (!res.ok) return toast(data.error || 'Soumission impossible.');
+    setStatut('EN_ATTENTE');
+    toast('Demande de validation envoyée ✓');
+    router.refresh();
+  }
+
   async function toggleNotif(key: keyof NotifPrefs, val: boolean) {
     const next = { ...prefs, [key]: val };
     setPrefs(next);
@@ -140,25 +158,55 @@ export default function ParametresClient({
           <>
             <h2>Vérification du profil</h2>
             <p className="sub">
-              Complétez ces étapes pour obtenir le badge <strong>« Freelance approuvé »</strong> et
-              apparaître en priorité dans les résultats.
+              Complétez ces étapes, puis demandez la validation. Votre profil n’est visible par les
+              clients qu’une fois <strong>approuvé par notre équipe</strong>.
             </p>
-            {verifie ? (
+            {statut === 'APPROUVE' ? (
               <div className="verif-banner ok">
-                <span className="big"><Check size={22} /></span>
+                <span className="big"><ShieldCheck size={22} /></span>
                 <span>
-                  Votre profil est <strong>vérifié par recrutefreelance.com</strong>. Le badge
-                  « Freelance approuvé » est visible sur votre profil.
+                  Profil <strong>approuvé</strong> ✓ — vous êtes visible par les clients dans
+                  « Trouver un freelance ».
                 </span>
               </div>
-            ) : (
+            ) : statut === 'EN_ATTENTE' ? (
               <div className="verif-banner pending">
                 <span className="big"><Clock size={22} /></span>
                 <span>
-                  Profil <strong>en attente de vérification</strong> — {faits} / {checks.length}{' '}
-                  critères remplis.
+                  Demande <strong>envoyée</strong> — en attente de validation par notre équipe.
+                  Vous serez notifié dès l’approbation.
                 </span>
               </div>
+            ) : (
+              <>
+                {statut === 'REJETE' && (
+                  <div className="verif-banner" style={{ background: '#fdecea', color: '#c0392b' }}>
+                    <span className="big"><X size={20} /></span>
+                    <span>
+                      Demande précédente <strong>refusée</strong>{motifRejet ? ` : ${motifRejet}` : ''}.
+                      Corrigez votre profil puis renvoyez la demande.
+                    </span>
+                  </div>
+                )}
+                {verifie ? (
+                  <div className="verif-banner ok" style={{ alignItems: 'center' }}>
+                    <span className="big"><Check size={22} /></span>
+                    <span style={{ flex: 1 }}>
+                      Tous les critères sont remplis ! Envoyez votre demande de validation.
+                    </span>
+                    <button className="btn btn-dark btn-sm" disabled={submitting} onClick={submitValidation}>
+                      {submitting ? 'Envoi…' : 'Demander la validation'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="verif-banner pending">
+                    <span className="big"><Clock size={22} /></span>
+                    <span>
+                      Profil <strong>incomplet</strong> — {faits} / {checks.length} critères remplis.
+                    </span>
+                  </div>
+                )}
+              </>
             )}
             <div className="progress-bar">
               <div style={{ width: `${pct}%` }} />

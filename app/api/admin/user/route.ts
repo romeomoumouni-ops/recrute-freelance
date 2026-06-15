@@ -26,7 +26,15 @@ export async function POST(req: Request) {
     await sb.from('User').update({ banni: action === 'ban' }).eq('id', id);
   } else {
     // verifManuel : fige la décision pour que le recalcul automatique ne l'écrase pas.
-    await sb.from('Profile').update({ estVerifie: action === 'verify', verifManuel: true }).eq('userId', id);
+    // On aligne aussi le statut de validation (= découvrabilité du freelance).
+    await sb
+      .from('Profile')
+      .update({
+        estVerifie: action === 'verify',
+        verifManuel: true,
+        statutValidation: action === 'verify' ? 'APPROUVE' : 'NON_SOUMIS',
+      })
+      .eq('userId', id);
   }
   const labels: Record<string, string> = { ban: 'Utilisateur banni', unban: 'Utilisateur débanni', verify: 'Freelance vérifié', unverify: 'Badge vérifié retiré' };
   await logAdminAction(session, labels[action], `utilisateur ${id}`);

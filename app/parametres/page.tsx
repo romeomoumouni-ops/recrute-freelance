@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { getVerifChecks } from '@/lib/verification';
+import { asValidationStatus } from '@/lib/validation';
 import ParametresClient from './ParametresClient';
 
 export const metadata: Metadata = { title: 'Paramètres' };
@@ -15,7 +16,7 @@ export default async function ParametresPage() {
   const { data: user } = await supabaseAdmin()
     .from('User')
     .select(
-      'prenom, email, role, pays, telephoneMomo, operateurMomo, notifPrefs, profile:Profile(photoUrl, titre, bio, cvUrl, services:Service(id), portfolio:PortfolioItem(id))'
+      'prenom, email, role, pays, telephoneMomo, operateurMomo, notifPrefs, profile:Profile(photoUrl, titre, bio, cvUrl, statutValidation, motifRejet, services:Service(id), portfolio:PortfolioItem(id))'
     )
     .eq('id', session.user.id)
     .maybeSingle();
@@ -23,7 +24,7 @@ export default async function ParametresPage() {
 
   const isFreelance = user.role === 'FREELANCE';
   const profile = user.profile as unknown as
-    | { photoUrl: string | null; titre: string | null; bio: string | null; cvUrl: string | null; services: unknown[]; portfolio: unknown[] }
+    | { photoUrl: string | null; titre: string | null; bio: string | null; cvUrl: string | null; statutValidation: string | null; motifRejet: string | null; services: unknown[]; portfolio: unknown[] }
     | null;
 
   const checks = isFreelance
@@ -53,6 +54,8 @@ export default async function ParametresPage() {
       compte={{ prenom: user.prenom, email: user.email, pays: user.pays ?? '' }}
       momo={{ telephoneMomo: user.telephoneMomo ?? '', operateurMomo: user.operateurMomo ?? '' }}
       checks={checks}
+      statutValidation={asValidationStatus(profile?.statutValidation)}
+      motifRejet={profile?.motifRejet ?? null}
       notifs={notifs}
     />
   );

@@ -3,13 +3,14 @@ import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { parseSkills } from '@/lib/utils';
+import { asValidationStatus } from '@/lib/validation';
 import ProfilEditor from './ProfilEditor';
 
 export const metadata: Metadata = { title: 'Mon profil' };
 export const dynamic = 'force-dynamic';
 
 const SELECT =
-  'photoUrl, titre, bio, note, cat, skills, cvName, services:Service(id,titre,description,prix,delaiJours,createdAt), portfolio:PortfolioItem(id,imageUrl,ordre), user:User(prenom,telephoneMomo)';
+  'photoUrl, titre, bio, note, cat, skills, cvName, statutValidation, motifRejet, services:Service(id,titre,description,prix,delaiJours,createdAt), portfolio:PortfolioItem(id,imageUrl,ordre), user:User(prenom,telephoneMomo)';
 
 export default async function MonProfilPage() {
   const session = await auth();
@@ -42,6 +43,8 @@ export default async function MonProfilPage() {
     <ProfilEditor
       prenom={user?.prenom ?? ''}
       telephoneMomo={user?.telephoneMomo ?? null}
+      statutValidation={asValidationStatus((profile as { statutValidation?: string }).statutValidation)}
+      motifRejet={(profile as { motifRejet?: string | null }).motifRejet ?? null}
       initial={{
         photoUrl: profile.photoUrl ?? null,
         titre: profile.titre ?? '',

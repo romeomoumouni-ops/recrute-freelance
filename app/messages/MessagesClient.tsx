@@ -249,10 +249,15 @@ function ChariowWidget({ productId, storeDomain }: { productId: string; storeDom
 export default function MessagesClient({
   initialConversations,
   banner,
+  role,
 }: {
   initialConversations: ConversationSummary[];
   banner: string;
+  role: 'CLIENT' | 'FREELANCE';
 }) {
+  const isClient = role === 'CLIENT';
+  const offerTitre = isClient ? 'Envoyer une proposition de prix' : 'Envoyer un devis';
+  const offerSubmit = isClient ? 'Envoyer la proposition' : 'Envoyer le devis';
   const params = useSearchParams();
   const [convs, setConvs] = useState<ConversationSummary[]>(initialConversations);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -520,7 +525,7 @@ export default function MessagesClient({
               <button
                 type="button"
                 className="chat-devis-btn"
-                title="Envoyer un devis à payer"
+                title={offerTitre}
                 onClick={() => setOfferOpen(true)}
               >
                 <Briefcase size={18} />
@@ -564,10 +569,11 @@ export default function MessagesClient({
           <button className="modal-close" onClick={() => setOfferOpen(false)} aria-label="Fermer">
             <X size={18} />
           </button>
-          <h2>Envoyer un devis</h2>
+          <h2>{offerTitre}</h2>
           <p className="sub">
-            Le destinataire pourra le payer par carte. Les fonds (moins 20 % de commission) sont
-            sécurisés, puis versés sur votre solde une fois la commande livrée et validée.
+            {isClient
+              ? 'Proposez un montant pour cette prestation. Le paiement par carte est sécurisé et conservé jusqu’à la livraison validée.'
+              : 'Le destinataire pourra le payer par carte. Les fonds (moins 20 % de commission) sont sécurisés, puis versés sur votre solde une fois la commande livrée et validée.'}
           </p>
           <div className="field">
             <label>Prestation</label>
@@ -599,7 +605,7 @@ export default function MessagesClient({
             disabled={offerSending || !offerDesc.trim() || !TIER_AMOUNTS.includes(Number(offerAmount))}
             onClick={sendOffer}
           >
-            {offerSending ? 'Envoi…' : 'Envoyer le devis'}
+            {offerSending ? 'Envoi…' : offerSubmit}
           </button>
         </div>
       </div>

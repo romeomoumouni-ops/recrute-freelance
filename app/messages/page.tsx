@@ -21,7 +21,11 @@ export default async function MessagesPage() {
   return (
     <div className="container">
       <Suspense fallback={null}>
-        <MessagesClient initialConversations={conversations} banner={banner} />
+        <MessagesClient
+          initialConversations={conversations}
+          banner={banner}
+          role={session.user.role as 'CLIENT' | 'FREELANCE'}
+        />
       </Suspense>
     </div>
   );

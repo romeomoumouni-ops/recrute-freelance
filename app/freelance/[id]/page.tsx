@@ -31,7 +31,11 @@ export default async function FreelancePage({ params }: Props) {
 
   const session = await auth();
   const isOwner = session?.user.id === f.id;
+  const isAdmin = !!session?.user.admin;
   const isLogged = !!session;
+
+  // Découverte : un profil non approuvé n'est visible que par son propriétaire et l'admin.
+  if (f.statutValidation !== 'APPROUVE' && !isOwner && !isAdmin) notFound();
   // Seuls les clients (ou visiteurs non connectés → invités à se connecter)
   // peuvent contacter un freelance. Un freelance ne contacte pas un autre freelance.
   const canContact = !isOwner && (!session || session.user.role === 'CLIENT');
@@ -183,8 +187,23 @@ export default async function FreelancePage({ params }: Props) {
       <div className="container">
         <div className="preview-banner">
           <span>
-            <Eye size={16} /> <strong>Aperçu de votre profil public</strong> — voici exactement ce que
-            voient les entreprises.
+            <Eye size={16} />{' '}
+            {f.statutValidation === 'APPROUVE' ? (
+              <>
+                <strong>Aperçu de votre profil public</strong> — voici exactement ce que voient les
+                entreprises.
+              </>
+            ) : f.statutValidation === 'EN_ATTENTE' ? (
+              <>
+                <strong>Aperçu — en attente de validation.</strong> Votre profil n’est pas encore
+                visible par les clients ; notre équipe l’examine.
+              </>
+            ) : (
+              <>
+                <strong>Aperçu — profil non encore publié.</strong> Complétez les étapes et demandez la
+                validation pour apparaître dans « Trouver un freelance ».
+              </>
+            )}
           </span>
           <Link className="btn btn-light" href="/mon-profil">
             Modifier mon profil

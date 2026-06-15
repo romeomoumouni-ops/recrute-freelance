@@ -1,5 +1,6 @@
 import { supabaseAdmin } from './supabase';
 import { parseSkills } from './utils';
+import { asValidationStatus, type ValidationStatus } from './validation';
 
 export interface FreelanceCard {
   id: string;
@@ -58,38 +59,52 @@ export interface FreelanceFull extends FreelanceCard {
   bio: string;
   mot: string | null;
   cvName: string | null;
+  statutValidation: ValidationStatus;
   services: { id: string; titre: string; description: string; prix: number; delaiJours: number }[];
   portfolio: { id: string; imageUrl: string }[];
   reviews: { id: string; note: number; commentaire: string | null; author: string; date: Date }[];
   prixMin: number | null;
 }
 
+// Profil complet construit depuis les tables de base (PAS la vue filtrée par approbation).
+// Renvoie `statutValidation` pour que la PAGE décide qui peut le voir
+// (l'owner et l'admin voient même un profil non approuvé ; les autres non).
 export async function getFreelanceProfile(id: string): Promise<FreelanceFull | null> {
   const sb = supabaseAdmin();
 
-  const { data: card } = await sb.from('freelance_card').select('*').eq('id', id).maybeSingle();
-  if (!card) return null;
-  const r = card as CardRow;
+  const { data: u } = await sb
+    .from('User')
+    .select('id, prenom, pays, role, banni')
+    .eq('id', id)
+    .maybeSingle();
+  const user = u as { id: string; prenom: string; pays: string | null; role: string; banni: boolean } | null;
+  if (!user || user.role !== 'FREELANCE' || user.banni) return null;
 
-  // Services + portfolio (via le profil de ce freelance)
   const { data: prof } = await sb
     .from('Profile')
     .select(
-      'id, services:Service(id,titre,description,prix,delaiJours,createdAt), portfolio:PortfolioItem(id,imageUrl,ordre)'
+      'titre, cat, skills, photoUrl, estVerifie, bio, note, cvName, statutValidation, services:Service(id,titre,description,prix,delaiJours,createdAt), portfolio:PortfolioItem(id,imageUrl,ordre)'
     )
     .eq('userId', id)
     .maybeSingle();
+  if (!prof) return null;
 
   type Svc = { id: string; titre: string; description: string; prix: number; delaiJours: number; createdAt: string };
   type Pf = { id: string; imageUrl: string; ordre: number };
-  const services = (((prof?.services as Svc[]) ?? []) as Svc[])
+  const p = prof as unknown as {
+    titre: string | null; cat: string | null; skills: string | null; photoUrl: string | null;
+    estVerifie: boolean; bio: string | null; note: string | null; cvName: string | null;
+    statutValidation: string | null; services: Svc[]; portfolio: Pf[];
+  };
+
+  const services = ((p.services ?? []) as Svc[])
     .slice()
     .sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1))
     .map((s) => ({ id: s.id, titre: s.titre, description: s.description, prix: s.prix, delaiJours: s.delaiJours }));
-  const portfolio = (((prof?.portfolio as Pf[]) ?? []) as Pf[])
+  const portfolio = ((p.portfolio ?? []) as Pf[])
     .slice()
     .sort((a, b) => a.ordre - b.ordre)
-    .map((p) => ({ id: p.id, imageUrl: p.imageUrl }));
+    .map((pf) => ({ id: pf.id, imageUrl: pf.imageUrl }));
 
   // Avis (Review -> Order.freelanceId)
   const { data: revs } = await sb
@@ -107,12 +122,26 @@ export async function getFreelanceProfile(id: string): Promise<FreelanceFull | n
     date: new Date(rv.createdAt),
   }));
 
+  const prixMin = services.length ? Math.min(...services.map((s) => s.prix)) : null;
+  const note = reviews.length ? reviews.reduce((a, r) => a + r.note, 0) / reviews.length : 0;
+
   return {
-    ...toCard(r),
-    bio: r.bio ?? '',
-    mot: r.mot ?? null,
-    cvName: r.cvName,
-    prixMin: r.prixMin,
+    id: user.id,
+    nom: user.prenom,
+    pays: user.pays,
+    titre: p.titre ?? 'Freelance',
+    cat: p.cat,
+    skills: parseSkills(p.skills),
+    tarif: prixMin,
+    photoUrl: p.photoUrl,
+    note,
+    avis: reviews.length,
+    estVerifie: p.estVerifie,
+    bio: p.bio ?? '',
+    mot: p.note ?? null,
+    cvName: p.cvName,
+    prixMin,
+    statutValidation: asValidationStatus(p.statutValidation),
     services,
     portfolio,
     reviews,

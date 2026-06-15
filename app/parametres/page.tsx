@@ -23,7 +23,9 @@ export default async function ParametresPage() {
   if (!user) redirect('/connexion');
 
   const isFreelance = user.role === 'FREELANCE';
-  const profile = user.profile as unknown as
+  // PostgREST peut renvoyer la relation imbriquée comme tableau OU objet : on normalise.
+  const profileRaw = user.profile as unknown;
+  const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as
     | { photoUrl: string | null; titre: string | null; bio: string | null; cvUrl: string | null; statutValidation: string | null; motifRejet: string | null; services: unknown[]; portfolio: unknown[] }
     | null;
 

@@ -20,7 +20,9 @@ export async function GET() {
     .eq('id', session.user.id)
     .maybeSingle();
 
-  const profile = (user?.profile ?? null) as unknown as {
+  // PostgREST peut renvoyer la relation imbriquée comme tableau OU objet : on normalise.
+  const profileRaw = user?.profile as unknown;
+  const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {
     photoUrl: string | null;
     titre: string | null;
     bio: string | null;

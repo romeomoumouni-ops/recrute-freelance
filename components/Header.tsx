@@ -65,6 +65,7 @@ export default function Header() {
         <nav className="nav">
           <Link href="/recherche">Trouver un freelance</Link>
           <Link href="/#comment">Comment ça marche</Link>
+          <Link href="/tarifs">Tarifs</Link>
           {logged && <Link href="/dashboard">Tableau de bord</Link>}
           {logged && <Link href="/messages">Messagerie</Link>}
         </nav>
@@ -152,6 +153,9 @@ export default function Header() {
             </Link>
             <Link href="/#comment" className="mm-link">
               Comment ça marche
+            </Link>
+            <Link href="/tarifs" className="mm-link">
+              Tarifs
             </Link>
             {logged ? (
               <>

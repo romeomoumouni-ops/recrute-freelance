@@ -653,3 +653,42 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .banned-contact { font-size: .82rem; color: var(--gray-500); }
 .banned-contact a { text-decoration: underline; }
 .banned-card .btn { margin-top: 16px; }
+
+/* ---------- Page Tarifs ---------- */
+.tarifs { max-width: 920px; padding-top: 36px; padding-bottom: 80px; }
+.tarifs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.tarif-card { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 26px 24px; background: #fff; display: flex; flex-direction: column; }
+.tarif-card.highlight { border-color: var(--black); box-shadow: 0 14px 40px rgba(0,0,0,.08); }
+.tarif-ic { width: 44px; height: 44px; border-radius: 12px; background: var(--off-white); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+.tarif-card.highlight .tarif-ic { background: var(--black); color: #fff; }
+.tarif-card h2 { font-size: 1.05rem; font-weight: 800; margin-bottom: 8px; }
+.tarif-price { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+.tarif-price span { font-size: .9rem; font-weight: 600; color: var(--gray-500); letter-spacing: 0; margin-left: 6px; }
+.tarif-sub { font-size: .85rem; color: var(--gray-700); margin: 10px 0 16px; line-height: 1.5; }
+.tarif-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 0 0 20px; padding: 0; }
+.tarif-list li { display: flex; gap: 9px; align-items: flex-start; font-size: .88rem; line-height: 1.45; color: var(--gray-700); }
+.tarif-list li .lucide, .tarif-list li svg { color: var(--green); flex-shrink: 0; margin-top: 2px; }
+.tarif-card .btn { margin-top: auto; }
+.tarif-list-wide { max-width: 620px; }
+.tarif-note { margin: 26px 0 0; padding: 16px 18px; background: var(--off-white); border: 1px solid var(--border); border-radius: var(--radius); font-size: .88rem; line-height: 1.55; color: var(--gray-700); }
+.tarifs-h2 { font-size: 1.25rem; font-weight: 800; margin: 44px 0 8px; }
+.tarifs-p { font-size: .9rem; color: var(--gray-700); margin-bottom: 16px; }
+.tarifs-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.tarif-step { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; background: #fff; }
+.tarif-step .n { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--black); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; font-size: .85rem; }
+.tarif-step strong { display: block; font-size: .92rem; margin-bottom: 3px; }
+.tarif-step p { font-size: .82rem; color: var(--gray-700); line-height: 1.45; }
+.faq { display: flex; flex-direction: column; gap: 10px; max-width: 720px; }
+.faq details { border: 1px solid var(--border); border-radius: var(--radius); background: #fff; padding: 0 16px; }
+.faq summary { cursor: pointer; font-weight: 600; font-size: .9rem; padding: 14px 0; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '+'; float: right; color: var(--gray-500); font-weight: 700; }
+.faq details[open] summary::after { content: '–'; }
+.faq details p { font-size: .86rem; color: var(--gray-700); line-height: 1.55; padding: 0 0 14px; }
+.tarifs-cta { margin-top: 48px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 36px 24px; background: var(--off-white); }
+.tarifs-cta h2 { font-size: 1.25rem; font-weight: 800; margin-bottom: 8px; }
+.tarifs-cta p { font-size: .9rem; color: var(--gray-700); margin-bottom: 18px; }
+@media (max-width: 720px) {
+  .tarifs-grid { grid-template-columns: 1fr; }
+  .tarifs-steps { grid-template-columns: 1fr; }
+}

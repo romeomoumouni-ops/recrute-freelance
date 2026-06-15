@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { Globe } from 'lucide-react';
 import Logo from './Logo';
 
+const WHATSAPP_CHANNEL = 'https://whatsapp.com/channel/0029Vb8DJATDTkJvtb1puW2a';
+
 export default function Footer() {
   return (
     <footer className="footer">
@@ -26,7 +28,7 @@ export default function Footer() {
                 <Link href="/#comment">Comment ça marche</Link>
               </li>
               <li>
-                <Link href="/#">Tarifs</Link>
+                <Link href="/tarifs">Tarifs</Link>
               </li>
             </ul>
           </div>
@@ -34,10 +36,10 @@ export default function Footer() {
             <h4>Communauté</h4>
             <ul>
               <li>
-                <Link href="/#entreprises">Pour les entreprises</Link>
+                <a href={WHATSAPP_CHANNEL} target="_blank" rel="noopener noreferrer">Pour les entreprises</a>
               </li>
               <li>
-                <Link href="/#freelances">Pour les freelances</Link>
+                <a href={WHATSAPP_CHANNEL} target="_blank" rel="noopener noreferrer">Pour les freelances</a>
               </li>
               <li>
                 <Link href="/#">Blog</Link>

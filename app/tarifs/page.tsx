@@ -22,9 +22,6 @@ export default async function TarifsPage() {
       <div className="page-head">
         <div className="container">
           <h1>Tarifs</h1>
-          <p style={{ fontSize: '.9rem', color: 'var(--gray-300)' }}>
-            Simple et transparent : l&apos;inscription est gratuite — vous ne payez que lorsque vous êtes payé.
-          </p>
         </div>
       </div>
 

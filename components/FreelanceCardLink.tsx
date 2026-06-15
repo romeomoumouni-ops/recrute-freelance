@@ -30,7 +30,8 @@ export default function FreelanceCardLink({ f }: { f: FreelanceCard }) {
         <span className="price">
           {f.tarif != null ? (
             <>
-              <small>dès</small> {euros(f.tarif)}
+              <small>À partir de</small> {euros(f.tarif)}
+              <small className="price-note">Prix à partir duquel ce freelance travaille</small>
             </>
           ) : (
             <small>Sur devis</small>

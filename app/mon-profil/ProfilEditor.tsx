@@ -66,6 +66,13 @@ export default function ProfilEditor({
   const [sPrix, setSPrix] = useState('');
   const [sDelai, setSDelai] = useState('');
 
+  // Édition d'un service existant
+  const [editId, setEditId] = useState<string | null>(null);
+  const [eTitre, setETitre] = useState('');
+  const [eDesc, setEDesc] = useState('');
+  const [ePrix, setEPrix] = useState('');
+  const [eDelai, setEDelai] = useState('');
+
   const photoInput = useRef<HTMLInputElement>(null);
   const pfInput = useRef<HTMLInputElement>(null);
   const cvInput = useRef<HTMLInputElement>(null);
@@ -207,6 +214,38 @@ export default function ProfilEditor({
       setServices(services.filter((s) => s.id !== id));
       router.refresh();
     }
+  }
+
+  function startEdit(s: Service) {
+    setEditId(s.id);
+    setETitre(s.titre);
+    setEDesc(s.description);
+    setEPrix(String(s.prix));
+    setEDelai(String(s.delaiJours));
+  }
+  async function saveEdit(id: string) {
+    const prix = Number(ePrix);
+    if (!eTitre.trim() || !prix) {
+      toast('Indiquez au moins un titre et un prix.');
+      return;
+    }
+    const res = await fetch('/api/services', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id,
+        titre: eTitre.trim(),
+        description: eDesc.trim(),
+        prix,
+        delaiJours: eDelai ? Number(eDelai) : 7,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) return toast(data.error || 'Erreur.');
+    setServices(services.map((s) => (s.id === id ? data.service : s)));
+    setEditId(null);
+    router.refresh();
+    toast('Service modifié ✓');
   }
 
   // ----- Portfolio -----
@@ -391,20 +430,48 @@ export default function ProfilEditor({
       <div className="edit-card">
         <h2>Mes services</h2>
         <div>
-          {services.map((s) => (
-            <div className="service-item" key={s.id}>
-              <div>
-                <div className="titre">{s.titre}</div>
-                <div className="desc">{s.description}</div>
+          {services.map((s) =>
+            editId === s.id ? (
+              <div className="service-item service-edit" key={s.id} style={{ display: 'block' }}>
+                <div className="field">
+                  <label>Titre du service</label>
+                  <input type="text" value={eTitre} onChange={(e) => setETitre(e.target.value)} />
+                </div>
+                <div className="field">
+                  <label>Description</label>
+                  <textarea rows={3} value={eDesc} onChange={(e) => setEDesc(e.target.value)} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <div className="field">
+                    <label>Prix à partir duquel tu acceptes de travailler (€)</label>
+                    <input type="number" min={1} value={ePrix} onChange={(e) => setEPrix(e.target.value)} />
+                  </div>
+                  <div className="field">
+                    <label>Délai (jours)</label>
+                    <input type="number" min={1} value={eDelai} onChange={(e) => setEDelai(e.target.value)} />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-dark btn-sm" onClick={() => saveEdit(s.id)}>Enregistrer</button>
+                  <button className="btn btn-outline btn-sm" onClick={() => setEditId(null)}>Annuler</button>
+                </div>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div className="prix">{euros(s.prix)}</div>
-                <button className="suppr" onClick={() => removeService(s.id)}>
-                  Supprimer
-                </button>
+            ) : (
+              <div className="service-item" key={s.id}>
+                <div>
+                  <div className="titre">{s.titre}</div>
+                  <div className="desc">{s.description}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div className="prix">dès {euros(s.prix)}</div>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4 }}>
+                    <button className="suppr" onClick={() => startEdit(s)}>Modifier</button>
+                    <button className="suppr" onClick={() => removeService(s.id)}>Supprimer</button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
         <div className="field">
           <label>Titre du service</label>
@@ -426,7 +493,7 @@ export default function ProfilEditor({
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <div className="field">
-            <label>Prix (€)</label>
+            <label>Prix à partir duquel tu acceptes de travailler (€)</label>
             <input
               type="number"
               min={1}

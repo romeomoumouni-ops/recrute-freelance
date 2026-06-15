@@ -44,6 +44,41 @@ export async function POST(req: Request) {
   return NextResponse.json({ ok: true, service, estVerifie });
 }
 
+// Modification d'un service existant.
+export async function PATCH(req: Request) {
+  const guard = await requireFreelanceProfile();
+  if (!guard.ok) return NextResponse.json({ error: guard.error }, { status: guard.status });
+  const sb = supabaseAdmin();
+
+  const body = await req.json().catch(() => null);
+  const id = body?.id;
+  if (!id || typeof id !== 'string') {
+    return NextResponse.json({ error: 'Identifiant manquant.' }, { status: 400 });
+  }
+  const parsed = serviceSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.errors[0]?.message ?? 'Données invalides.' },
+      { status: 400 }
+    );
+  }
+  const { titre, description, prix, delaiJours } = parsed.data;
+
+  const { data: service, error } = await sb
+    .from('Service')
+    .update({ titre, description, prix, delaiJours })
+    .eq('id', id)
+    .eq('profileId', guard.profileId)
+    .select('id, titre, description, prix, delaiJours')
+    .single();
+  if (error || !service) {
+    return NextResponse.json({ error: 'Modification impossible.' }, { status: 500 });
+  }
+
+  const estVerifie = await recomputeVerification(guard.userId);
+  return NextResponse.json({ ok: true, service, estVerifie });
+}
+
 // Suppression : ?id=...
 export async function DELETE(req: Request) {
   const guard = await requireFreelanceProfile();

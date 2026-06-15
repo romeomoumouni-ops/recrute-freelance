@@ -9,6 +9,7 @@ import { euros } from '@/lib/utils';
 import Avatar from '@/components/Avatar';
 import DevisProvider from '@/components/devis/DevisProvider';
 import DevisButton from '@/components/devis/DevisButton';
+import ServiceDescription from '@/components/ServiceDescription';
 
 interface Props {
   params: { id: string };
@@ -108,7 +109,7 @@ export default async function FreelancePage({ params }: Props) {
             <div className="service-item" key={s.id}>
               <div>
                 <div className="titre">{s.titre}</div>
-                <div className="desc">{s.description}</div>
+                <ServiceDescription text={s.description} />
                 <div className="desc">Livraison estimée : {s.delaiJours} jours</div>
               </div>
               <div style={{ textAlign: 'right' }}>

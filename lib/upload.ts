@@ -63,12 +63,20 @@ export function validateAnyFile(file: File): string | null {
 }
 
 export function validateDoc(file: File): string | null {
-  const ok = [
+  const okMime = [
     'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   ];
-  if (!ok.includes(file.type)) return 'Le CV doit être un PDF ou un document Word.';
-  if (file.size > MAX_FILE_MB * 1024 * 1024) return `Fichier trop volumineux (max ${MAX_FILE_MB} Mo).`;
+  // Certains navigateurs n'envoient pas (ou mal) le type MIME : on accepte aussi par extension.
+  const name = (file.name || '').toLowerCase();
+  const okExt = name.endsWith('.pdf') || name.endsWith('.doc') || name.endsWith('.docx');
+  if (!okMime.includes(file.type) && !okExt) {
+    return 'Le CV doit être un PDF ou un document Word (.pdf, .doc, .docx).';
+  }
+  if (file.size === 0) return 'Fichier vide.';
+  // Plafond ~4,5 Mo des fonctions serverless Vercel : on reste sous la limite.
+  if (file.size > MAX_DELIVERY_MB * 1024 * 1024)
+    return `Fichier trop volumineux (max ${MAX_DELIVERY_MB} Mo).`;
   return null;
 }

@@ -34,11 +34,17 @@ export default function HomePage() {
               <Link className="chip" href="/recherche?cat=marketing">
                 Marketing Digital <span className="tag">Populaire</span>
               </Link>
+              <Link className="chip" href="/recherche?cat=audiovisuel">
+                Audiovisuel
+              </Link>
               <Link className="chip" href="/recherche?cat=redaction">
                 Rédaction
               </Link>
               <Link className="chip" href="/recherche?cat=social">
                 Réseaux sociaux
+              </Link>
+              <Link className="chip" href="/recherche?cat=business">
+                Business
               </Link>
             </div>
           </div>

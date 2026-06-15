@@ -26,13 +26,19 @@ export default function HomePage() {
                 Design de logo
               </Link>
               <Link className="chip" href="/recherche?cat=dev">
-                Développement Web
+                Site &amp; Développement web
               </Link>
               <Link className="chip" href="/recherche?cat=ia">
                 Services IA
               </Link>
               <Link className="chip" href="/recherche?cat=marketing">
                 Marketing Digital <span className="tag">Populaire</span>
+              </Link>
+              <Link className="chip" href="/recherche?cat=redaction">
+                Rédaction
+              </Link>
+              <Link className="chip" href="/recherche?cat=social">
+                Réseaux sociaux
               </Link>
             </div>
           </div>
@@ -70,14 +76,14 @@ export default function HomePage() {
               <h3>Services IA</h3>
               <p>Automatisation, chatbots, data — les meilleurs experts IA d&apos;Afrique francophone.</p>
             </Link>
-            <Link className="card dark" href="/recherche?cat=video">
+            <Link className="card dark" href="/recherche?cat=audiovisuel">
               <div className="icon"><Clapperboard size={24} /></div>
-              <h3>Vidéo &amp; Animation</h3>
+              <h3>Audiovisuel</h3>
               <p>Montage, motion design et animation pour vos contenus et campagnes.</p>
             </Link>
             <Link className="card" href="/recherche?cat=dev">
               <div className="icon"><Code2 size={24} /></div>
-              <h3>Développement Web &amp; Mobile</h3>
+              <h3>Site &amp; Développement web</h3>
               <p>Sites, applications et SaaS livrés par des développeurs confirmés.</p>
             </Link>
             <Link className="card" href="/recherche?cat=marketing">

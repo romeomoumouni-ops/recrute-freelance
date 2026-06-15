@@ -32,11 +32,14 @@ export const STATUT_CLASS: Record<OrderStatus, string> = {
 };
 
 export const CATEGORIES: Record<string, string> = {
-  dev: 'Développement',
-  design: 'Design',
-  marketing: 'Marketing Digital',
-  video: 'Vidéo & Animation',
+  design: 'Design de logo',
+  dev: 'Site & Développement web',
   ia: 'Services IA',
+  marketing: 'Marketing Digital',
+  audiovisuel: 'Audiovisuel',
+  redaction: 'Rédaction',
+  social: 'Réseaux sociaux',
+  business: 'Business',
 };
 
 export const CATEGORIES_LIST = Object.entries(CATEGORIES).map(([value, label]) => ({

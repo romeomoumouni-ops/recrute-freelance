@@ -21,6 +21,13 @@ export function supabaseAdmin(): SupabaseClient {
     _admin = createClient(url, serviceRoleKey, {
       auth: { persistSession: false, autoRefreshToken: false },
       db: { schema: 'public' },
+      // IMPORTANT : Next.js met en cache les `fetch` côté serveur (Data Cache), ce qui
+      // figeait les lectures (un freelance approuvé n'apparaissait pas, données obsolètes).
+      // On force `no-store` : toutes les lectures Supabase sont toujours fraîches.
+      global: {
+        fetch: ((input: RequestInfo | URL, init?: RequestInit) =>
+          fetch(input, { ...init, cache: 'no-store' })) as typeof fetch,
+      },
       // Node < 22 n'a pas de WebSocket global ; on fournit `ws` (realtime non utilisé).
       realtime: { transport: ws as unknown as undefined },
     });

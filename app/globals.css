@@ -723,3 +723,7 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .blog-more-link { display: block; border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; color: inherit; }
 .blog-more-link:hover { border-color: var(--black); }
 .blog-more-link strong { display: block; font-size: .92rem; margin-top: 2px; }
+
+/* CV cliquable sur le profil public */
+.cv-file-link { cursor: pointer; text-decoration: none; color: inherit; transition: border-color .15s ease, background .15s ease; }
+.cv-file-link:hover { border-color: var(--black); background: var(--off-white); }

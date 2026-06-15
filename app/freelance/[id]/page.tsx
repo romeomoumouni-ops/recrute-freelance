@@ -150,12 +150,19 @@ export default async function FreelancePage({ params }: Props) {
         )}
       </div>
 
-      {f.cvName && (
+      {f.cvName && f.cvUrl && (
         <div className="profile-section">
           <h2>CV</h2>
-          <div className="cv-file" style={{ maxWidth: 380 }}>
+          <a
+            className="cv-file cv-file-link"
+            style={{ maxWidth: 380 }}
+            href={f.cvUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Ouvrir / télécharger le CV"
+          >
             <FileText size={15} /> {f.cvName}
-          </div>
+          </a>
         </div>
       )}
 
@@ -235,17 +242,6 @@ export default async function FreelancePage({ params }: Props) {
             <Link className="btn btn-outline btn-block" href="/parametres" style={{ marginTop: 10 }}>
               Vérification du profil
             </Link>
-            {f.cvUrl && (
-              <a
-                className="btn btn-outline btn-block"
-                style={{ marginTop: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                href={f.cvUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FileText size={15} /> Télécharger le CV
-              </a>
-            )}
           </div>
         </div>
       </div>
@@ -283,17 +279,6 @@ export default async function FreelancePage({ params }: Props) {
             <a className="btn btn-outline btn-block" href="#portfolio">
               Voir le portfolio
             </a>
-            {f.cvUrl && (
-              <a
-                className="btn btn-outline btn-block"
-                style={{ marginTop: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                href={f.cvUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FileText size={15} /> Télécharger le CV
-              </a>
-            )}
             {canContact ? (
               <>
                 <div style={{ marginTop: 10 }}>

@@ -50,10 +50,10 @@ export default function Footer() {
             <h4>Support</h4>
             <ul>
               <li>
-                <Link href="/#">Centre d&apos;aide</Link>
+                <Link href="/aide">Centre d&apos;aide</Link>
               </li>
               <li>
-                <Link href="/#">Contact</Link>
+                <a href="https://wa.me/22969201952" target="_blank" rel="noopener noreferrer">Contact</a>
               </li>
               <li>
                 <Link href="/#">Conditions d&apos;utilisation</Link>

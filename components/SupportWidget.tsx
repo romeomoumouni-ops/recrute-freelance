@@ -39,6 +39,13 @@ export default function SupportWidget() {
     return () => clearInterval(i);
   }, [refreshMe, pathname]);
 
+  // Permet d'ouvrir le chat depuis un bouton externe (ex : page Centre d'aide).
+  useEffect(() => {
+    const openHandler = () => setOpen(true);
+    window.addEventListener('open-support', openHandler);
+    return () => window.removeEventListener('open-support', openHandler);
+  }, []);
+
   const loadMessages = useCallback(async () => {
     const res = await fetch('/api/support', { cache: 'no-store' });
     if (!res.ok) return;

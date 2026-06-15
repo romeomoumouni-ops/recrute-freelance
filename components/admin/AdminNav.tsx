@@ -17,6 +17,7 @@ const TABS: [string, string][] = [
   ['/admin/export', 'Export'],
   ['/admin/reglages', 'Réglages'],
   ['/admin/journal', 'Journal'],
+  ['/admin/bictorys-test', 'Test paiement'],
 ];
 
 function isActive(href: string, pathname: string): boolean {

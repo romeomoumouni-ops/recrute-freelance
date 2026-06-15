@@ -59,6 +59,7 @@ export interface FreelanceFull extends FreelanceCard {
   bio: string;
   mot: string | null;
   cvName: string | null;
+  cvUrl: string | null;
   statutValidation: ValidationStatus;
   services: { id: string; titre: string; description: string; prix: number; delaiJours: number }[];
   portfolio: { id: string; imageUrl: string }[];
@@ -83,7 +84,7 @@ export async function getFreelanceProfile(id: string): Promise<FreelanceFull | n
   const { data: prof } = await sb
     .from('Profile')
     .select(
-      'titre, cat, skills, photoUrl, estVerifie, bio, note, cvName, statutValidation, services:Service(id,titre,description,prix,delaiJours,createdAt), portfolio:PortfolioItem(id,imageUrl,ordre)'
+      'titre, cat, skills, photoUrl, estVerifie, bio, note, cvName, cvUrl, statutValidation, services:Service(id,titre,description,prix,delaiJours,createdAt), portfolio:PortfolioItem(id,imageUrl,ordre)'
     )
     .eq('userId', id)
     .maybeSingle();
@@ -93,7 +94,7 @@ export async function getFreelanceProfile(id: string): Promise<FreelanceFull | n
   type Pf = { id: string; imageUrl: string; ordre: number };
   const p = prof as unknown as {
     titre: string | null; cat: string | null; skills: string | null; photoUrl: string | null;
-    estVerifie: boolean; bio: string | null; note: string | null; cvName: string | null;
+    estVerifie: boolean; bio: string | null; note: string | null; cvName: string | null; cvUrl: string | null;
     statutValidation: string | null; services: Svc[]; portfolio: Pf[];
   };
 
@@ -140,6 +141,7 @@ export async function getFreelanceProfile(id: string): Promise<FreelanceFull | n
     bio: p.bio ?? '',
     mot: p.note ?? null,
     cvName: p.cvName,
+    cvUrl: p.cvUrl,
     prixMin,
     statutValidation: asValidationStatus(p.statutValidation),
     services,

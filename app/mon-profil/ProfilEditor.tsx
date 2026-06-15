@@ -80,7 +80,10 @@ export default function ProfilEditor({
     servicesCount: services.length,
     telephoneMomo,
   });
-  const faits = checks.filter((c) => c.ok).length;
+  // Le CV est facultatif : la progression et la soumission ne comptent que les critères requis.
+  const requis = checks.filter((c) => !c.optional);
+  const faits = requis.filter((c) => c.ok).length;
+  const tousRequisFaits = faits === requis.length;
 
   // ----- Persistance du texte (titre/bio/skills/cat) -----
   async function persistProfile(next?: { skills?: string[]; cat?: string }) {
@@ -508,12 +511,12 @@ export default function ProfilEditor({
       <div className="edit-card verif-card">
         <h2>Validation du profil</h2>
         <p className="hint" style={{ marginTop: -4, marginBottom: 14 }}>
-          Complétez les {checks.length} critères ci-dessous, puis envoyez votre demande. Votre profil
+          Complétez les {requis.length} critères requis ci-dessous, puis envoyez votre demande. Votre profil
           n’apparaît auprès des clients qu’une fois <strong>approuvé par notre équipe</strong>.
         </p>
 
         <div className="progress-bar" style={{ marginBottom: 14 }}>
-          <div style={{ width: `${Math.round((faits / checks.length) * 100)}%` }} />
+          <div style={{ width: `${Math.round((faits / requis.length) * 100)}%` }} />
         </div>
 
         <div className="check-list">
@@ -556,7 +559,7 @@ export default function ProfilEditor({
                 </span>
               </div>
             )}
-            {faits === checks.length ? (
+            {tousRequisFaits ? (
               <button className="btn btn-dark" disabled={submitting} onClick={submitValidation}>
                 {submitting ? 'Envoi…' : 'Demander la validation de mon profil'}
               </button>
@@ -564,7 +567,7 @@ export default function ProfilEditor({
               <div className="verif-banner pending">
                 <span className="big"><Clock size={22} /></span>
                 <span>
-                  <strong>{faits} / {checks.length}</strong> critères remplis — complétez tout pour pouvoir
+                  <strong>{faits} / {requis.length}</strong> critères remplis — complétez tout pour pouvoir
                   soumettre votre demande.
                 </span>
               </div>

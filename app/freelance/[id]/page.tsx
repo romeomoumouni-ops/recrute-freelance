@@ -272,6 +272,17 @@ export default async function FreelancePage({ params }: Props) {
             <a className="btn btn-outline btn-block" href="#portfolio">
               Voir le portfolio
             </a>
+            {f.cvUrl && (
+              <a
+                className="btn btn-outline btn-block"
+                style={{ marginTop: 10, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                href={f.cvUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <FileText size={15} /> Télécharger le CV
+              </a>
+            )}
             {canContact ? (
               <>
                 <div style={{ marginTop: 10 }}>

@@ -88,9 +88,11 @@ export default function ParametresClient({
   // notifs state
   const [prefs, setPrefs] = useState<NotifPrefs>(notifs);
 
-  const faits = checks.filter((c) => c.ok).length;
-  const pct = checks.length ? Math.round((faits / checks.length) * 100) : 0;
-  const verifie = checks.length > 0 && faits === checks.length;
+  // Le CV est facultatif : on ne compte que les critères requis.
+  const requis = checks.filter((c) => !c.optional);
+  const faits = requis.filter((c) => c.ok).length;
+  const pct = requis.length ? Math.round((faits / requis.length) * 100) : 0;
+  const verifie = requis.length > 0 && faits === requis.length;
 
   async function saveCompte() {
     const res = await fetch('/api/parametres', {
@@ -202,7 +204,7 @@ export default function ParametresClient({
                   <div className="verif-banner pending">
                     <span className="big"><Clock size={22} /></span>
                     <span>
-                      Profil <strong>incomplet</strong> — {faits} / {checks.length} critères remplis.
+                      Profil <strong>incomplet</strong> — {faits} / {requis.length} critères remplis.
                     </span>
                   </div>
                 )}

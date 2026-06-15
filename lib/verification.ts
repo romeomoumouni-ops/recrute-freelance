@@ -17,9 +17,10 @@ export interface VerifCheck {
   desc: string;
   ok: boolean;
   lien: string;
+  optional?: boolean; // n'est pas requis pour valider le profil
 }
 
-// Les 6 critères de vérification du profil freelance.
+// Critères de vérification du profil freelance (le CV est facultatif).
 export function getVerifChecks(input: VerifInput): VerifCheck[] {
   const bioLen = (input.bio || '').trim().length;
   return [
@@ -46,10 +47,11 @@ export function getVerifChecks(input: VerifInput): VerifCheck[] {
     },
     {
       key: 'cv',
-      titre: 'CV ou expérience',
-      desc: 'Votre CV au format PDF.',
+      titre: 'CV ou expérience (facultatif)',
+      desc: 'Optionnel — votre CV au format PDF, pour rassurer davantage les clients.',
       ok: !!input.cvUrl,
       lien: '/mon-profil',
+      optional: true,
     },
     {
       key: 'service',
@@ -69,7 +71,10 @@ export function getVerifChecks(input: VerifInput): VerifCheck[] {
 }
 
 export function isVerified(input: VerifInput): boolean {
-  return getVerifChecks(input).every((c) => c.ok);
+  // Seuls les critères requis (non facultatifs) doivent être remplis.
+  return getVerifChecks(input)
+    .filter((c) => !c.optional)
+    .every((c) => c.ok);
 }
 
 // Compte les compétences (utilisé indirectement ailleurs)

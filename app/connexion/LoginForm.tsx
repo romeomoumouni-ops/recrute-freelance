@@ -97,9 +97,6 @@ export default function LoginForm() {
 
         <div className="auth-divider"><span>ou</span></div>
         <GoogleAuthButton label="Se connecter avec Google" />
-        <p className="hint" style={{ textAlign: 'center', marginTop: 8 }}>
-          Entreprises et freelances inscrits via Google.
-        </p>
 
         <p className="auth-alt" style={{ marginTop: 14 }}>
           <Link href="/mot-de-passe-oublie">Mot de passe oublié ?</Link>

@@ -728,6 +728,13 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .cv-file-link { cursor: pointer; text-decoration: none; color: inherit; transition: border-color .15s ease, background .15s ease; }
 .cv-file-link:hover { border-color: var(--black); background: var(--off-white); }
 
+/* Zone de danger : suppression de compte */
+.danger-zone { margin-top: 34px; padding: 18px; border: 1px solid #f3c2bd; background: #fef5f4; border-radius: var(--radius); }
+.danger-zone h3 { font-size: .95rem; font-weight: 800; color: #c0392b; margin-bottom: 6px; }
+.danger-zone p { font-size: .82rem; color: var(--gray-700); line-height: 1.5; margin-bottom: 14px; }
+.btn-danger { background: #c0392b; color: #fff; border: 1px solid #c0392b; }
+.btn-danger:hover { background: #a93226; border-color: #a93226; }
+
 /* Séparateur « ou » + bouton Google */
 .auth-divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--gray-500); font-size: .8rem; }
 .auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }

@@ -87,6 +87,22 @@ export default function ParametresClient({
   const [op, setOp] = useState(momo.operateurMomo);
   // notifs state
   const [prefs, setPrefs] = useState<NotifPrefs>(notifs);
+  // suppression de compte
+  const [delOpen, setDelOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function deleteAccount() {
+    setDeleting(true);
+    const res = await fetch('/api/account/delete', { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setDeleting(false);
+      setDelOpen(false);
+      return toast(data.error || 'Suppression impossible.');
+    }
+    // Compte supprimé : session terminée, retour à l'accueil.
+    window.location.href = '/';
+  }
 
   // Le CV est facultatif : on ne compte que les critères requis.
   const requis = checks.filter((c) => !c.optional);
@@ -264,6 +280,17 @@ export default function ParametresClient({
             <button className="btn btn-dark" onClick={saveCompte}>
               Enregistrer
             </button>
+
+            <div className="danger-zone">
+              <h3>Supprimer mon compte</h3>
+              <p>
+                La suppression est <strong>définitive</strong> : votre profil, vos services, vos
+                messages et toutes vos données seront effacés. Vous pourrez vous réinscrire plus tard.
+              </p>
+              <button className="btn btn-danger" onClick={() => setDelOpen(true)}>
+                Supprimer mon compte
+              </button>
+            </div>
           </>
         )}
 
@@ -328,6 +355,26 @@ export default function ParametresClient({
             ))}
           </>
         )}
+      </div>
+
+      {/* Modale de confirmation de suppression */}
+      <div className={`modal-backdrop${delOpen ? ' open' : ''}`} onClick={() => !deleting && setDelOpen(false)}>
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <h2>Supprimer définitivement votre compte ?</h2>
+          <p className="sub">
+            Cette action est <strong>irréversible</strong>. Toutes vos données (profil, services,
+            portfolio, messages, commandes…) seront effacées de la plateforme. Vous pourrez vous
+            réinscrire plus tard si vous le souhaitez.
+          </p>
+          <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
+            <button className="btn btn-danger" disabled={deleting} onClick={deleteAccount}>
+              {deleting ? 'Suppression…' : 'Oui, supprimer mon compte'}
+            </button>
+            <button className="btn btn-outline" disabled={deleting} onClick={() => setDelOpen(false)}>
+              Annuler
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

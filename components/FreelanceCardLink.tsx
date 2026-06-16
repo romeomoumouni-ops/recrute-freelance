@@ -57,11 +57,15 @@ export default function FreelanceCardLink({ f }: { f: FreelanceCard }) {
             <small>Sur devis</small>
           )}
         </span>
-        {f.avis > 0 && (
-          <span className="rating">
-            <Star size={14} fill="currentColor" /> {f.note.toFixed(1)} <small>({f.avis})</small>
-          </span>
-        )}
+        <span className="rating">
+          {f.avis > 0 ? (
+            <>
+              <Star size={14} fill="currentColor" /> {f.note.toFixed(1)} <small>({f.avis})</small>
+            </>
+          ) : (
+            <small style={{ color: 'var(--gray-500)' }}>Nouveau</small>
+          )}
+        </span>
       </div>
 
       <Link href={href} className="btn btn-dark btn-block">

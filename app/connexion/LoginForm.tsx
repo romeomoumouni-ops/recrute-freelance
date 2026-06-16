@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createBrowserSupabase } from '@/lib/supabase-browser';
 import PasswordInput from '@/components/PasswordInput';
+import GoogleAuthButton from '@/components/GoogleAuthButton';
 import { toast } from '@/lib/toast';
 
 export default function LoginForm() {
@@ -93,6 +94,12 @@ export default function LoginForm() {
             {loading ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
+
+        <div className="auth-divider"><span>ou</span></div>
+        <GoogleAuthButton label="Se connecter avec Google" />
+        <p className="hint" style={{ textAlign: 'center', marginTop: 8 }}>
+          Entreprises et freelances inscrits via Google.
+        </p>
 
         <p className="auth-alt" style={{ marginTop: 14 }}>
           <Link href="/mot-de-passe-oublie">Mot de passe oublié ?</Link>

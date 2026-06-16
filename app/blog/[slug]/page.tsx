@@ -8,21 +8,19 @@ interface Props {
   params: { slug: string };
 }
 
-export function generateStaticParams() {
-  return listArticles().map((a) => ({ slug: a.slug }));
-}
+export const dynamic = 'force-dynamic';
 
-export function generateMetadata({ params }: Props): Metadata {
-  const a = getArticle(params.slug);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const a = await getArticle(params.slug);
   if (!a) return { title: 'Article introuvable' };
   return { title: a.title, description: a.excerpt };
 }
 
-export default function ArticlePage({ params }: Props) {
-  const a = getArticle(params.slug);
+export default async function ArticlePage({ params }: Props) {
+  const a = await getArticle(params.slug);
   if (!a) notFound();
 
-  const others = listArticles().filter((x) => x.slug !== a.slug).slice(0, 3);
+  const others = (await listArticles()).filter((x) => x.slug !== a.slug).slice(0, 3);
 
   return (
     <>

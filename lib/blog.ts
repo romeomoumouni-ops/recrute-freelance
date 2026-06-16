@@ -1,4 +1,8 @@
+import 'server-only';
+import { supabaseAdmin } from './supabase';
+
 // Contenu de blog 100% original (conseils freelances). Aucun texte copié de tiers.
+// Articles statiques de base + articles publiés quotidiennement (table BlogPost).
 
 export interface Block {
   h?: string; // sous-titre
@@ -173,10 +177,57 @@ export const ARTICLES: Article[] = [
   },
 ];
 
-export function listArticles(): Article[] {
-  return ARTICLES;
+interface DbRow {
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  category: string | null;
+  blocks: unknown;
+  readMins: number | null;
 }
 
-export function getArticle(slug: string): Article | null {
-  return ARTICLES.find((a) => a.slug === slug) ?? null;
+function rowToArticle(r: DbRow): Article {
+  return {
+    slug: r.slug,
+    title: r.title,
+    excerpt: r.excerpt ?? '',
+    category: r.category ?? 'Conseils',
+    readMins: r.readMins ?? 5,
+    blocks: Array.isArray(r.blocks) ? (r.blocks as Block[]) : [],
+  };
+}
+
+async function dbArticles(): Promise<Article[]> {
+  try {
+    const { data } = await supabaseAdmin()
+      .from('BlogPost')
+      .select('slug, title, excerpt, category, blocks, readMins')
+      .eq('published', true)
+      .order('createdAt', { ascending: false });
+    return ((data as DbRow[]) ?? []).map(rowToArticle);
+  } catch {
+    return [];
+  }
+}
+
+// Articles publiés quotidiennement en premier, puis les articles de base.
+export async function listArticles(): Promise<Article[]> {
+  const db = await dbArticles();
+  return [...db, ...ARTICLES];
+}
+
+export async function getArticle(slug: string): Promise<Article | null> {
+  const fromStatic = ARTICLES.find((a) => a.slug === slug);
+  if (fromStatic) return fromStatic;
+  try {
+    const { data } = await supabaseAdmin()
+      .from('BlogPost')
+      .select('slug, title, excerpt, category, blocks, readMins')
+      .eq('slug', slug)
+      .eq('published', true)
+      .maybeSingle();
+    return data ? rowToArticle(data as DbRow) : null;
+  } catch {
+    return null;
+  }
 }

@@ -9,8 +9,10 @@ export const metadata: Metadata = {
     'Conseils gratuits pour freelances : tarification, devis, négociation, portfolio, relation client et qualité de livraison.',
 };
 
-export default function BlogPage() {
-  const articles = listArticles();
+export const dynamic = 'force-dynamic';
+
+export default async function BlogPage() {
+  const articles = await listArticles();
 
   return (
     <>

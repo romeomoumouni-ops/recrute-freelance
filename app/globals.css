@@ -728,6 +728,14 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .cv-file-link { cursor: pointer; text-decoration: none; color: inherit; transition: border-color .15s ease, background .15s ease; }
 .cv-file-link:hover { border-color: var(--black); background: var(--off-white); }
 
+/* Carte freelance : lien d'en-tête + carrousel portfolio + bouton */
+.fl-top-link { color: inherit; text-decoration: none; }
+.fl-portfolio { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 4px; margin: 6px 0 2px; }
+.fl-portfolio::-webkit-scrollbar { height: 5px; }
+.fl-portfolio::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 999px; }
+.fl-portfolio img { flex: 0 0 auto; width: 132px; height: 86px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); scroll-snap-align: start; }
+.fl-card .btn-block { margin-top: 12px; }
+
 /* Zone de danger : suppression de compte */
 .danger-zone { margin-top: 34px; padding: 18px; border: 1px solid #f3c2bd; background: #fef5f4; border-radius: var(--radius); }
 .danger-zone h3 { font-size: .95rem; font-weight: 800; color: #c0392b; margin-bottom: 6px; }

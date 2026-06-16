@@ -14,6 +14,7 @@ export interface FreelanceCard {
   note: number;
   avis: number;
   estVerifie: boolean;
+  portfolioPreview: string[]; // aperçu (URLs) pour le carrousel sur la carte
 }
 
 interface CardRow {
@@ -46,13 +47,37 @@ function toCard(r: CardRow): FreelanceCard {
     note: r.note ?? 0,
     avis: r.avis ?? 0,
     estVerifie: r.estVerifie,
+    portfolioPreview: [],
   };
 }
 
 export async function getFreelanceCards(): Promise<FreelanceCard[]> {
-  const { data, error } = await supabaseAdmin().from('freelance_card').select('*');
+  const sb = supabaseAdmin();
+  const { data, error } = await sb.from('freelance_card').select('*');
   if (error) throw new Error(error.message);
-  return (data as CardRow[]).map(toCard);
+  const cards = (data as CardRow[]).map(toCard);
+
+  // Aperçu portfolio (quelques images) par freelance, pour le carrousel sur la carte.
+  const ids = cards.map((c) => c.id);
+  if (ids.length) {
+    const { data: profs } = await sb
+      .from('Profile')
+      .select('userId, portfolio:PortfolioItem(imageUrl, ordre)')
+      .in('userId', ids);
+    type P = { userId: string; portfolio: { imageUrl: string; ordre: number }[] | null };
+    const byUser = new Map<string, string[]>();
+    for (const p of (profs as P[]) ?? []) {
+      const imgs = (p.portfolio ?? [])
+        .slice()
+        .sort((a, b) => a.ordre - b.ordre)
+        .map((x) => x.imageUrl)
+        .slice(0, 8);
+      byUser.set(p.userId, imgs);
+    }
+    for (const c of cards) c.portfolioPreview = byUser.get(c.id) ?? [];
+  }
+
+  return cards;
 }
 
 export interface FreelanceFull extends FreelanceCard {
@@ -142,6 +167,7 @@ export async function getFreelanceProfile(id: string): Promise<FreelanceFull | n
     mot: p.note ?? null,
     cvName: p.cvName,
     cvUrl: p.cvUrl,
+    portfolioPreview: portfolio.map((pf) => pf.imageUrl).slice(0, 8),
     prixMin,
     statutValidation: asValidationStatus(p.statutValidation),
     services,

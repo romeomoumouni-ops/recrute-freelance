@@ -1,22 +1,19 @@
 import { NextResponse } from 'next/server';
-import type { EmailOtpType } from '@supabase/supabase-js';
+import type { EmailOtpType, User } from '@supabase/supabase-js';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendEmail } from '@/lib/email';
 
 // Onboarding d'un nouvel inscrit via Google : applique le rôle choisi, crée le profil
 // freelance si besoin, et envoie notre e-mail de bienvenue (une seule fois).
-async function onboardOAuthUser(origin: string, newrole: string | null) {
+// On reçoit `user` directement du résultat de l'échange (la session n'est pas encore
+// lisible via getUser() dans la même requête).
+async function onboardOAuthUser(origin: string, newrole: string | null, user: User | null) {
   try {
-    const supabase = createServerSupabase();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
     if (!user) return;
 
     const createdMs = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
-    const isNew = createdMs < 5 * 60 * 1000; // inscrit il y a moins de 5 min
-    if (!isNew) return;
+    const isNew = createdMs < 10 * 60 * 1000; // inscrit il y a moins de 10 min
 
     const sb = supabaseAdmin();
     const { data: row } = await sb
@@ -25,17 +22,21 @@ async function onboardOAuthUser(origin: string, newrole: string | null) {
       .eq('id', user.id)
       .maybeSingle();
     const u = row as { prenom: string | null; role: string; welcomeEmailedAt: string | null } | null;
-    if (!u || u.welcomeEmailedAt) return; // déjà onboardé
+    if (!u || u.welcomeEmailedAt) return; // déjà onboardé (e-mail déjà envoyé)
 
-    const role = newrole === 'FREELANCE' ? 'FREELANCE' : 'CLIENT';
-    if (role === 'FREELANCE' && u.role !== 'FREELANCE') {
+    // Attribuer le rôle choisi UNIQUEMENT lors d'une nouvelle inscription
+    // (on ne change jamais le rôle d'un compte existant).
+    const chosen = newrole === 'FREELANCE' ? 'FREELANCE' : 'CLIENT';
+    if (isNew && chosen === 'FREELANCE' && u.role !== 'FREELANCE') {
       await sb.from('User').update({ role: 'FREELANCE' }).eq('id', user.id);
       const { data: prof } = await sb.from('Profile').select('id').eq('userId', user.id).maybeSingle();
       if (!prof) await sb.from('Profile').insert({ userId: user.id, skills: '[]' });
     }
 
+    // Rôle effectif après attribution éventuelle (pour le bon contenu d'e-mail).
+    const effectiveRole = isNew ? chosen : u.role;
     const prenom = u.prenom ?? user.email?.split('@')[0] ?? '';
-    const isFreelance = role === 'FREELANCE';
+    const isFreelance = effectiveRole === 'FREELANCE';
     const titre = isFreelance
       ? 'Bienvenue ! Votre compte freelance est créé 🎉'
       : 'Bienvenue ! Votre compte entreprise est créé 🎉';
@@ -76,10 +77,12 @@ export async function GET(request: Request) {
 
   const supabase = createServerSupabase();
   let ok = false;
+  let oauthUser: User | null = null;
 
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     ok = !error;
+    oauthUser = data?.user ?? null;
   } else if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     ok = !error;
@@ -101,7 +104,7 @@ export async function GET(request: Request) {
   // Connexion OAuth (Google) : on GARDE la session et on redirige vers l'app.
   // (`next` est un chemin interne fourni par le bouton Google, ex. /dashboard.)
   if (next && next.startsWith('/') && !next.startsWith('//')) {
-    await onboardOAuthUser(origin, searchParams.get('newrole'));
+    await onboardOAuthUser(origin, searchParams.get('newrole'), oauthUser);
     return NextResponse.redirect(`${origin}${next}`);
   }
 

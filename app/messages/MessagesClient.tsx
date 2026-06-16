@@ -13,6 +13,8 @@ import {
   AlertTriangle,
   X,
   Loader2,
+  Tag,
+  Check,
 } from 'lucide-react';
 import Avatar from '@/components/Avatar';
 import type { ConversationSummary } from '@/lib/conversations';
@@ -172,6 +174,79 @@ function DevisOfferCard({
   );
 }
 
+const PROP_STATUT: Record<string, string> = {
+  pending: 'en attente de réponse',
+  accepted: 'acceptée ✓',
+  declined: 'refusée',
+};
+
+// Proposition de prix envoyée par le CLIENT (non payable). Le freelance accepte/refuse.
+function PropositionCard({
+  m,
+  onAccept,
+  onDecline,
+  busy,
+}: {
+  m: Msg;
+  onAccept: (id: string) => void;
+  onDecline: (id: string) => void;
+  busy: boolean;
+}) {
+  let amountEur = 0;
+  let description = '';
+  let status = 'pending';
+  try {
+    if (m.meta) {
+      const p = JSON.parse(m.meta);
+      amountEur = p.amountEur || 0;
+      description = p.description || '';
+      status = p.status || 'pending';
+    }
+  } catch {
+    /* ignore */
+  }
+  const mine = m.mine; // true = client émetteur de la proposition
+
+  return (
+    <div className={`devis-msg proposition ${mine ? 'moi' : 'eux'}`}>
+      <div className="devis-msg-head"><Tag size={14} /> Proposition de prix · {PROP_STATUT[status] ?? status}</div>
+      <div className="devis-msg-service">
+        <span>{description}</span>
+        <span className="devis-msg-prix">{euros(amountEur)}</span>
+      </div>
+
+      {status === 'pending' &&
+        (mine ? (
+          <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
+            En attente de la réponse du freelance…
+          </p>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <button className="btn btn-outline" disabled={busy} onClick={() => onDecline(m.id)}>
+              {busy ? '…' : 'Refuser'}
+            </button>
+            <button className="btn btn-dark" disabled={busy} onClick={() => onAccept(m.id)}>
+              {busy ? '…' : 'Accepter'}
+            </button>
+          </div>
+        ))}
+
+      {status === 'accepted' && (
+        <p className="devis-msg-body" style={{ color: 'var(--green)', fontWeight: 600 }}>
+          <Check size={15} /> Proposition acceptée{mine ? ' par le freelance' : ' — envoyez un devis à payer'}.
+        </p>
+      )}
+      {status === 'declined' && (
+        <p className="devis-msg-body" style={{ color: 'var(--gray-500)' }}>
+          Proposition refusée.
+        </p>
+      )}
+
+      <span className="heure">{m.heure}</span>
+    </div>
+  );
+}
+
 function formatSize(bytes: number): string {
   if (!bytes) return '';
   if (bytes < 1024) return `${bytes} o`;
@@ -281,7 +356,9 @@ export default function MessagesClient({
   async function sendOffer() {
     if (!activeId) return;
     setOfferSending(true);
-    const res = await fetch('/api/devis/offer', {
+    // Client -> proposition de prix (non payable) ; Freelance -> devis payable.
+    const endpoint = isClient ? '/api/devis/proposition' : '/api/devis/offer';
+    const res = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -298,6 +375,21 @@ export default function MessagesClient({
     setOfferAmount('');
     setOfferDesc('');
     scrollBottom();
+  }
+
+  // Freelance : accepter / refuser une proposition de prix du client.
+  async function propositionAction(messageId: string, action: 'accept' | 'decline') {
+    setBusyId(messageId);
+    const res = await fetch('/api/devis/proposition', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messageId, action }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setBusyId(null);
+    if (!res.ok) return toast(data.error || 'Action impossible.');
+    toast(action === 'accept' ? 'Proposition acceptée ✓' : 'Proposition refusée.');
+    if (activeId) loadMessages(activeId);
   }
 
   async function payOffer(offerMessageId: string) {
@@ -506,6 +598,14 @@ export default function MessagesClient({
                     onRevise={requestRevision}
                     busy={payingId === m.id || busyId === m.id}
                   />
+                ) : m.type === 'PROPOSITION' ? (
+                  <PropositionCard
+                    key={m.id}
+                    m={m}
+                    onAccept={(id) => propositionAction(id, 'accept')}
+                    onDecline={(id) => propositionAction(id, 'decline')}
+                    busy={busyId === m.id}
+                  />
                 ) : m.type === 'FILE' ? (
                   <FileCard key={m.id} m={m} />
                 ) : m.type === 'SYSTEM' ? (
@@ -585,7 +685,7 @@ export default function MessagesClient({
             />
           </div>
           <div className="field">
-            <label>Montant</label>
+            <label>{isClient ? 'Prix que vous proposez' : 'Montant'}</label>
             <select value={offerAmount} onChange={(e) => setOfferAmount(e.target.value)}>
               <option value="">Choisir un montant…</option>
               {TIER_AMOUNTS.map((a) => (
@@ -595,9 +695,11 @@ export default function MessagesClient({
               ))}
             </select>
             <div className="hint">
-              {offerAmount
-                ? `Le client paiera ${euros(Number(offerAmount))} par carte.`
-                : 'Montants disponibles au paiement par carte.'}
+              {isClient
+                ? 'Le freelance pourra accepter ou refuser, puis vous envoyer un devis.'
+                : offerAmount
+                  ? `Le client paiera ${euros(Number(offerAmount))} par carte.`
+                  : 'Montants disponibles au paiement par carte.'}
             </div>
           </div>
           <button

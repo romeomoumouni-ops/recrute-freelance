@@ -10,6 +10,7 @@ import Avatar from '@/components/Avatar';
 import DevisProvider from '@/components/devis/DevisProvider';
 import DevisButton from '@/components/devis/DevisButton';
 import ServiceDescription from '@/components/ServiceDescription';
+import PortfolioGallery from '@/components/PortfolioGallery';
 
 interface Props {
   params: { id: string };
@@ -136,14 +137,7 @@ export default async function FreelancePage({ params }: Props) {
       <div className="profile-section" id="portfolio">
         <h2>Portfolio</h2>
         {f.portfolio.length ? (
-          <div className="portfolio-grid">
-            {f.portfolio.map((img) => (
-              <div className="portfolio-item" key={img.id}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={img.imageUrl} alt="Réalisation" />
-              </div>
-            ))}
-          </div>
+          <PortfolioGallery items={f.portfolio} />
         ) : (
           <p style={{ fontSize: '.83rem', color: 'var(--gray-500)' }}>
             Aucune réalisation ajoutée pour le moment.

@@ -728,6 +728,21 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .cv-file-link { cursor: pointer; text-decoration: none; color: inherit; transition: border-color .15s ease, background .15s ease; }
 .cv-file-link:hover { border-color: var(--black); background: var(--off-white); }
 
+/* Portfolio cliquable + lightbox */
+.portfolio-clickable { padding: 0; border: none; background: none; cursor: pointer; display: block; width: 100%; }
+.portfolio-clickable img { transition: transform .2s ease, opacity .2s ease; }
+.portfolio-clickable:hover img { transform: scale(1.03); opacity: .92; }
+.lightbox { position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.9); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.lightbox-img { max-width: min(94vw, 1100px); max-height: 86vh; object-fit: contain; border-radius: 8px; }
+.lightbox-close { position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,.12); color: #fff; border: none; border-radius: 50%; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.lightbox-close:hover { background: rgba(255,255,255,.24); }
+.lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.12); color: #fff; border: none; border-radius: 50%; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.lightbox-nav:hover { background: rgba(255,255,255,.26); }
+.lightbox-nav.left { left: 16px; }
+.lightbox-nav.right { right: 16px; }
+.lightbox-count { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); color: #fff; font-size: .85rem; background: rgba(255,255,255,.12); padding: 5px 14px; border-radius: 999px; }
+@media (max-width: 560px) { .lightbox-nav { width: 44px; height: 44px; } .lightbox-nav.left { left: 8px; } .lightbox-nav.right { right: 8px; } }
+
 /* « Voir plus » des descriptions de service */
 .voir-plus { background: none; border: none; padding: 0; color: var(--black); font-weight: 700; font-size: inherit; cursor: pointer; text-decoration: underline; }
 .voir-plus:hover { color: var(--green); }

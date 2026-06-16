@@ -36,6 +36,12 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/reset-password`);
   }
 
+  // Connexion OAuth (Google) : on GARDE la session et on redirige vers l'app.
+  // (`next` est un chemin interne fourni par le bouton Google, ex. /dashboard.)
+  if (next && next.startsWith('/') && !next.startsWith('//')) {
+    return NextResponse.redirect(`${origin}${next}`);
+  }
+
   // Confirmation d'inscription : l'e-mail est validé → on déconnecte pour que la personne
   // se connecte explicitement avec ses identifiants, puis page de confirmation dédiée.
   await supabase.auth.signOut();

@@ -113,48 +113,127 @@ function buildEmail(prenom: string, rows: DigestRow[]): { subject: string; html:
   return { subject, html, text };
 }
 
+// E-mail simple et branché (validation de profil, réponse du support).
+function simpleEmail(
+  prenom: string,
+  titre: string,
+  corps: string,
+  ctaLabel: string,
+  ctaUrl: string
+): { html: string; text: string } {
+  const html = `<!doctype html><html><body style="margin:0;background:#f3f4f6;padding:24px;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+    <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb">
+      <div style="background:#111827;padding:20px 24px"><span style="color:#fff;font-size:18px;font-weight:700">RecruteFreelance</span></div>
+      <div style="padding:24px">
+        <p style="margin:0 0 6px;font-size:16px;color:#111827">Bonjour ${escapeHtml(prenom || '')},</p>
+        <p style="margin:0 0 8px;font-size:15px;color:#111827;font-weight:600">${escapeHtml(titre)}</p>
+        <p style="margin:0 0 20px;font-size:14px;color:#374151;line-height:1.6">${escapeHtml(corps)}</p>
+        <a href="${ctaUrl}" style="display:inline-block;background:#111827;color:#fff;text-decoration:none;padding:12px 22px;border-radius:10px;font-size:14px;font-weight:600">${escapeHtml(ctaLabel)}</a>
+      </div>
+      <div style="padding:16px 24px;border-top:1px solid #f3f4f6;color:#9ca3af;font-size:12px">recrutefreelance.com</div>
+    </div>
+  </body></html>`;
+  const text = `Bonjour ${prenom || ''},\n\n${titre}\n${corps}\n\n${ctaLabel} : ${ctaUrl}`;
+  return { html, text };
+}
+
 export async function POST(req: Request) {
   if (!authorized(req)) {
     return NextResponse.json({ error: 'Non autorisé.' }, { status: 401 });
   }
 
   const sb = supabaseAdmin();
+
+  // ---- 1) Messages non lus (>= 2h) ----
+  let sent = 0;
+  const notifiedIds: string[] = [];
   const { data, error } = await sb.rpc('pending_digest_messages');
   if (error) {
     console.error('[digest] rpc error', error.message);
-    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
-  }
-  const rows = (data as DigestRow[]) ?? [];
-  if (rows.length === 0) {
-    return NextResponse.json({ sent: 0, recipients: 0 });
+  } else {
+    const rows = (data as DigestRow[]) ?? [];
+    const byRecipient = new Map<string, DigestRow[]>();
+    for (const r of rows) {
+      if (!byRecipient.has(r.recipient_id)) byRecipient.set(r.recipient_id, []);
+      byRecipient.get(r.recipient_id)!.push(r);
+    }
+    for (const [, msgs] of byRecipient) {
+      const { subject, html, text } = buildEmail(msgs[0].recipient_prenom ?? '', msgs);
+      const ok = await sendEmail({ to: msgs[0].recipient_email, subject, html, text });
+      if (ok) {
+        sent++;
+        notifiedIds.push(...msgs.map((m) => m.message_id));
+      }
+    }
+    if (notifiedIds.length > 0) await sb.rpc('mark_messages_notified', { p_ids: notifiedIds });
   }
 
-  // Regroupe par destinataire
-  const byRecipient = new Map<string, DigestRow[]>();
-  for (const r of rows) {
-    if (!byRecipient.has(r.recipient_id)) byRecipient.set(r.recipient_id, []);
-    byRecipient.get(r.recipient_id)!.push(r);
-  }
-
-  let sent = 0;
-  const notifiedIds: string[] = [];
-  for (const [, msgs] of byRecipient) {
-    const to = msgs[0].recipient_email;
-    const prenom = msgs[0].recipient_prenom ?? '';
-    const { subject, html, text } = buildEmail(prenom, msgs);
-    const ok = await sendEmail({ to, subject, html, text });
+  // ---- 2) Validations de profil (approuvé / refusé) non vues (>= 2h) ----
+  let validations = 0;
+  const { data: vrows } = await sb.rpc('pending_validation_emails');
+  const vlist =
+    (vrows as { id: string; email: string; prenom: string | null; titre: string; corps: string | null }[]) ?? [];
+  const vDone: string[] = [];
+  for (const v of vlist) {
+    if (!v.email) continue;
+    const { html, text } = simpleEmail(
+      v.prenom ?? '',
+      v.titre,
+      v.corps ?? '',
+      'Voir mon profil',
+      `${SITE_URL}/mon-profil`
+    );
+    const ok = await sendEmail({ to: v.email, subject: v.titre, html, text });
     if (ok) {
-      sent++;
-      // On ne marque "notifié" que si l'e-mail est bien parti (sinon on réessaiera au prochain cron).
-      notifiedIds.push(...msgs.map((m) => m.message_id));
+      validations++;
+      vDone.push(v.id);
     }
   }
+  if (vDone.length > 0) await sb.rpc('mark_notifications_emailed', { p_ids: vDone });
 
-  if (notifiedIds.length > 0) {
-    await sb.rpc('mark_messages_notified', { p_ids: notifiedIds });
+  // ---- 3) Réponses du support non vues (>= 2h) ----
+  let support = 0;
+  const { data: srows } = await sb.rpc('pending_support_emails');
+  const slist =
+    (srows as { id: string; userId: string; email: string; prenom: string | null; contenu: string }[]) ?? [];
+  const byUser = new Map<string, typeof slist>();
+  for (const s of slist) {
+    if (!s.email) continue;
+    if (!byUser.has(s.userId)) byUser.set(s.userId, []);
+    byUser.get(s.userId)!.push(s);
   }
+  const sDone: string[] = [];
+  for (const [, msgs] of byUser) {
+    const corps =
+      msgs.length === 1
+        ? `Le support vous a répondu : « ${msgs[0].contenu.slice(0, 200)} »`
+        : `Le support vous a envoyé ${msgs.length} nouvelles réponses.`;
+    const { html, text } = simpleEmail(
+      msgs[0].prenom ?? '',
+      'Vous avez une réponse du support',
+      corps,
+      'Ouvrir le chat',
+      `${SITE_URL}/aide`
+    );
+    const ok = await sendEmail({
+      to: msgs[0].email,
+      subject: 'Réponse du support — RecruteFreelance',
+      html,
+      text,
+    });
+    if (ok) {
+      support++;
+      sDone.push(...msgs.map((m) => m.id));
+    }
+  }
+  if (sDone.length > 0) await sb.rpc('mark_support_emailed', { p_ids: sDone });
 
-  return NextResponse.json({ sent, recipients: byRecipient.size, messages: notifiedIds.length });
+  return NextResponse.json({
+    messages: notifiedIds.length,
+    messageEmails: sent,
+    validations,
+    support,
+  });
 }
 
 // Permet un déclenchement manuel/diagnostic protégé par secret.

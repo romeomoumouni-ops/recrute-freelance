@@ -21,6 +21,47 @@ export async function POST() {
   const uid = session.user.id;
   const sb = supabaseAdmin();
 
+  // Garde-fou financier : pas de suppression s'il reste de l'argent ou des commandes en jeu.
+  const { count: activeOrders } = await sb
+    .from('Order')
+    .select('id', { count: 'exact', head: true })
+    .or(`clientId.eq.${uid},freelanceId.eq.${uid}`)
+    .in('statut', ['EN_COURS', 'LIVREE']);
+  if (activeOrders && activeOrders > 0) {
+    return NextResponse.json(
+      {
+        error:
+          'Vous avez des commandes en cours (paiement en séquestre). Terminez ou faites valider ces commandes avant de supprimer votre compte.',
+      },
+      { status: 400 }
+    );
+  }
+
+  if (session.user.role === 'FREELANCE') {
+    const { data: prof } = await sb
+      .from('Profile')
+      .select('soldeDisponible')
+      .eq('userId', uid)
+      .maybeSingle();
+    if (prof && Number((prof as { soldeDisponible: number }).soldeDisponible) > 0) {
+      return NextResponse.json(
+        { error: 'Vous avez un solde disponible. Retirez vos fonds (Mobile Money) avant de supprimer votre compte.' },
+        { status: 400 }
+      );
+    }
+    const { count: pendingW } = await sb
+      .from('Withdrawal')
+      .select('id', { count: 'exact', head: true })
+      .eq('freelanceId', uid)
+      .eq('statut', 'EN_ATTENTE');
+    if (pendingW && pendingW > 0) {
+      return NextResponse.json(
+        { error: 'Un retrait est en cours de traitement. Attendez qu’il soit finalisé avant de supprimer votre compte.' },
+        { status: 400 }
+      );
+    }
+  }
+
   // 1) Supprime toutes les données applicatives (ordre respectant les contraintes).
   const { error } = await sb.rpc('delete_user_account', { uid });
   if (error) {

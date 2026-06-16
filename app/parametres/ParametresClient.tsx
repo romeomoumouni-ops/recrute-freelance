@@ -90,6 +90,8 @@ export default function ParametresClient({
   // suppression de compte
   const [delOpen, setDelOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [delText, setDelText] = useState('');
+  const delConfirmed = delText.trim().toUpperCase() === 'SUPPRIMER';
 
   async function deleteAccount() {
     setDeleting(true);
@@ -366,11 +368,32 @@ export default function ParametresClient({
             portfolio, messages, commandes…) seront effacées de la plateforme. Vous pourrez vous
             réinscrire plus tard si vous le souhaitez.
           </p>
-          <div style={{ display: 'flex', gap: 10, marginTop: 18, flexWrap: 'wrap' }}>
-            <button className="btn btn-danger" disabled={deleting} onClick={deleteAccount}>
+          <div className="field">
+            <label>Pour confirmer, tapez <strong>SUPPRIMER</strong> ci-dessous</label>
+            <input
+              type="text"
+              value={delText}
+              onChange={(e) => setDelText(e.target.value)}
+              placeholder="SUPPRIMER"
+              autoComplete="off"
+            />
+          </div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 6, flexWrap: 'wrap' }}>
+            <button
+              className="btn btn-danger"
+              disabled={deleting || !delConfirmed}
+              onClick={deleteAccount}
+            >
               {deleting ? 'Suppression…' : 'Oui, supprimer mon compte'}
             </button>
-            <button className="btn btn-outline" disabled={deleting} onClick={() => setDelOpen(false)}>
+            <button
+              className="btn btn-outline"
+              disabled={deleting}
+              onClick={() => {
+                setDelOpen(false);
+                setDelText('');
+              }}
+            >
               Annuler
             </button>
           </div>

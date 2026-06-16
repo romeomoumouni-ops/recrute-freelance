@@ -3,19 +3,24 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { Mail, Building2, Briefcase } from 'lucide-react';
+import { Mail, Building2, Briefcase, ArrowLeft, ArrowRight } from 'lucide-react';
 import { PAYS_AFRIQUE } from '@/lib/constants';
 import { createBrowserSupabase } from '@/lib/supabase-browser';
 import PasswordInput from '@/components/PasswordInput';
 
 type Role = 'CLIENT' | 'FREELANCE';
+type Step = 'choose' | 'form';
 
 export default function RegisterForm() {
   const params = useSearchParams();
   const [supabase] = useState(() => createBrowserSupabase());
-  const [role, setRole] = useState<Role>(
-    params.get('role') === 'freelance' ? 'FREELANCE' : 'CLIENT'
-  );
+
+  const roleParam = params.get('role');
+  const initialRole: Role | null =
+    roleParam === 'freelance' ? 'FREELANCE' : roleParam === 'client' ? 'CLIENT' : null;
+
+  const [role, setRole] = useState<Role>(initialRole ?? 'CLIENT');
+  const [step, setStep] = useState<Step>(initialRole ? 'form' : 'choose');
   const [prenom, setPrenom] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,6 +29,12 @@ export default function RegisterForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+
+  function chooseRole(r: Role) {
+    setRole(r);
+    setError('');
+    setStep('form');
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -56,15 +67,14 @@ export default function RegisterForm() {
       );
       return;
     }
-    // Email de confirmation envoyé (pas de session tant que non confirmé).
     if (data.user && !data.session) {
       setSent(true);
       return;
     }
-    // Cas où la confirmation serait désactivée : session immédiate.
     window.location.href = '/dashboard';
   }
 
+  // --- Écran de confirmation e-mail ---
   if (sent) {
     return (
       <div className="auth-wrap">
@@ -88,28 +98,50 @@ export default function RegisterForm() {
     );
   }
 
+  // --- Étape 1 : choix du profil ---
+  if (step === 'choose') {
+    return (
+      <div className="auth-wrap">
+        <div className="auth-card">
+          <h1>Créer un compte</h1>
+          <p className="sub">Pour commencer, dites-nous qui vous êtes.</p>
+
+          <div className="role-choice">
+            <button type="button" className="role-choice-card" onClick={() => chooseRole('CLIENT')}>
+              <span className="rc-ic"><Building2 size={24} /></span>
+              <strong>Je suis une entreprise</strong>
+              <span className="rc-desc">Je veux engager des freelances</span>
+              <span className="rc-go">Continuer <ArrowRight size={15} /></span>
+            </button>
+            <button type="button" className="role-choice-card" onClick={() => chooseRole('FREELANCE')}>
+              <span className="rc-ic"><Briefcase size={24} /></span>
+              <strong>Je suis un freelance africain</strong>
+              <span className="rc-desc">Je veux trouver des missions</span>
+              <span className="rc-go">Continuer <ArrowRight size={15} /></span>
+            </button>
+          </div>
+
+          <p className="auth-alt">
+            Déjà inscrit ? <Link href="/connexion">Se connecter</Link>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // --- Étape 2 : formulaire selon le profil ---
   return (
     <div className="auth-wrap">
       <div className="auth-card">
-        <h1>Créer un compte</h1>
-        <p className="sub">Gratuit, en moins d&apos;une minute.</p>
-
-        <div className="role-switch">
-          <button
-            type="button"
-            className={role === 'CLIENT' ? 'active' : ''}
-            onClick={() => setRole('CLIENT')}
-          >
-            <Building2 size={16} /> Je suis une entreprise
-          </button>
-          <button
-            type="button"
-            className={role === 'FREELANCE' ? 'active' : ''}
-            onClick={() => setRole('FREELANCE')}
-          >
-            <Briefcase size={16} /> Je suis freelance
-          </button>
-        </div>
+        <button type="button" className="auth-back" onClick={() => { setStep('choose'); setError(''); }}>
+          <ArrowLeft size={15} /> Changer de profil
+        </button>
+        <h1>{role === 'CLIENT' ? 'Compte entreprise' : 'Compte freelance'}</h1>
+        <p className="sub">
+          {role === 'CLIENT'
+            ? 'Pour engager des freelances. Gratuit, en moins d’une minute.'
+            : 'Pour trouver des missions. Gratuit, en moins d’une minute.'}
+        </p>
 
         {error && <div className="form-error">{error}</div>}
 

@@ -728,6 +728,18 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .cv-file-link { cursor: pointer; text-decoration: none; color: inherit; transition: border-color .15s ease, background .15s ease; }
 .cv-file-link:hover { border-color: var(--black); background: var(--off-white); }
 
+/* Inscription en 2 étapes : choix du profil */
+.role-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 18px 0 6px; }
+.role-choice-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; text-align: left; padding: 20px 18px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; cursor: pointer; transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease; }
+.role-choice-card:hover { border-color: var(--black); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.07); }
+.role-choice-card .rc-ic { width: 44px; height: 44px; border-radius: 12px; background: var(--off-white); display: inline-flex; align-items: center; justify-content: center; margin-bottom: 4px; }
+.role-choice-card strong { font-size: 1rem; font-weight: 800; letter-spacing: -0.01em; }
+.role-choice-card .rc-desc { font-size: .82rem; color: var(--gray-500); line-height: 1.4; }
+.role-choice-card .rc-go { display: inline-flex; align-items: center; gap: 5px; font-size: .82rem; font-weight: 700; color: var(--black); margin-top: 8px; }
+.auth-back { display: inline-flex; align-items: center; gap: 6px; background: none; border: none; padding: 0; margin: 0 0 12px; font-size: .82rem; font-weight: 600; color: var(--gray-700); cursor: pointer; }
+.auth-back:hover { color: var(--black); }
+@media (max-width: 520px) { .role-choice { grid-template-columns: 1fr; } }
+
 /* Portfolio cliquable + lightbox */
 .portfolio-clickable { padding: 0; border: none; background: none; cursor: pointer; display: block; width: 100%; }
 .portfolio-clickable img { transition: transform .2s ease, opacity .2s ease; }

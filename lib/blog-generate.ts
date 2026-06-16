@@ -5,16 +5,18 @@ const MODEL = process.env.BLOG_MODEL || 'claude-haiku-4-5-20251001';
 const ENDPOINT = 'https://api.anthropic.com/v1/messages';
 
 const CATEGORIES = [
+  // Orientés ENTREPRISES / clients (prioritaires)
+  'Recruter un freelance',
+  'Guide entreprise',
+  'Déléguer',
+  'Coûts & budget',
+  'Freelance Afrique',
+  // Orientés freelances
   'Tarification',
-  'Vente',
-  'Négociation',
-  'Profil',
   'Relation client',
-  'Qualité',
-  'Organisation',
   'Productivité',
   'Prospection',
-  'Mobile Money',
+  'Qualité',
 ];
 
 export interface GeneratedArticle {
@@ -36,16 +38,20 @@ export function slugify(s: string): string {
     .slice(0, 70);
 }
 
-const SYSTEM = `Tu es rédacteur SEO pour recrutefreelance.com, une plateforme qui met en relation des freelances francophones d'Afrique avec des clients/entreprises d'Europe (paiement sécurisé en séquestre, versement sur Mobile Money, commission de 20% côté freelance).
-Tu écris des articles de blog ORIGINAUX, utiles et optimisés pour le référencement (SEO), en français, à destination des freelances.
+const SYSTEM = `Tu es rédacteur SEO pour recrutefreelance.com, une plateforme qui permet aux entreprises et entrepreneurs (souvent en Europe) de trouver et recruter des freelances francophones d'Afrique : talents performants, tarifs compétitifs, même langue, paiement sécurisé en séquestre et versement sur Mobile Money.
+Tu écris des articles de blog ORIGINAUX, utiles et optimisés pour le référencement (SEO) en français.
+PRIORITÉ (environ 3 articles sur 4) : des articles destinés aux ENTREPRISES/CLIENTS qui cherchent à déléguer ou recruter un freelance. Vise les requêtes Google de ces clients : « trouver un freelance », « recruter un freelance », « freelance pas cher », « freelance Afrique francophone », « déléguer / externaliser », « combien coûte un freelance », « freelance vs agence », etc.
+Le reste (environ 1 sur 4) : des articles destinés aux freelances.
 Règles :
 - Contenu 100% original, jamais copié.
-- Ton concret, bienveillant, orienté action.
-- Optimisé SEO : titre accrocheur contenant des mots-clés, sous-titres clairs, paragraphes courts.
+- Ton concret, orienté action, qui inspire confiance.
+- SEO : titre accrocheur contenant des mots-clés recherchés, sous-titres clairs, paragraphes courts.
+- Pour les articles « entreprises », mets subtilement en avant l'intérêt de recruter des freelances africains francophones via la plateforme (qualité, coût, paiement sécurisé) sans publicité lourde.
 - Tu réponds UNIQUEMENT avec un objet JSON valide, sans texte autour, sans balise Markdown.`;
 
 function buildPrompt(existingTitles: string[]): string {
-  return `Rédige un nouvel article de blog pour freelances (différent de ceux déjà publiés).
+  return `Rédige un NOUVEL article de blog (différent de ceux déjà publiés).
+Choisis de préférence un sujet destiné aux ENTREPRISES qui cherchent un freelance (recrutement, délégation, budget, choix du bon profil). Un article sur quatre environ peut viser les freelances.
 
 Titres DÉJÀ publiés (à NE PAS répéter, choisis un sujet et un angle nouveaux) :
 ${existingTitles.slice(0, 60).map((t) => `- ${t}`).join('\n') || '(aucun)'}
@@ -54,7 +60,7 @@ Catégories possibles : ${CATEGORIES.join(', ')}.
 
 Réponds STRICTEMENT avec cet objet JSON (et rien d'autre) :
 {
-  "title": "Titre SEO accrocheur (max 70 caractères)",
+  "title": "Titre SEO accrocheur (max 70 caractères, avec mots-clés recherchés)",
   "excerpt": "Résumé d'accroche en 1-2 phrases (max 180 caractères)",
   "category": "une des catégories proposées",
   "metaDescription": "Méta description SEO (max 155 caractères)",
@@ -71,7 +77,7 @@ Réponds STRICTEMENT avec cet objet JSON (et rien d'autre) :
   ]
 }
 
-Contraintes : entre 6 et 11 blocs, paragraphes de 2 à 4 phrases, au moins 3 sous-titres (h), idéalement une liste. Mentionne quand c'est pertinent les atouts de la plateforme (paiement sécurisé/séquestre, Mobile Money, clients européens) sans en faire une publicité lourde.`;
+Contraintes : entre 6 et 11 blocs, paragraphes de 2 à 4 phrases, au moins 3 sous-titres (h), idéalement une liste. Termine par un appel à l'action discret invitant à trouver/recruter un freelance sur recrutefreelance.com (pour les articles entreprises).`;
 }
 
 function extractJson(text: string): GeneratedArticle | null {

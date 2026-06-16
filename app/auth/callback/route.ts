@@ -14,6 +14,8 @@ async function onboardOAuthUser(origin: string, newrole: string | null, user: Us
 
     const createdMs = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
     const isNew = createdMs < 10 * 60 * 1000; // inscrit il y a moins de 10 min
+    // Connexion (pas une nouvelle inscription) : rien à faire, surtout pas d'e-mail de bienvenue.
+    if (!isNew) return;
 
     const sb = supabaseAdmin();
     const { data: row } = await sb

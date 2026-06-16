@@ -20,6 +20,23 @@ async function run(req: Request) {
 
   const sb = supabaseAdmin();
 
+  // 1) File d'attente : on publie d'abord un article pré-rédigé (published=false), le plus ancien.
+  //    Cela garantit un article par jour, même sans clé IA.
+  const { data: queued } = await sb
+    .from('BlogPost')
+    .select('id, slug, title')
+    .eq('published', false)
+    .order('createdAt', { ascending: true })
+    .limit(1)
+    .maybeSingle();
+  if (queued) {
+    const q = queued as { id: string; slug: string; title: string };
+    // On le publie et on le date à maintenant pour qu'il apparaisse en tête du blog.
+    await sb.from('BlogPost').update({ published: true, createdAt: new Date().toISOString() }).eq('id', q.id);
+    return NextResponse.json({ ok: true, source: 'file', slug: q.slug, title: q.title });
+  }
+
+  // 2) Sinon, génération par IA (nécessite ANTHROPIC_API_KEY).
   // Titres récents pour éviter les doublons.
   const { data: recent } = await sb
     .from('BlogPost')
@@ -30,7 +47,7 @@ async function run(req: Request) {
 
   const article = await generateArticle(titles);
   if (!article) {
-    return NextResponse.json({ skipped: true, reason: 'ANTHROPIC_API_KEY manquant ou génération indisponible.' });
+    return NextResponse.json({ skipped: true, reason: 'File vide et ANTHROPIC_API_KEY manquant.' });
   }
 
   // Slug unique

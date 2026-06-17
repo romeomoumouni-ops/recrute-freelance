@@ -12,7 +12,6 @@ const TABS: [string, string][] = [
   ['/admin/moderation', 'Modération'],
   ['/admin/avis', 'Avis'],
   ['/admin/utilisateurs', 'Utilisateurs'],
-  ['/admin/conversations', 'Messageries'],
   ['/admin/support', 'Support'],
   ['/admin/communication', 'Communication'],
   ['/admin/export', 'Export'],

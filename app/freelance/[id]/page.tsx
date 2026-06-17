@@ -60,6 +60,14 @@ export default async function FreelancePage({ params }: Props) {
         </div>
       </div>
 
+      {isOwner && f.statutValidation !== 'APPROUVE' && (
+        <div className="profil-todo" style={{ marginTop: 14 }}>
+          <strong>Finalisez votre profil et vos services</strong> pour être publié et mis en avant
+          sur la plateforme. Une fois toutes les étapes complétées, demandez la validation depuis{' '}
+          <Link href="/mon-profil" style={{ textDecoration: 'underline' }}>Modifier mon profil</Link>.
+        </div>
+      )}
+
       <div className="fl-meta" style={{ marginTop: 14 }}>
         {f.avis > 0 ? (
           <span className="rating">

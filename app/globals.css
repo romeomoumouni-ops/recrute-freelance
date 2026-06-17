@@ -187,7 +187,7 @@ input, select, textarea { font-family: inherit; }
 .filters select, .filters input { border: 1.5px solid var(--border); border-radius: 9px; padding: 10px 14px; font-size: .85rem; outline: none; background: var(--white); }
 .filters input { flex: 1; min-width: 220px; }
 .results-count { font-size: .8rem; color: var(--gray-500); margin: 14px 0 22px; }
-.freelance-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+.freelance-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
 .fl-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 24px; transition: transform .15s ease, box-shadow .15s ease; display: flex; flex-direction: column; height: 100%; }
 .fl-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,.08); }
 .fl-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }

@@ -38,7 +38,7 @@ export default function LoginForm() {
       }
       return;
     }
-    const callbackUrl = params.get('callbackUrl') || '/dashboard';
+    const callbackUrl = params.get('callbackUrl') || '/bienvenue';
     router.push(callbackUrl);
     router.refresh();
   }

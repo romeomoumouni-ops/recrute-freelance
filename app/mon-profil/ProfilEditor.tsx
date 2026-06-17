@@ -338,6 +338,12 @@ export default function ProfilEditor({
             </div>
           </div>
         </div>
+        {statutValidation !== 'APPROUVE' && (
+          <div className="profil-todo">
+            <strong>Finalisez votre profil et vos services</strong> pour être publié et mis en avant
+            sur la plateforme. Complétez toutes les étapes ci-dessous, puis demandez la validation.
+          </div>
+        )}
       </div>
 
       {/* Présentation */}

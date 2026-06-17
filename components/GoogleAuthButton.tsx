@@ -28,7 +28,7 @@ export default function GoogleAuthButton({
 
   async function go() {
     setLoading(true);
-    const qs = new URLSearchParams({ next: '/dashboard' });
+    const qs = new URLSearchParams({ next: '/bienvenue' });
     if (role) qs.set('newrole', role);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

@@ -72,7 +72,7 @@ export default function RegisterForm() {
       setSent(true);
       return;
     }
-    window.location.href = '/dashboard';
+    window.location.href = '/bienvenue';
   }
 
   // --- Écran de confirmation e-mail ---

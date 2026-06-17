@@ -186,7 +186,7 @@ input, select, textarea { font-family: inherit; }
 .filters input { flex: 1; min-width: 220px; }
 .results-count { font-size: .8rem; color: var(--gray-500); margin: 14px 0 22px; }
 .freelance-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
-.fl-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 24px; transition: transform .15s ease, box-shadow .15s ease; display: block; }
+.fl-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 24px; transition: transform .15s ease, box-shadow .15s ease; display: flex; flex-direction: column; height: 100%; }
 .fl-card:hover { transform: translateY(-4px); box-shadow: 0 12px 30px rgba(0,0,0,.08); }
 .fl-top { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
 .avatar { width: 52px; height: 52px; border-radius: 50%; background: var(--black); color: var(--white); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; flex-shrink: 0; overflow: hidden; }
@@ -196,7 +196,7 @@ input, select, textarea { font-family: inherit; }
 .fl-meta { display: flex; align-items: center; gap: 10px; font-size: .75rem; color: var(--gray-700); margin-bottom: 14px; flex-wrap: wrap; }
 .badge { background: var(--off-white); border: 1px solid var(--border); border-radius: 999px; padding: 4px 11px; font-size: .68rem; font-weight: 600; display: inline-block; }
 .skills { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px; }
-.fl-bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 14px; }
+.fl-bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--border); padding-top: 14px; margin-top: auto; }
 .price { font-size: .95rem; font-weight: 700; }
 .price small { font-size: .7rem; font-weight: 500; color: var(--gray-500); }
 .rating { font-size: .78rem; font-weight: 600; }
@@ -734,10 +734,10 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 
 /* Carte freelance : lien d'en-tête + carrousel portfolio + bouton */
 .fl-top-link { color: inherit; text-decoration: none; }
-.fl-portfolio { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 4px; margin: 6px 0 2px; }
+.fl-portfolio { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; padding-bottom: 4px; margin: 4px 0 16px; }
 .fl-portfolio::-webkit-scrollbar { height: 5px; }
 .fl-portfolio::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 999px; }
-.fl-portfolio img { flex: 0 0 auto; width: 132px; height: 86px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); scroll-snap-align: start; }
+.fl-portfolio img { flex: 0 0 auto; width: 116px; height: 76px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); scroll-snap-align: start; }
 .fl-card .btn-block { margin-top: 12px; }
 
 /* Zone de danger : suppression de compte */

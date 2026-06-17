@@ -12,6 +12,77 @@ export interface AdminConvSummary {
   flaggedCount: number;
 }
 
+export interface AdminConvRow {
+  id: string;
+  clientNom: string;
+  clientEmail: string;
+  freelanceNom: string;
+  freelanceEmail: string;
+  lastContenu: string;
+  lastAt: string | null;
+  total: number;
+  flaggedCount: number;
+}
+
+// Toutes les conversations de la plateforme (admin), triées par activité récente.
+export async function getAllConversations(): Promise<AdminConvRow[]> {
+  const sb = supabaseAdmin();
+  const { data: convs } = await sb
+    .from('Conversation')
+    .select('id, clientId, freelanceId, createdAt')
+    .order('createdAt', { ascending: false })
+    .limit(500);
+
+  type C = { id: string; clientId: string; freelanceId: string; createdAt: string };
+  const list = (convs as C[]) ?? [];
+  if (list.length === 0) return [];
+
+  const userIds = uniq(list.flatMap((c) => [c.clientId, c.freelanceId]));
+  const { data: users } = await sb.from('User').select('id, prenom, email').in('id', userIds);
+  const byId = new Map(
+    ((users as { id: string; prenom: string; email: string }[]) ?? []).map((u) => [u.id, u])
+  );
+
+  const convIds = list.map((c) => c.id);
+  const { data: msgs } = await sb
+    .from('Message')
+    .select('id, conversationId, contenu, createdAt, flagged')
+    .in('conversationId', convIds)
+    .order('createdAt', { ascending: false })
+    .limit(5000);
+
+  type M = { conversationId: string; contenu: string; createdAt: string; flagged: boolean };
+  const last = new Map<string, M>();
+  const total = new Map<string, number>();
+  const flagged = new Map<string, number>();
+  for (const m of (msgs as M[]) ?? []) {
+    if (!last.has(m.conversationId)) last.set(m.conversationId, m);
+    total.set(m.conversationId, (total.get(m.conversationId) ?? 0) + 1);
+    if (m.flagged) flagged.set(m.conversationId, (flagged.get(m.conversationId) ?? 0) + 1);
+  }
+
+  const rows: AdminConvRow[] = list.map((c) => {
+    const cl = byId.get(c.clientId);
+    const fr = byId.get(c.freelanceId);
+    const lm = last.get(c.id);
+    return {
+      id: c.id,
+      clientNom: cl?.prenom ?? '—',
+      clientEmail: cl?.email ?? '',
+      freelanceNom: fr?.prenom ?? '—',
+      freelanceEmail: fr?.email ?? '',
+      lastContenu: lm?.contenu ?? 'Aucun message',
+      lastAt: lm?.createdAt ?? null,
+      total: total.get(c.id) ?? 0,
+      flaggedCount: flagged.get(c.id) ?? 0,
+    };
+  });
+
+  // Tri par dernier message (les plus récents d'abord).
+  rows.sort((a, b) => (a.lastAt ?? '') < (b.lastAt ?? '') ? 1 : -1);
+  return rows;
+}
+
 export interface AdminThreadMessage {
   id: string;
   senderId: string;

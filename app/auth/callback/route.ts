@@ -4,19 +4,13 @@ import { createServerSupabase } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendEmail } from '@/lib/email';
 
-// Onboarding d'un nouvel inscrit via Google : applique le rôle choisi, crée le profil
-// freelance si besoin, et envoie notre e-mail de bienvenue (une seule fois).
-// On reçoit `user` directement du résultat de l'échange (la session n'est pas encore
-// lisible via getUser() dans la même requête).
-async function onboardOAuthUser(origin: string, newrole: string | null, user: User | null) {
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// Envoie NOTRE e-mail de bienvenue (adapté au rôle), une seule fois par compte.
+// Lit le rôle réel dans public.User (source de vérité).
+async function sendWelcomeOnce(origin: string, user: User | null) {
   try {
-    if (!user) return;
-
-    const createdMs = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
-    const isNew = createdMs < 10 * 60 * 1000; // inscrit il y a moins de 10 min
-    // Connexion (pas une nouvelle inscription) : rien à faire, surtout pas d'e-mail de bienvenue.
-    if (!isNew) return;
-
+    if (!user || !user.email) return;
     const sb = supabaseAdmin();
     const { data: row } = await sb
       .from('User')
@@ -24,46 +18,61 @@ async function onboardOAuthUser(origin: string, newrole: string | null, user: Us
       .eq('id', user.id)
       .maybeSingle();
     const u = row as { prenom: string | null; role: string; welcomeEmailedAt: string | null } | null;
-    if (!u || u.welcomeEmailedAt) return; // déjà onboardé (e-mail déjà envoyé)
+    if (!u || u.welcomeEmailedAt) return; // déjà envoyé
 
-    // Attribuer le rôle choisi UNIQUEMENT lors d'une nouvelle inscription
-    // (on ne change jamais le rôle d'un compte existant).
-    const chosen = newrole === 'FREELANCE' ? 'FREELANCE' : 'CLIENT';
-    if (isNew && chosen === 'FREELANCE' && u.role !== 'FREELANCE') {
-      await sb.from('User').update({ role: 'FREELANCE' }).eq('id', user.id);
-      const { data: prof } = await sb.from('Profile').select('id').eq('userId', user.id).maybeSingle();
-      if (!prof) await sb.from('Profile').insert({ userId: user.id, skills: '[]' });
-    }
-
-    // Rôle effectif après attribution éventuelle (pour le bon contenu d'e-mail).
-    const effectiveRole = isNew ? chosen : u.role;
-    const prenom = u.prenom ?? user.email?.split('@')[0] ?? '';
-    const isFreelance = effectiveRole === 'FREELANCE';
+    const prenom = u.prenom ?? user.email.split('@')[0] ?? '';
+    const isFreelance = u.role === 'FREELANCE';
     const titre = isFreelance
-      ? 'Bienvenue ! Votre compte freelance est créé 🎉'
+      ? 'Bienvenue sur RecruteFreelance 🎉'
       : 'Bienvenue ! Votre compte entreprise est créé 🎉';
     const corps = isFreelance
-      ? 'Complétez votre profil (photo, présentation, portfolio, services, Mobile Money) pour être validé et apparaître auprès des clients.'
-      : 'Vous pouvez dès maintenant rechercher des freelances et leur confier vos projets, en toute sécurité.';
-    const ctaLabel = isFreelance ? 'Compléter mon profil' : 'Trouver un freelance';
+      ? 'Votre inscription est confirmée. Il ne vous reste plus qu’à <strong>terminer le remplissage de votre profil et à le soumettre</strong>, afin qu’il apparaisse sur la marketplace et que les clients puissent vous contacter.'
+      : 'Votre inscription est confirmée. Vous pouvez dès maintenant rechercher des freelances et leur confier vos projets, en toute sécurité.';
+    const ctaLabel = isFreelance ? 'Compléter et soumettre mon profil' : 'Trouver un freelance';
     const ctaUrl = isFreelance ? `${origin}/mon-profil` : `${origin}/recherche`;
-    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
     const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:520px;margin:0 auto;border:1px solid #ececea;border-radius:14px;overflow:hidden">
       <div style="background:#0d0d0d;padding:20px 24px"><span style="color:#fff;font-weight:800;font-size:17px">recrutefreelance</span></div>
       <div style="padding:24px;color:#222;font-size:14px;line-height:1.6">
         <p>Bonjour ${esc(prenom)},</p>
         <p style="font-weight:600;color:#0d0d0d">${esc(titre)}</p>
-        <p>${esc(corps)}</p>
+        <p>${corps}</p>
         <p style="margin-top:18px"><a href="${ctaUrl}" style="background:#0d0d0d;color:#fff;text-decoration:none;padding:12px 22px;border-radius:10px;font-weight:600;display:inline-block">${esc(ctaLabel)}</a></p>
         <p style="margin-top:20px;color:#888;font-size:12px">— L'équipe recrutefreelance.com</p>
       </div>
     </div>`;
-    if (user.email) {
-      const sent = await sendEmail({ to: user.email, subject: titre, html });
-      if (sent) await sb.from('User').update({ welcomeEmailedAt: new Date().toISOString() }).eq('id', user.id);
-    }
+
+    const sent = await sendEmail({ to: user.email, subject: titre, html });
+    if (sent) await sb.from('User').update({ welcomeEmailedAt: new Date().toISOString() }).eq('id', user.id);
   } catch {
-    /* l'onboarding ne doit jamais bloquer la connexion */
+    /* ne jamais bloquer le flux */
+  }
+}
+
+// Onboarding Google : applique le rôle choisi (nouvelle inscription), crée le profil
+// freelance si besoin, puis envoie l'e-mail de bienvenue. (Pas d'e-mail sur une simple connexion.)
+async function onboardOAuthUser(origin: string, newrole: string | null, user: User | null) {
+  try {
+    if (!user) return;
+    const createdMs = user.created_at ? Date.now() - new Date(user.created_at).getTime() : Infinity;
+    const isNew = createdMs < 10 * 60 * 1000; // inscription récente
+    if (!isNew) return; // connexion : rien à faire
+
+    const sb = supabaseAdmin();
+    const { data: row } = await sb.from('User').select('role, welcomeEmailedAt').eq('id', user.id).maybeSingle();
+    const u = row as { role: string; welcomeEmailedAt: string | null } | null;
+    if (!u || u.welcomeEmailedAt) return;
+
+    const chosen = newrole === 'FREELANCE' ? 'FREELANCE' : 'CLIENT';
+    if (chosen === 'FREELANCE' && u.role !== 'FREELANCE') {
+      await sb.from('User').update({ role: 'FREELANCE' }).eq('id', user.id);
+      const { data: prof } = await sb.from('Profile').select('id').eq('userId', user.id).maybeSingle();
+      if (!prof) await sb.from('Profile').insert({ userId: user.id, skills: '[]' });
+    }
+
+    await sendWelcomeOnce(origin, user); // lit le rôle (mis à jour) et envoie l'e-mail
+  } catch {
+    /* ne jamais bloquer la connexion */
   }
 }
 
@@ -79,15 +88,16 @@ export async function GET(request: Request) {
 
   const supabase = createServerSupabase();
   let ok = false;
-  let oauthUser: User | null = null;
+  let authedUser: User | null = null;
 
   if (code) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     ok = !error;
-    oauthUser = data?.user ?? null;
+    authedUser = data?.user ?? null;
   } else if (tokenHash && type) {
-    const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
+    const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     ok = !error;
+    authedUser = data?.user ?? null;
   }
 
   if (!ok) {
@@ -104,14 +114,15 @@ export async function GET(request: Request) {
   }
 
   // Connexion OAuth (Google) : on GARDE la session et on redirige vers l'app.
-  // (`next` est un chemin interne fourni par le bouton Google, ex. /dashboard.)
   if (next && next.startsWith('/') && !next.startsWith('//')) {
-    await onboardOAuthUser(origin, searchParams.get('newrole'), oauthUser);
+    await onboardOAuthUser(origin, searchParams.get('newrole'), authedUser);
     return NextResponse.redirect(`${origin}${next}`);
   }
 
-  // Confirmation d'inscription : l'e-mail est validé → on déconnecte pour que la personne
-  // se connecte explicitement avec ses identifiants, puis page de confirmation dédiée.
+  // Confirmation d'inscription par e-mail : on envoie NOTRE e-mail de bienvenue
+  // (rappel de compléter + soumettre le profil pour les freelances), puis on déconnecte
+  // pour que la personne se connecte avec ses identifiants.
+  await sendWelcomeOnce(origin, authedUser);
   await supabase.auth.signOut();
   return NextResponse.redirect(`${origin}/inscription-confirmee`);
 }

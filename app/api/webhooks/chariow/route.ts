@@ -180,6 +180,24 @@ async function handleSale(payload: any) {
     corps: `${payerPrenom} a payé votre commande « ${description} » (${euros(r.montantEur)}). Livrez-la pour débloquer les fonds.`,
     lien: `/messages?c=${r.conversationId}`,
   });
+
+  // Notifie les administrateurs qu'une nouvelle commande a été passée sur le site.
+  const { data: freelanceUser } = await sb
+    .from('User')
+    .select('prenom')
+    .eq('id', r.freelanceId)
+    .maybeSingle();
+  const freelancePrenom = (freelanceUser as { prenom: string } | null)?.prenom ?? 'un freelance';
+  const { data: admins } = await sb.from('User').select('id').eq('admin', true);
+  for (const a of (admins as { id: string }[]) ?? []) {
+    await createNotification({
+      userId: a.id,
+      type: 'PAIEMENT',
+      titre: '🛒 Nouvelle commande',
+      corps: `${payerPrenom} a payé « ${description} » à ${freelancePrenom} (${euros(r.montantEur)}). Fonds en séquestre.`,
+      lien: '/admin/litiges',
+    });
+  }
 }
 
 export async function GET() {

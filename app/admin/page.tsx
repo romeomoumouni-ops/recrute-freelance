@@ -14,12 +14,15 @@ interface Stats {
 
 export default async function AdminHome() {
   const sb = supabaseAdmin();
-  const [{ data }, validations] = await Promise.all([
+  const cutoff24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().replace('Z', '');
+  const [{ data }, validations, nouvellesCommandes] = await Promise.all([
     sb.rpc('admin_stats'),
     sb.from('Profile').select('userId', { count: 'exact', head: true }).eq('statutValidation', 'EN_ATTENTE'),
+    sb.from('Order').select('id', { count: 'exact', head: true }).gte('createdAt', cutoff24h),
   ]);
   const s = (data as Stats) ?? ({} as Stats);
   const validationsEnAttente = validations.count ?? 0;
+  const commandes24h = nouvellesCommandes.count ?? 0;
 
   return (
     <>
@@ -27,6 +30,10 @@ export default async function AdminHome() {
 
       {/* Alertes : ce qui demande une action */}
       <div className="admin-alerts">
+        <Link href="/admin/litiges" className={`admin-alert${commandes24h ? ' hot' : ''}`}>
+          <div className="n">{commandes24h}</div>
+          <div className="l">Nouvelles commandes<br />(dernières 24h)</div>
+        </Link>
         <Link href="/admin/validations" className={`admin-alert${validationsEnAttente ? ' hot' : ''}`}>
           <div className="n">{validationsEnAttente}</div>
           <div className="l">Demandes de validation<br />à traiter</div>

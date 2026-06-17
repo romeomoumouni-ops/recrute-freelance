@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import Toaster from '@/components/Toaster';
 import SupportWidget from '@/components/SupportWidget';
 import BannedOverlay from '@/components/BannedOverlay';
+import MetaPixel from '@/components/MetaPixel';
 
 const montserrat = Montserrat({
   subsets: ['latin'],
@@ -28,6 +29,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={montserrat.className}>
       <body>
+        <Suspense fallback={null}>
+          <MetaPixel />
+        </Suspense>
         <Header />
         <main>{children}</main>
         <Footer />

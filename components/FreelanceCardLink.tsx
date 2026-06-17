@@ -36,10 +36,14 @@ export default function FreelanceCardLink({ f }: { f: FreelanceCard }) {
         ))}
       </div>
 
-      {/* Aperçu portfolio à taille fixe (3 vignettes max + « +N ») */}
-      {f.portfolioPreview.length > 0 ? (
-        <div className="fl-portfolio" aria-label="Aperçu du portfolio">
-          {f.portfolioPreview.slice(0, 3).map((src, i) => (
+      {/* Aperçu portfolio : toujours 3 emplacements de même largeur (vides comblés) */}
+      <div className="fl-portfolio" aria-label="Aperçu du portfolio">
+        {[0, 1, 2].map((i) => {
+          const src = f.portfolioPreview[i];
+          if (!src) {
+            return <span className="fl-thumb fl-thumb-empty" key={i} aria-hidden="true" />;
+          }
+          return (
             <Link href={href} className="fl-thumb" key={i}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={src} alt="Réalisation" loading="lazy" />
@@ -47,11 +51,9 @@ export default function FreelanceCardLink({ f }: { f: FreelanceCard }) {
                 <span className="fl-thumb-more">+{f.portfolioPreview.length - 3}</span>
               )}
             </Link>
-          ))}
-        </div>
-      ) : (
-        <div className="fl-portfolio-empty">Aucune réalisation pour le moment</div>
-      )}
+          );
+        })}
+      </div>
 
       <div className="fl-bottom">
         <span className="price">

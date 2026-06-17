@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   },
   description:
     "La marketplace qui connecte les entreprises européennes aux freelances d'Afrique francophone, payés directement sur Mobile Money.",
+  verification: {
+    google: 'LtKyeDrCBV_UbOGBuj_i3KnoGgXzbo9r-yBXB0TGO3I',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -36,14 +36,21 @@ export default function FreelanceCardLink({ f }: { f: FreelanceCard }) {
         ))}
       </div>
 
-      {/* Aperçu portfolio glissable (avant de cliquer sur le profil) */}
-      {f.portfolioPreview.length > 0 && (
+      {/* Aperçu portfolio à taille fixe (3 vignettes max + « +N ») */}
+      {f.portfolioPreview.length > 0 ? (
         <div className="fl-portfolio" aria-label="Aperçu du portfolio">
-          {f.portfolioPreview.map((src, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img key={i} src={src} alt="Réalisation" loading="lazy" />
+          {f.portfolioPreview.slice(0, 3).map((src, i) => (
+            <Link href={href} className="fl-thumb" key={i}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={src} alt="Réalisation" loading="lazy" />
+              {i === 2 && f.portfolioPreview.length > 3 && (
+                <span className="fl-thumb-more">+{f.portfolioPreview.length - 3}</span>
+              )}
+            </Link>
           ))}
         </div>
+      ) : (
+        <div className="fl-portfolio-empty">Aucune réalisation pour le moment</div>
       )}
 
       <div className="fl-bottom">

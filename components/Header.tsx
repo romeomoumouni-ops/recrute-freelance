@@ -9,6 +9,8 @@ import { createBrowserSupabase } from '@/lib/supabase-browser';
 import NotificationBell from './NotificationBell';
 import Logo from './Logo';
 
+const COMMUNAUTE_URL = 'https://chat.whatsapp.com/FF4i9FNjj2o6CirP70lYmD';
+
 interface Me {
   authenticated: boolean;
   id?: string;
@@ -68,6 +70,11 @@ export default function Header() {
           <Link href="/tarifs">Tarifs</Link>
           {logged && <Link href="/dashboard">Tableau de bord</Link>}
           {logged && <Link href="/messages">Messagerie</Link>}
+          {logged && me?.role === 'FREELANCE' && (
+            <a href={COMMUNAUTE_URL} target="_blank" rel="noopener noreferrer" className="nav-communaute">
+              Rejoignez la communauté
+            </a>
+          )}
         </nav>
 
         <div className="header-actions">
@@ -169,6 +176,11 @@ export default function Header() {
                   <Link href="/mon-profil" className="mm-link">
                     Modifier mon profil
                   </Link>
+                )}
+                {me?.role === 'FREELANCE' && (
+                  <a href={COMMUNAUTE_URL} target="_blank" rel="noopener noreferrer" className="mm-link">
+                    Rejoignez la communauté
+                  </a>
                 )}
                 <Link href={profileHref} className="mm-link">
                   Mon profil

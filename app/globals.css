@@ -42,6 +42,8 @@ input, select, textarea { font-family: inherit; }
 .brand-word span { font-weight: 400; }
 .nav { display: flex; gap: 28px; font-size: 0.85rem; font-weight: 500; color: var(--gray-700); }
 .nav a:hover { color: var(--black); }
+.nav-communaute { color: var(--green) !important; font-weight: 700; }
+.nav-communaute:hover { color: var(--green) !important; opacity: .8; }
 .header-actions { display: flex; align-items: center; gap: 18px; }
 .link-login { font-size: 0.85rem; font-weight: 600; }
 .badge-count { display: inline-flex; align-items: center; justify-content: center; min-width: 17px; height: 17px; padding: 0 4px; background: var(--green); color: var(--white); border-radius: 999px; font-size: .6rem; font-weight: 700; margin-left: 2px; vertical-align: top; }

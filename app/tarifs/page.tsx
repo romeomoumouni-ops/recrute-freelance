@@ -5,7 +5,7 @@ import { Check, ShieldCheck, Wallet, Building2, BadgeCheck, Gift } from 'lucide-
 export const metadata: Metadata = {
   title: 'Tarifs',
   description:
-    "Freelances : 1er mois gratuit, puis 20 000 FCFA/mois, et 0 % de commission — vous gardez 100 % de vos missions. Gratuit pour les entreprises. Paiement Mobile Money.",
+    "Freelances : 7 jours d'essai gratuits, puis 20 000 FCFA/mois, et 0 % de commission — vous gardez 100 % de l'argent que vous gagnez. Gratuit pour les entreprises. Paiement Mobile Money.",
 };
 
 export const dynamic = 'force-dynamic';
@@ -42,13 +42,13 @@ export default function TarifsPage() {
             <h2>Pour les freelances</h2>
             <div className="tarif-price">20&nbsp;000 FCFA<span> / mois</span></div>
             <p className="tarif-sub">
-              <strong>Votre 1er mois est 100 % gratuit.</strong> Vous testez toute la plateforme sans payer.
-              Ensuite, c&apos;est 20&nbsp;000 FCFA/mois (≈&nbsp;30&nbsp;€) — résiliable à tout moment.
+              <strong>Vos 7 premiers jours sont 100 % gratuits.</strong> Vous testez toute la plateforme sans
+              payer. Ensuite, c&apos;est 20&nbsp;000 FCFA/mois (≈&nbsp;30&nbsp;€) — résiliable à tout moment.
             </p>
             <ul className="tarif-list">
-              <li><Gift size={15} /> 1er mois offert, sans engagement</li>
+              <li><Gift size={15} /> 7 jours d&apos;essai gratuits, sans engagement</li>
               <li><Check size={15} /> <strong>0&nbsp;% de commission</strong> sur vos missions</li>
-              <li><Check size={15} /> Vous gardez <strong>100&nbsp;%</strong> de ce que vous gagnez</li>
+              <li><Check size={15} /> Vous gardez <strong>100&nbsp;%</strong> de l&apos;argent que vous gagnez</li>
               <li><Check size={15} /> Accès à des clients d&apos;Europe francophone</li>
               <li><Check size={15} /> Paiement sur Mobile Money sous 3 à 5 jours après validation</li>
             </ul>
@@ -61,8 +61,8 @@ export default function TarifsPage() {
           <p>
             <strong>Un abonnement simple, zéro commission.</strong> Au lieu de prélever un pourcentage sur
             chaque mission, recrutefreelance.com fonctionne avec un abonnement mensuel unique de
-            <strong> 20&nbsp;000 FCFA</strong> côté freelance — avec le <strong>1er mois offert</strong>.
-            Vous encaissez ensuite <strong>l&apos;intégralité</strong> de vos missions. Pour les entreprises,
+            <strong> 20&nbsp;000 FCFA</strong> côté freelance — avec <strong>7 jours d&apos;essai offerts</strong>.
+            Vous encaissez ensuite <strong>l&apos;intégralité</strong> de l&apos;argent que vous gagnez. Pour les entreprises,
             la plateforme reste entièrement gratuite.
           </p>
         </div>
@@ -134,8 +134,8 @@ export default function TarifsPage() {
           <details>
             <summary>Combien coûte la plateforme pour un freelance ?</summary>
             <p>
-              Votre <strong>1er mois est entièrement gratuit</strong> : vous créez votre profil, recevez des
-              demandes et réalisez des missions sans rien payer. Ensuite, l&apos;abonnement est de
+              Vos <strong>7 premiers jours sont entièrement gratuits</strong> : vous créez votre profil, recevez
+              des demandes et réalisez des missions sans rien payer. Ensuite, l&apos;abonnement est de
               <strong> 20&nbsp;000 FCFA par mois</strong> (≈&nbsp;30&nbsp;€), sans engagement.
             </p>
           </details>
@@ -147,10 +147,10 @@ export default function TarifsPage() {
             </p>
           </details>
           <details>
-            <summary>Que se passe-t-il après le mois gratuit ?</summary>
+            <summary>Que se passe-t-il après les 7 jours gratuits ?</summary>
             <p>
-              À la fin du 1er mois offert, vous passez à 20&nbsp;000 FCFA/mois pour continuer à apparaître sur
-              la marketplace et recevoir des missions. Vous pouvez résilier quand vous voulez.
+              À la fin de vos 7 jours d&apos;essai, vous passez à 20&nbsp;000 FCFA/mois pour continuer à
+              apparaître sur la marketplace et recevoir des missions. Vous pouvez résilier quand vous voulez.
             </p>
           </details>
           <details>
@@ -176,7 +176,7 @@ export default function TarifsPage() {
 
         <div className="tarifs-cta">
           <h2>Prêt à recevoir des missions d&apos;entreprises européennes ?</h2>
-          <p>Votre 1er mois est offert. 0 % de commission — vous gardez 100 % de vos missions.</p>
+          <p>Vos 7 premiers jours sont offerts. 0 % de commission — vous gardez 100 % de l&apos;argent que vous gagnez.</p>
           <Link href="/inscription?role=freelance" className="btn btn-dark">Commencer gratuitement</Link>
         </div>
       </div>

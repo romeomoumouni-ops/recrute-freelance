@@ -47,7 +47,7 @@ Règles :
 - Ton concret, orienté action, qui inspire confiance.
 - SEO : titre accrocheur contenant des mots-clés recherchés, sous-titres clairs, paragraphes courts.
 - Pour les articles « entreprises », mets subtilement en avant l'intérêt de recruter des freelances africains francophones via la plateforme (qualité, coût, paiement sécurisé) sans publicité lourde.
-- Modèle économique exact (si tu l'évoques) : la plateforme est 100% GRATUITE pour les entreprises ; les freelances ont un abonnement (1er mois offert, puis 20 000 FCFA/mois) et AUCUNE commission n'est prélevée sur les missions. N'invente JAMAIS de pourcentage de commission.
+- Modèle économique exact (si tu l'évoques) : la plateforme est 100% GRATUITE pour les entreprises ; les freelances ont un abonnement (7 jours d'essai gratuits, puis 20 000 FCFA/mois) et AUCUNE commission n'est prélevée sur les missions. N'invente JAMAIS de pourcentage de commission.
 - Tu réponds UNIQUEMENT avec un objet JSON valide, sans texte autour, sans balise Markdown.`;
 
 function buildPrompt(existingTitles: string[]): string {

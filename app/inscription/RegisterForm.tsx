@@ -117,7 +117,7 @@ export default function RegisterForm() {
             <button type="button" className="role-choice-card" onClick={() => chooseRole('FREELANCE')}>
               <span className="rc-ic"><Briefcase size={24} /></span>
               <strong>Je suis un freelance africain</strong>
-              <span className="rc-desc">Trouver des missions — 1er mois gratuit, 0 % de commission</span>
+              <span className="rc-desc">Trouver des missions — 7 jours gratuits, 0 % de commission</span>
               <span className="rc-go">Continuer <ArrowRight size={15} /></span>
             </button>
           </div>
@@ -146,8 +146,8 @@ export default function RegisterForm() {
 
         {role === 'FREELANCE' && (
           <div className="auth-perk">
-            <strong>1er mois 100 % gratuit</strong>, puis 20&nbsp;000 FCFA/mois — et{' '}
-            <strong>0&nbsp;% de commission</strong> : vous gardez l’intégralité de vos missions.
+            <strong>7 jours d’essai gratuits</strong>, puis 20&nbsp;000 FCFA/mois — et{' '}
+            <strong>0&nbsp;% de commission</strong> : vous gardez l’intégralité de l’argent que vous gagnez.
           </div>
         )}
 

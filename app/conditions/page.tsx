@@ -72,7 +72,7 @@ export default function ConditionsPage() {
           La création d&apos;un compte est gratuite. Pour les <strong>Clients</strong>, l&apos;utilisation de la
           Plateforme est entièrement gratuite, sans frais ni abonnement. Pour les <strong>Freelances</strong>,
           l&apos;accès à la Plateforme s&apos;effectue via un abonnement mensuel décrit à l&apos;Article 6,
-          dont le <strong>premier mois est offert</strong>.
+          précédé d&apos;une <strong>période d&apos;essai gratuite de 7 jours</strong>.
         </p>
         <h3>4.3 Validation des profils Freelances</h3>
         <p>
@@ -104,11 +104,11 @@ export default function ConditionsPage() {
           Freelance perçoit <strong>l&apos;intégralité (100&nbsp;%)</strong> du montant de chaque Mission
           validée. En contrepartie de l&apos;accès à la Plateforme (mise en relation, sécurisation du
           paiement, traitement du versement, support et résolution des litiges), le Freelance souscrit un
-          <strong> abonnement mensuel de 20&nbsp;000 FCFA</strong>. Le <strong>premier mois est offert</strong> :
-          aucun montant n&apos;est dû pendant cette période d&apos;essai. À l&apos;issue du mois offert,
-          l&apos;abonnement est exigible pour maintenir la visibilité du profil et l&apos;accès aux Missions.
-          L&apos;abonnement est sans engagement et résiliable à tout moment ; il n&apos;est pas remboursable au
-          prorata pour le mois entamé.
+          <strong> abonnement mensuel de 20&nbsp;000 FCFA</strong>, précédé d&apos;une <strong>période
+          d&apos;essai gratuite de 7 jours</strong> : aucun montant n&apos;est dû pendant ces 7 jours. À
+          l&apos;issue de la période d&apos;essai, l&apos;abonnement est exigible pour maintenir la visibilité du
+          profil et l&apos;accès aux Missions. L&apos;abonnement est sans engagement et résiliable à tout
+          moment ; il n&apos;est pas remboursable au prorata pour le mois entamé.
         </p>
 
         <h2>Article 7 — Séquestre des fonds</h2>

@@ -88,9 +88,10 @@ export default function AidePage() {
             <summary>Combien coûte la plateforme ?</summary>
             <p>
               Pour les <strong>entreprises</strong>, c&apos;est entièrement gratuit. Pour les
-              <strong> freelances</strong>, le <strong>1er mois est offert</strong>, puis l&apos;abonnement est
-              de <strong>20&nbsp;000 FCFA/mois</strong> — et <strong>0&nbsp;% de commission</strong> sur les
-              missions (vous gardez 100 % de ce que vous gagnez). Voir la page Tarifs.
+              <strong> freelances</strong>, les <strong>7 premiers jours sont offerts</strong>, puis
+              l&apos;abonnement est de <strong>20&nbsp;000 FCFA/mois</strong> — et <strong>0&nbsp;% de
+              commission</strong> sur les missions (vous gardez 100 % de l&apos;argent que vous gagnez). Voir la
+              page Tarifs.
             </p>
           </details>
         </div>

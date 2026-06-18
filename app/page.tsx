@@ -118,10 +118,11 @@ export default function HomePage() {
           </div>
           <div className="promise-card dark" id="freelances">
             <div className="kicker">Pour les freelances en Afrique</div>
+            <span className="free-badge">🎁 7 jours d&apos;essai gratuits</span>
             <h3>Des clients européens, payés sur votre Mobile Money</h3>
             <ul>
-              <li><strong>1er mois 100 % gratuit</strong>, puis 20&nbsp;000 FCFA/mois seulement</li>
-              <li><strong>0&nbsp;% de commission</strong> : vous gardez l&apos;intégralité de vos missions</li>
+              <li><strong>7 jours gratuits</strong>, puis 20&nbsp;000 FCFA/mois seulement</li>
+              <li><strong>0&nbsp;% de commission</strong> : vous gardez l&apos;intégralité de l&apos;argent que vous gagnez</li>
               <li>Accédez à des missions d&apos;entreprises européennes</li>
               <li>Payé directement sur votre Mobile Money, sans compte bancaire</li>
             </ul>
@@ -170,8 +171,8 @@ export default function HomePage() {
         <div className="cta">
           <h2>Prêt à collaborer avec les meilleurs talents francophones&nbsp;?</h2>
           <p>
-            Entreprises : trouvez un freelance gratuitement. Freelances : votre{' '}
-            <strong>1er mois est offert</strong>, puis 20&nbsp;000 FCFA/mois, sans aucune commission
+            Entreprises : trouvez un freelance gratuitement. Freelances :{' '}
+            <strong>7 jours d&apos;essai gratuits</strong>, puis 20&nbsp;000 FCFA/mois, sans aucune commission
             sur vos missions.
           </p>
           <div className="cta-actions">

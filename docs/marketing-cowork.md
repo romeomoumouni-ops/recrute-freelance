@@ -12,7 +12,7 @@ RecruteFreelance est une **marketplace qui connecte les entreprises et entrepren
 - **Pour les entreprises/clients** : trouver et recruter un freelance, échanger dans une messagerie intégrée, payer en ligne par carte. L'usage est **100 % gratuit** pour elles.
 - **Pour les freelances (Afrique francophone)** : créer un profil, être **validé par notre équipe** (gage de qualité), recevoir des missions de clients européens, et être **payé sur Mobile Money**.
 - **Paiement sécurisé (séquestre)** : le client paie d'avance, les fonds sont **bloqués** par la plateforme et **libérés au freelance seulement après validation** de la livraison. Le freelance reçoit son paiement sur Mobile Money **sous 3 à 5 jours**.
-- **Modèle économique** : **abonnement freelance** — **1er mois 100 % gratuit**, puis **20 000 FCFA/mois** (≈ 30 €), **0 % de commission** (le freelance garde **100 %** de ses missions), **100 % gratuit pour les entreprises**.
+- **Modèle économique** : **abonnement freelance** — **7 jours d'essai gratuits**, puis **20 000 FCFA/mois** (≈ 30 €), **0 % de commission** (le freelance garde **100 %** de l'argent qu'il gagne), **100 % gratuit pour les entreprises**.
 - **Catégories de services** : Design de logo · Site & Développement web · Services IA · Marketing Digital · Audiovisuel · Rédaction · Réseaux sociaux · Business.
 - **Connexion** par e-mail ou via Google.
 

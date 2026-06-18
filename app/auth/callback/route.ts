@@ -26,7 +26,7 @@ async function sendWelcomeOnce(origin: string, user: User | null) {
       ? 'Bienvenue sur RecruteFreelance 🎉'
       : 'Bienvenue ! Votre compte entreprise est créé 🎉';
     const corps = isFreelance
-      ? 'Votre inscription est confirmée et votre <strong>1er mois est 100 % gratuit</strong> (puis 20 000 FCFA/mois, 0 % de commission sur vos missions). Il ne vous reste plus qu’à <strong>terminer le remplissage de votre profil et à le soumettre</strong>, afin qu’il apparaisse sur la marketplace et que les clients puissent vous contacter.'
+      ? 'Votre inscription est confirmée et vous profitez de <strong>7 jours d’essai gratuits</strong> (puis 20 000 FCFA/mois, 0 % de commission sur vos missions). Il ne vous reste plus qu’à <strong>terminer le remplissage de votre profil et à le soumettre</strong>, afin qu’il apparaisse sur la marketplace et que les clients puissent vous contacter.'
       : 'Votre inscription est confirmée. Vous pouvez dès maintenant rechercher des freelances et leur confier vos projets, en toute sécurité.';
     const ctaLabel = isFreelance ? 'Compléter et soumettre mon profil' : 'Trouver un freelance';
     const ctaUrl = isFreelance ? `${origin}/mon-profil` : `${origin}/recherche`;

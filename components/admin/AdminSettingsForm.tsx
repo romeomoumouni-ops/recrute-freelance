@@ -36,7 +36,7 @@ export default function AdminSettingsForm({
         <label>Commission plateforme (%)</label>
         <input type="number" min={0} max={90} step={1} value={pct} onChange={(e) => setPct(e.target.value)} />
         <div className="hint">
-          Modèle actuel : <strong>abonnement freelance</strong> (1er mois offert, puis 20 000 FCFA/mois) et
+          Modèle actuel : <strong>abonnement freelance</strong> (7 jours d&apos;essai gratuits, puis 20 000 FCFA/mois) et
           <strong> 0 % de commission</strong>. Laisse ce champ à <strong>0</strong> — le freelance reçoit{' '}
           {100 - (Number(pct) || 0)} % de chaque mission.
         </div>

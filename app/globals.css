@@ -661,6 +661,10 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .banned-contact { font-size: .82rem; color: var(--gray-500); }
 .banned-contact a { text-decoration: underline; }
 .banned-card .btn { margin-top: 16px; }
+.abo-banner { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; background: #0d0d0d; color: #fff; font-size: .82rem; font-weight: 600; padding: 10px 16px; text-align: center; }
+.abo-banner svg { flex-shrink: 0; }
+.abo-banner-btn { background: #fff; color: #0d0d0d; border: none; border-radius: 999px; padding: 5px 14px; font-weight: 800; font-size: .8rem; cursor: pointer; }
+.abo-banner-btn:hover { opacity: .9; }
 
 /* ---------- Page Tarifs ---------- */
 .tarifs { max-width: 920px; padding-top: 36px; padding-bottom: 80px; }

@@ -7,6 +7,7 @@ import { logAdminAction } from '@/lib/admin-log';
 const schema = z.object({
   commission_rate: z.coerce.number().min(0).max(0.9),
   banner_messagerie: z.string().trim().max(500),
+  abonnement_url: z.string().trim().max(500).optional().default(''),
 });
 
 // Admin : enregistre les réglages éditables sans code.
@@ -23,6 +24,7 @@ export async function POST(req: Request) {
   const rows = [
     { key: 'commission_rate', value: String(parsed.data.commission_rate) },
     { key: 'banner_messagerie', value: parsed.data.banner_messagerie },
+    { key: 'abonnement_url', value: parsed.data.abonnement_url },
   ];
   await supabaseAdmin().from('Setting').upsert(rows, { onConflict: 'key' });
   await logAdminAction(session, 'Réglages modifiés', `commission ${Math.round(parsed.data.commission_rate * 100)}%`);

@@ -6,6 +6,7 @@ import { OPERATEUR_LABEL } from '@/lib/constants';
 import AdminButton from '@/components/admin/AdminButton';
 import AdminValidationActions from '@/components/admin/AdminValidationActions';
 import { getConversationsForUser } from '@/lib/admin-conversations';
+import { computeAbonnement } from '@/lib/abonnement';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,7 @@ export default async function AdminUserDetail({ params }: { params: { id: string
 
   const [{ data: profile }, { data: asClient }, { data: asFreelance }, { data: withdrawals }] = await Promise.all([
     isFreelance
-      ? sb.from('Profile').select('titre, bio, note, photoUrl, estVerifie, statutValidation, motifRejet, soldeDisponible, totalGagne').eq('userId', id).maybeSingle()
+      ? sb.from('Profile').select('titre, bio, note, photoUrl, estVerifie, statutValidation, motifRejet, soldeDisponible, totalGagne, abonnementValidUntil').eq('userId', id).maybeSingle()
       : Promise.resolve({ data: null }),
     sb.from('Order').select('id, titre, montant, statut, createdAt').eq('clientId', id).order('createdAt', { ascending: false }).limit(30),
     isFreelance
@@ -38,7 +39,9 @@ export default async function AdminUserDetail({ params }: { params: { id: string
       : Promise.resolve({ data: [] }),
   ]);
 
-  const p = profile as { titre: string | null; bio: string | null; note: string | null; photoUrl: string | null; estVerifie: boolean; statutValidation: string | null; motifRejet: string | null; soldeDisponible: number; totalGagne: number } | null;
+  const p = profile as { titre: string | null; bio: string | null; note: string | null; photoUrl: string | null; estVerifie: boolean; statutValidation: string | null; motifRejet: string | null; soldeDisponible: number; totalGagne: number; abonnementValidUntil: string | null } | null;
+  const abo = isFreelance ? computeAbonnement(u.createdAt, p?.abonnementValidUntil ?? null) : null;
+  const ABO_LABEL: Record<string, string> = { trial: 'Essai gratuit', paid: 'Abonné', expired: 'Expiré' };
   type O = { id: string; titre: string; montant: number; statut: string; createdAt: string };
   const orders = [...((asClient as O[]) ?? []), ...((asFreelance as O[]) ?? [])];
   type W = { id: string; montant: number; statut: string; createdAt: string; numero: string };
@@ -69,6 +72,17 @@ export default async function AdminUserDetail({ params }: { params: { id: string
               <div className="admin-kv"><span>Solde disponible</span><strong>{euros(p.soldeDisponible)}</strong></div>
               <div className="admin-kv"><span>Total gagné</span><strong>{euros(p.totalGagne)}</strong></div>
               <div className="admin-kv"><span>Titre</span><strong>{p.titre || '—'}</strong></div>
+              {abo && (
+                <div className="admin-kv">
+                  <span>Abonnement</span>
+                  <strong>
+                    {ABO_LABEL[abo.mode]}
+                    {abo.active && abo.mode === 'trial' && ` · fin de l'essai dans ${abo.daysLeft} j`}
+                    {abo.active && abo.mode === 'paid' && abo.validUntil && ` · payé jusqu'au ${dateCourte(abo.validUntil)}`}
+                    {!abo.active && ' — accès bloqué'}
+                  </strong>
+                </div>
+              )}
             </>
           )}
         </div>
@@ -90,6 +104,16 @@ export default async function AdminUserDetail({ params }: { params: { id: string
               <AdminButton endpoint="/api/admin/user" body={{ id: u.id, action: p?.estVerifie ? 'unverify' : 'verify' }}
                 label={p?.estVerifie ? 'Retirer le badge vérifié' : 'Vérifier le freelance'}
                 className="btn btn-outline btn-sm" successMsg="Mis à jour." />
+            )}
+            {isFreelance && (
+              <AdminButton endpoint="/api/admin/abonnement" body={{ userId: u.id, action: 'extend' }}
+                label="✅ Réactiver l'abonnement (+1 mois)"
+                className="btn btn-dark btn-sm" successMsg="Abonnement prolongé d'un mois." />
+            )}
+            {isFreelance && abo?.mode === 'paid' && (
+              <AdminButton endpoint="/api/admin/abonnement" body={{ userId: u.id, action: 'cancel' }}
+                label="Annuler l'abonnement payé" className="btn btn-outline btn-sm"
+                confirmMsg="Annuler l'abonnement payé de ce freelance ?" successMsg="Abonnement annulé." />
             )}
             {isFreelance && p?.photoUrl && (
               <AdminButton endpoint="/api/admin/profile" body={{ userId: u.id, action: 'clearPhoto' }}

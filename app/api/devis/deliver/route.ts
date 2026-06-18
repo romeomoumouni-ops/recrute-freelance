@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { loadOffer, setOfferMeta, postSystemMessage } from '@/lib/devis-server';
 import { createNotification } from '@/lib/notifications';
+import { blockIfFreelanceExpired } from '@/lib/abonnement';
 
 const schema = z.object({ offerMessageId: z.string().min(1) });
 
@@ -12,6 +13,8 @@ export async function POST(req: Request) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: 'Non authentifié.' }, { status: 401 });
   if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
+  const blocked = await blockIfFreelanceExpired(session);
+  if (blocked) return blocked;
 
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);

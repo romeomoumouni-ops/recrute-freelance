@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { assertMember } from '@/lib/conversations';
 import { tierForAmount, TIER_AMOUNTS } from '@/lib/chariow-products';
 import { heureCourte } from '@/lib/utils';
+import { blockIfFreelanceExpired } from '@/lib/abonnement';
 
 const offerSchema = z.object({
   conversationId: z.string().min(1),
@@ -23,6 +24,8 @@ export async function POST(req: Request) {
     );
   }
   if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
+  const blocked = await blockIfFreelanceExpired(session);
+  if (blocked) return blocked;
 
   const body = await req.json().catch(() => null);
   const parsed = offerSchema.safeParse(body);

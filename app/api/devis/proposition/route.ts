@@ -4,6 +4,7 @@ import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { assertMember } from '@/lib/conversations';
 import { heureCourte } from '@/lib/utils';
+import { blockIfFreelanceExpired } from '@/lib/abonnement';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,6 +78,8 @@ export async function PATCH(req: Request) {
   if (session.user.role !== 'FREELANCE') {
     return NextResponse.json({ error: 'Action réservée au freelance.' }, { status: 403 });
   }
+  const blocked = await blockIfFreelanceExpired(session);
+  if (blocked) return blocked;
 
   const body = await req.json().catch(() => null);
   const parsed = actSchema.safeParse(body);

@@ -7,6 +7,7 @@ import Footer from '@/components/Footer';
 import Toaster from '@/components/Toaster';
 import SupportWidget from '@/components/SupportWidget';
 import BannedOverlay from '@/components/BannedOverlay';
+import AbonnementGate from '@/components/AbonnementGate';
 import MetaPixel from '@/components/MetaPixel';
 
 const montserrat = Montserrat({
@@ -35,6 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Suspense fallback={null}>
           <MetaPixel />
         </Suspense>
+        <AbonnementGate />
         <Header />
         <main>{children}</main>
         <Footer />

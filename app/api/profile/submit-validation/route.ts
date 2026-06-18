@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { isVerified } from '@/lib/verification';
+import { blockIfFreelanceExpired } from '@/lib/abonnement';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,6 +13,8 @@ export async function POST() {
   if (session.user.role !== 'FREELANCE')
     return NextResponse.json({ error: 'Réservé aux freelances.' }, { status: 403 });
   if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
+  const blocked = await blockIfFreelanceExpired(session);
+  if (blocked) return blocked;
 
   const sb = supabaseAdmin();
   const { data: user } = await sb

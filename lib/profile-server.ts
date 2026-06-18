@@ -1,6 +1,7 @@
 import { supabaseAdmin } from './supabase';
 import { isVerified } from './verification';
 import { auth } from './auth';
+import { getFreelanceAbonnement } from './abonnement';
 
 // Recalcule et persiste estVerifie pour un freelance.
 export async function recomputeVerification(userId: string): Promise<boolean> {
@@ -43,6 +44,10 @@ export async function requireFreelanceProfile(): Promise<
   if (!session) return { ok: false, status: 401, error: 'Non authentifié.' };
   if (session.user.role !== 'FREELANCE') {
     return { ok: false, status: 403, error: 'Réservé aux comptes freelance.' };
+  }
+  const abo = session.user.admin ? null : await getFreelanceAbonnement(session.user.id);
+  if (abo && !abo.active) {
+    return { ok: false, status: 402, error: 'Votre essai gratuit de 7 jours est terminé. Abonnez-vous (20 000 FCFA/mois) pour continuer.' };
   }
   const sb = supabaseAdmin();
   const { data: profile } = await sb

@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { withdrawalSchema } from '@/lib/validations';
 import { TAUX_FCFA } from '@/lib/constants';
+import { blockIfFreelanceExpired } from '@/lib/abonnement';
 
 // Retrait Mobile Money (freelance) : RPC atomique (débite le solde + enregistre le retrait).
 export async function POST(req: Request) {
@@ -12,6 +13,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Réservé aux freelances.' }, { status: 403 });
   }
   if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
+  const blocked = await blockIfFreelanceExpired(session);
+  if (blocked) return blocked;
 
   const body = await req.json().catch(() => null);
   const parsed = withdrawalSchema.safeParse(body);

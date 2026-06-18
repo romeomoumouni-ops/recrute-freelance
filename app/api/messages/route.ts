@@ -5,6 +5,7 @@ import { assertMember } from '@/lib/conversations';
 import { messageSchema } from '@/lib/validations';
 import { heureCourte } from '@/lib/utils';
 import { detectOffPlatform } from '@/lib/moderation';
+import { blockIfFreelanceExpired } from '@/lib/abonnement';
 
 interface MsgRow {
   id: string;
@@ -68,6 +69,8 @@ export async function POST(req: Request) {
   }
   const { conversationId, contenu } = parsed.data;
   if (session.user.banni) return NextResponse.json({ error: 'Compte suspendu.' }, { status: 403 });
+  const blocked = await blockIfFreelanceExpired(session);
+  if (blocked) return blocked;
 
   const conv = await assertMember(conversationId, session.user.id);
   if (!conv) return NextResponse.json({ error: 'Conversation introuvable.' }, { status: 404 });

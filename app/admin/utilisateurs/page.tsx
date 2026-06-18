@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 export default async function AdminUtilisateurs() {
   const sb = supabaseAdmin();
   const [{ data: users }, { data: profiles }] = await Promise.all([
-    sb.from('User').select('id, prenom, email, role, banni, createdAt, pays').order('createdAt', { ascending: false }).limit(500),
+    sb.from('User').select('id, prenom, email, role, banni, createdAt, pays').eq('isTestBot', false).order('createdAt', { ascending: false }).limit(500),
     sb.from('Profile').select('userId, estVerifie'),
   ]);
 

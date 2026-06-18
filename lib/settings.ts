@@ -4,6 +4,8 @@ import { supabaseAdmin } from './supabase';
 export const SETTING_DEFAULTS: Record<string, string> = {
   commission_rate: '0',
   abonnement_url: '', // lien de paiement Chariow de l'abonnement freelance (20 000 FCFA/mois)
+  bots_test_actifs: 'on', // coupe-circuit du moteur de test (bots) — passer à 'off' avant le public
+
   banner_messagerie:
     "Pour votre sécurité, n'échangez aucune coordonnée hors de la plateforme (mail, WhatsApp, Instagram, etc.) — au risque d'être totalement banni.",
 };

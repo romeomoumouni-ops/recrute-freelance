@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { assertMember } from '@/lib/conversations';
 import { heureCourte } from '@/lib/utils';
 import { blockIfFreelanceExpired } from '@/lib/abonnement';
+import { notifyDevisRecu } from '@/lib/devis-notify';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +53,15 @@ export async function POST(req: Request) {
     .select('id, contenu, createdAt')
     .single();
   if (error || !msg) return NextResponse.json({ error: 'Envoi impossible.' }, { status: 500 });
+
+  // Prévient le freelance par e-mail qu'il a reçu une demande de devis.
+  await notifyDevisRecu({
+    freelanceId: conv.freelanceId,
+    fromName: session.user.prenom,
+    amountEur,
+    description,
+    conversationId,
+  });
 
   const m = msg as { id: string; contenu: string; createdAt: string };
   return NextResponse.json({

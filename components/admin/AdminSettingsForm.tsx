@@ -8,15 +8,18 @@ export default function AdminSettingsForm({
   commissionPct,
   banner,
   abonnementUrl,
+  botsActifs,
 }: {
   commissionPct: number;
   banner: string;
   abonnementUrl: string;
+  botsActifs: boolean;
 }) {
   const router = useRouter();
   const [pct, setPct] = useState(String(commissionPct));
   const [text, setText] = useState(banner);
   const [aboUrl, setAboUrl] = useState(abonnementUrl);
+  const [bots, setBots] = useState(botsActifs);
   const [busy, setBusy] = useState(false);
 
   async function save() {
@@ -28,6 +31,7 @@ export default function AdminSettingsForm({
         commission_rate: Number(pct) / 100,
         banner_messagerie: text.trim(),
         abonnement_url: aboUrl.trim(),
+        bots_test_actifs: bots ? 'on' : 'off',
       }),
     });
     const data = await res.json().catch(() => ({}));
@@ -60,6 +64,17 @@ export default function AdminSettingsForm({
           Lien Chariow vers lequel le freelance est redirigé pour payer les 20 000 FCFA/mois quand son
           essai de 7 jours est terminé. Après paiement, réactive le compte depuis sa fiche (« Réactiver
           l&apos;abonnement »).
+        </div>
+      </div>
+      <div className="field">
+        <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <input type="checkbox" checked={bots} onChange={(e) => setBots(e.target.checked)} style={{ width: 'auto' }} />
+          Moteur de test (bots) actif
+        </label>
+        <div className="hint">
+          Quand c&apos;est coché, les comptes-bots de test envoient des demandes de devis aux freelances en fin
+          d&apos;essai. <strong>Décoche avant le passage en public</strong> pour ne pas déranger les vrais
+          utilisateurs (ou utilise « Tout nettoyer » ci-dessous).
         </div>
       </div>
       <div className="field">

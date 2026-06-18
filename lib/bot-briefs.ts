@@ -79,8 +79,8 @@ export function pickBrief(cat: string | null | undefined, seed: number): string 
   return arr[seed % arr.length];
 }
 
-// Montant de la demande de devis : entre 300 et 900 €, par paliers de 50 pour rester crédible.
+// Montant de la demande de devis : entre 300 et 1000 €, par paliers de 50 pour rester crédible.
 export function pickAmount(seed: number): number {
-  const paliers = [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900];
+  const paliers = [300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000];
   return paliers[seed % paliers.length];
 }

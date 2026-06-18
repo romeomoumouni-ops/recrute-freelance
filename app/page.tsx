@@ -120,13 +120,13 @@ export default function HomePage() {
             <div className="kicker">Pour les freelances en Afrique</div>
             <h3>Des clients européens, payés sur votre Mobile Money</h3>
             <ul>
+              <li><strong>1er mois 100 % gratuit</strong>, puis 20&nbsp;000 FCFA/mois seulement</li>
+              <li><strong>0&nbsp;% de commission</strong> : vous gardez l&apos;intégralité de vos missions</li>
               <li>Accédez à des missions d&apos;entreprises européennes</li>
-              <li>Recevez vos paiements directement sur votre Mobile Money</li>
-              <li>Pas besoin de compte bancaire international</li>
-              <li>Construisez votre réputation avec des avis vérifiés</li>
+              <li>Payé directement sur votre Mobile Money, sans compte bancaire</li>
             </ul>
             <Link className="btn btn-light" href="/inscription?role=freelance">
-              Devenir freelance
+              Commencer gratuitement
             </Link>
           </div>
         </div>
@@ -170,15 +170,16 @@ export default function HomePage() {
         <div className="cta">
           <h2>Prêt à collaborer avec les meilleurs talents francophones&nbsp;?</h2>
           <p>
-            Rejoignez recrutefreelance.com dès aujourd&apos;hui — l&apos;inscription est gratuite,
-            pour les entreprises comme pour les freelances.
+            Entreprises : trouvez un freelance gratuitement. Freelances : votre{' '}
+            <strong>1er mois est offert</strong>, puis 20&nbsp;000 FCFA/mois, sans aucune commission
+            sur vos missions.
           </p>
           <div className="cta-actions">
             <Link className="btn btn-light" href="/recherche">
               Je cherche un freelance
             </Link>
             <Link className="btn btn-ghost" href="/inscription?role=freelance">
-              Je suis freelance
+              Je deviens freelance
             </Link>
           </div>
         </div>

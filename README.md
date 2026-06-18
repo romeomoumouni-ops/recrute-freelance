@@ -2,7 +2,7 @@
 
 Marketplace qui connecte les **entreprises d'Europe francophone** aux **freelances d'Afrique francophone**, payés directement sur **Mobile Money** (Orange Money, MTN MoMo, Wave, Moov Money).
 
-Modèle : commission de **10 %** payée par le client, fonds séquestrés (escrow) puis libérés au freelance à la validation de la livraison.
+Modèle : **abonnement freelance** (1er mois gratuit, puis **20 000 FCFA/mois**), **0 % de commission** (le freelance garde 100 % de ses missions), gratuit pour les entreprises. Fonds séquestrés (escrow) puis libérés au freelance à la validation de la livraison.
 
 ---
 

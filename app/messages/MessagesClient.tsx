@@ -673,7 +673,7 @@ export default function MessagesClient({
           <p className="sub">
             {isClient
               ? 'Proposez un montant pour cette prestation. Le paiement par carte est sécurisé et conservé jusqu’à la livraison validée.'
-              : 'Le destinataire pourra le payer par carte. Les fonds (moins 20 % de commission) sont sécurisés, puis versés sur votre solde une fois la commande livrée et validée.'}
+              : 'Le destinataire pourra le payer par carte. Les fonds sont sécurisés, puis versés intégralement sur votre solde (0 % de commission) une fois la commande livrée et validée.'}
           </p>
           <div className="field">
             <label>Prestation</label>

@@ -87,8 +87,10 @@ export default function AidePage() {
           <details>
             <summary>Combien coûte la plateforme ?</summary>
             <p>
-              L&apos;inscription est gratuite et il n&apos;y a aucun abonnement. Les entreprises ne paient aucun
-              frais ; seuls les freelances versent une commission sur les missions réalisées. Voir la page Tarifs.
+              Pour les <strong>entreprises</strong>, c&apos;est entièrement gratuit. Pour les
+              <strong> freelances</strong>, le <strong>1er mois est offert</strong>, puis l&apos;abonnement est
+              de <strong>20&nbsp;000 FCFA/mois</strong> — et <strong>0&nbsp;% de commission</strong> sur les
+              missions (vous gardez 100 % de ce que vous gagnez). Voir la page Tarifs.
             </p>
           </details>
         </div>

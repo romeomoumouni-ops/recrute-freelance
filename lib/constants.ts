@@ -1,7 +1,11 @@
 // ===== Constantes métier =====
 
-export const COMMISSION = 0.1; // 10 % payés par le client
+export const COMMISSION = 0; // Plus aucune commission : le freelance garde 100 % de ses missions
 export const TAUX_FCFA = 655.96; // 1 € = 655,96 FCFA
+
+// Abonnement freelance : 1er mois gratuit, puis 20 000 FCFA / mois.
+export const ABONNEMENT_FCFA = 20000;
+export const ABONNEMENT_EUR = Math.round(ABONNEMENT_FCFA / TAUX_FCFA); // ≈ 30 €
 
 export type Role = 'CLIENT' | 'FREELANCE';
 export type OrderStatus =

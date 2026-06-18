@@ -3,7 +3,6 @@
 import { createContext, useContext, useState, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Check } from 'lucide-react';
-import { COMMISSION } from '@/lib/constants';
 import { euros } from '@/lib/utils';
 import { toast } from '@/lib/toast';
 
@@ -113,8 +112,7 @@ export default function OrderProvider({
   }, [isLogged, freelanceId, requireLogin, router]);
 
   const montant = draft ? (draft.mode === 'jour' ? draft.unitPrice * draft.jours : draft.unitPrice) : 0;
-  const commission = Math.round(montant * COMMISSION);
-  const total = montant + commission;
+  const total = montant; // 0 % de commission : le client paie le montant de la mission
 
   function goPay() {
     if (!draft) return;
@@ -235,10 +233,6 @@ export default function OrderProvider({
                     : 'Forfait service'}
                 </span>
                 <span>{euros(montant)}</span>
-              </div>
-              <div className="order-line">
-                <span>Frais de service (10 %)</span>
-                <span>{euros(commission)}</span>
               </div>
               <div className="order-line total">
                 <span>Total à payer</span>

@@ -1,20 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { getSetting } from '@/lib/settings';
 
 export const metadata: Metadata = {
   title: "Conditions Générales d'Utilisation",
   description:
-    "Conditions Générales d'Utilisation et de Vente de recrutefreelance.com : compte, commandes, paiement, commission, séquestre, annulation et remboursement.",
+    "Conditions Générales d'Utilisation et de Vente de recrutefreelance.com : compte, abonnement freelance, commandes, paiement, séquestre, annulation et remboursement.",
 };
 
 export const dynamic = 'force-dynamic';
 
-export default async function ConditionsPage() {
-  const rate = Number(await getSetting('commission_rate')) || 0.2;
-  const pct = Math.round(rate * 100);
-  const part = 100 - pct;
-
+export default function ConditionsPage() {
   return (
     <>
       <div className="page-head">
@@ -45,7 +40,7 @@ export default async function ConditionsPage() {
           <li><strong>Mission / Prestation</strong> : le service réalisé par le Freelance pour le Client.</li>
           <li><strong>Séquestre</strong> : conservation sécurisée des fonds par la Plateforme jusqu&apos;à validation.</li>
           <li><strong>Mobile Money</strong> : service de paiement mobile par lequel le Freelance est réglé.</li>
-          <li><strong>Commission</strong> : rémunération de la Plateforme prélevée sur le montant des missions.</li>
+          <li><strong>Abonnement</strong> : formule mensuelle souscrite par le Freelance pour accéder à la Plateforme.</li>
         </ul>
 
         <h2>Article 2 — Objet</h2>
@@ -72,10 +67,12 @@ export default async function ConditionsPage() {
           fournies doivent être exactes, complètes et tenues à jour. Un Utilisateur est responsable de la
           confidentialité de ses identifiants et de toute activité réalisée depuis son compte.
         </p>
-        <h3>4.2 Gratuité de l&apos;inscription</h3>
+        <h3>4.2 Inscription et abonnement</h3>
         <p>
-          La création d&apos;un compte est gratuite, sans abonnement, aussi bien pour les Clients que pour les
-          Freelances. Pour les Clients, l&apos;utilisation de la Plateforme est entièrement gratuite.
+          La création d&apos;un compte est gratuite. Pour les <strong>Clients</strong>, l&apos;utilisation de la
+          Plateforme est entièrement gratuite, sans frais ni abonnement. Pour les <strong>Freelances</strong>,
+          l&apos;accès à la Plateforme s&apos;effectue via un abonnement mensuel décrit à l&apos;Article 6,
+          dont le <strong>premier mois est offert</strong>.
         </p>
         <h3>4.3 Validation des profils Freelances</h3>
         <p>
@@ -94,19 +91,24 @@ export default async function ConditionsPage() {
           prestation, sans préjudice de son rôle d&apos;arbitrage défini à l&apos;Article 8.
         </p>
 
-        <h2>Article 6 — Prix, paiement et commission</h2>
+        <h2>Article 6 — Prix, paiement et abonnement</h2>
         <h3>6.1 Paiement par le Client</h3>
         <p>
           Le Client règle le montant de la Commande en ligne au moment de l&apos;acceptation du devis. Le
-          paiement est traité par un prestataire de services de paiement tiers.
+          paiement est traité par un prestataire de services de paiement tiers. Aucun frais ni commission
+          n&apos;est facturé au Client en sus du montant de la Mission.
         </p>
-        <h3>6.2 Commission de la Plateforme</h3>
+        <h3>6.2 Abonnement du Freelance</h3>
         <p>
-          La Plateforme prélève une commission de <strong>{pct}%</strong> sur le montant de chaque Mission.
-          Cette commission est supportée par le Freelance : sur une Mission donnée, le Freelance perçoit
-          <strong> {part}%</strong> du montant et la Plateforme conserve <strong>{pct}%</strong> au titre de
-          ses services (mise en relation, sécurisation du paiement, traitement du versement, support et
-          résolution des litiges). Aucun frais de commission n&apos;est facturé au Client.
+          La Plateforme <strong>ne prélève aucune commission</strong> sur le montant des Missions : le
+          Freelance perçoit <strong>l&apos;intégralité (100&nbsp;%)</strong> du montant de chaque Mission
+          validée. En contrepartie de l&apos;accès à la Plateforme (mise en relation, sécurisation du
+          paiement, traitement du versement, support et résolution des litiges), le Freelance souscrit un
+          <strong> abonnement mensuel de 20&nbsp;000 FCFA</strong>. Le <strong>premier mois est offert</strong> :
+          aucun montant n&apos;est dû pendant cette période d&apos;essai. À l&apos;issue du mois offert,
+          l&apos;abonnement est exigible pour maintenir la visibilité du profil et l&apos;accès aux Missions.
+          L&apos;abonnement est sans engagement et résiliable à tout moment ; il n&apos;est pas remboursable au
+          prorata pour le mois entamé.
         </p>
 
         <h2>Article 7 — Séquestre des fonds</h2>
@@ -124,8 +126,8 @@ export default async function ConditionsPage() {
         <p>
           Le Freelance livre la Mission via la Plateforme. Le Client dispose alors de la possibilité de
           <strong> valider</strong> la Commande (la prestation étant jugée conforme) ou de demander une
-          correction. La validation déclenche la libération des fonds au profit du Freelance, déduction faite
-          de la commission prévue à l&apos;Article 6.
+          correction. La validation déclenche la libération de l&apos;intégralité des fonds au profit du
+          Freelance, sans aucune déduction de commission.
         </p>
         <h3>8.2 Pouvoir d&apos;arbitrage de la Plateforme</h3>
         <p>
@@ -165,7 +167,7 @@ export default async function ConditionsPage() {
 
         <h2>Article 10 — Versement au Freelance (Mobile Money)</h2>
         <p>
-          Une fois la Commande validée, le solde du Freelance (montant de la Mission diminué de la commission)
+          Une fois la Commande validée, le solde du Freelance (l&apos;intégralité du montant de la Mission)
           devient disponible. Le Freelance peut alors demander un retrait. Le versement est effectué sur le
           compte Mobile Money renseigné par le Freelance, généralement sous un délai de <strong>3 à 5
           jours</strong> ouvrés à compter de la demande de retrait. Le Freelance est seul responsable de
@@ -215,8 +217,8 @@ export default async function ConditionsPage() {
           qualité, la conformité ou la bonne fin des prestations, qui relèvent de la responsabilité des
           Freelances. La responsabilité de la Plateforme ne saurait être engagée pour les manquements
           imputables aux Utilisateurs, ni pour les interruptions, indisponibilités ou cas de force majeure. La
-          responsabilité de la Plateforme, si elle était retenue, serait limitée au montant de la commission
-          perçue sur la Commande concernée.
+          responsabilité de la Plateforme, si elle était retenue, serait limitée au montant de
+          l&apos;abonnement mensuel en vigueur.
         </p>
 
         <h2>Article 16 — Litiges entre Utilisateurs</h2>

@@ -179,6 +179,7 @@ input, select, textarea { font-family: inherit; }
 .role-switch button.active { border-color: var(--black); background: var(--black); color: var(--white); }
 .auth-alt { text-align: center; font-size: .8rem; color: var(--gray-500); margin-top: 20px; }
 .auth-alt a { font-weight: 700; color: var(--black); }
+.auth-perk { background: var(--off-white); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: .82rem; line-height: 1.45; color: var(--gray-700); margin: 0 0 22px; }
 
 /* ---------- Page recherche ---------- */
 .page-head { background: var(--black); color: var(--white); padding: 48px 0; }

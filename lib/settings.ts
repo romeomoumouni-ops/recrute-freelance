@@ -2,7 +2,7 @@ import 'server-only';
 import { supabaseAdmin } from './supabase';
 
 export const SETTING_DEFAULTS: Record<string, string> = {
-  commission_rate: '0.2',
+  commission_rate: '0',
   banner_messagerie:
     "Pour votre sécurité, n'échangez aucune coordonnée hors de la plateforme (mail, WhatsApp, Instagram, etc.) — au risque d'être totalement banni.",
 };

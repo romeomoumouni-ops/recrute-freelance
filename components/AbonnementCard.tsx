@@ -45,9 +45,9 @@ export default function AbonnementCard() {
     else window.location.href = '/aide';
   }
 
-  const subscribeBtn = (
+  const payBtn = (label: string) => (
     <button className="btn btn-dark btn-sm" onClick={pay}>
-      M&apos;abonner maintenant — 20&nbsp;000 FCFA/mois
+      {label}
     </button>
   );
 
@@ -59,8 +59,9 @@ export default function AbonnementCard() {
           <strong>Abonnement actif</strong>
           <p>
             Votre accès est garanti jusqu&apos;au <strong>{abo.validUntil ? frDate(abo.validUntil) : '—'}</strong>.
-            Il sera renouvelé à chaque paiement.
+            Vous pouvez le prolonger dès maintenant si vous le souhaitez.
           </p>
+          {payBtn('Prolonger mon abonnement — 20 000 FCFA/mois')}
         </div>
       </div>
     );
@@ -73,10 +74,10 @@ export default function AbonnementCard() {
         <div className="abo-card-body">
           <strong>Essai gratuit — il vous reste {abo.daysLeft} jour{abo.daysLeft > 1 ? 's' : ''}</strong>
           <p>
-            À la fin de l&apos;essai, l&apos;accès devient payant (20&nbsp;000 FCFA/mois, 0&nbsp;% de
-            commission). Vous pouvez vous abonner dès maintenant, sans attendre la fin des 7 jours.
+            Pas envie d&apos;attendre la fin des 7 jours&nbsp;? Vous pouvez vous abonner dès maintenant
+            (20&nbsp;000 FCFA/mois, 0&nbsp;% de commission) — votre accès sera garanti sans interruption.
           </p>
-          {subscribeBtn}
+          {payBtn('Je préfère m’abonner tout de suite →')}
         </div>
       </div>
     );
@@ -89,7 +90,7 @@ export default function AbonnementCard() {
       <div className="abo-card-body">
         <strong>Essai terminé — accès bloqué</strong>
         <p>Abonnez-vous pour réactiver votre compte et continuer à recevoir des missions.</p>
-        {subscribeBtn}
+        {payBtn('M’abonner — 20 000 FCFA/mois')}
       </div>
     </div>
   );

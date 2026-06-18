@@ -5,7 +5,6 @@ import { supabaseAdmin } from '@/lib/supabase';
 import { parseSkills } from '@/lib/utils';
 import { asValidationStatus } from '@/lib/validation';
 import ProfilEditor from './ProfilEditor';
-import AbonnementCard from '@/components/AbonnementCard';
 
 export const metadata: Metadata = { title: 'Mon profil' };
 export const dynamic = 'force-dynamic';
@@ -41,11 +40,7 @@ export default async function MonProfilPage() {
     .map((p) => ({ id: p.id, imageUrl: p.imageUrl }));
 
   return (
-    <>
-      <div className="container" style={{ paddingTop: 24 }}>
-        <AbonnementCard />
-      </div>
-      <ProfilEditor
+    <ProfilEditor
       prenom={user?.prenom ?? ''}
       telephoneMomo={user?.telephoneMomo ?? null}
       statutValidation={asValidationStatus((profile as { statutValidation?: string }).statutValidation)}
@@ -61,7 +56,6 @@ export default async function MonProfilPage() {
         services,
         portfolio,
       }}
-      />
-    </>
+    />
   );
 }

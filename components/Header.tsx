@@ -67,7 +67,11 @@ export default function Header() {
         <nav className="nav">
           <Link href="/recherche">Trouver un freelance</Link>
           <Link href="/#comment">Comment ça marche</Link>
-          <Link href="/tarifs">Tarifs</Link>
+          {logged && me?.role === 'FREELANCE' ? (
+            <Link href="/mon-abonnement">Mon abonnement</Link>
+          ) : (
+            <Link href="/tarifs">Tarifs</Link>
+          )}
           {logged && <Link href="/dashboard">Tableau de bord</Link>}
           {logged && <Link href="/messages">Messagerie</Link>}
           {logged && me?.role === 'FREELANCE' && (
@@ -161,9 +165,15 @@ export default function Header() {
             <Link href="/#comment" className="mm-link">
               Comment ça marche
             </Link>
-            <Link href="/tarifs" className="mm-link">
-              Tarifs
-            </Link>
+            {logged && me?.role === 'FREELANCE' ? (
+              <Link href="/mon-abonnement" className="mm-link">
+                Mon abonnement
+              </Link>
+            ) : (
+              <Link href="/tarifs" className="mm-link">
+                Tarifs
+              </Link>
+            )}
             {logged ? (
               <>
                 <Link href="/dashboard" className="mm-link">

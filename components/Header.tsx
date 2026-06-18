@@ -9,7 +9,7 @@ import { createBrowserSupabase } from '@/lib/supabase-browser';
 import NotificationBell from './NotificationBell';
 import Logo from './Logo';
 
-const COMMUNAUTE_URL = 'https://chat.whatsapp.com/FF4i9FNjj2o6CirP70lYmD';
+const COMMUNAUTE_URL = 'https://whatsapp.com/channel/0029Vb8DJATDTkJvtb1puW2a';
 
 interface Me {
   authenticated: boolean;

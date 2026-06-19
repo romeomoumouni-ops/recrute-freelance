@@ -301,9 +301,25 @@ export default function ProfilEditor({
     <div className="container profil-edit">
       <h1>Mon profil</h1>
       <p className="sub">
-        C&apos;est ce que les clients verront. Plus il est complet, plus vite vous serez{' '}
-        <strong>vérifié ✓</strong>.
+        C&apos;est ce que les clients verront. Plus il est complet, plus vous remontez dans les{' '}
+        résultats de recherche.
       </p>
+
+      {/* Bandeau « prêt à soumettre » bien visible, en haut */}
+      {statutValidation !== 'APPROUVE' && statutValidation !== 'EN_ATTENTE' && tousRequisFaits && (
+        <div className="profil-ready">
+          <div className="profil-ready-txt">
+            <strong>🎉 Votre profil est prêt à être soumis !</strong>
+            <span>
+              Titre et présentation remplis. Soumettez-le pour validation — vous apparaîtrez ensuite sur la
+              marketplace. (Ajouter photo, services et portfolio vous fera remonter dans les résultats.)
+            </span>
+          </div>
+          <button className="btn btn-light" disabled={submitting} onClick={submitValidation}>
+            {submitting ? 'Envoi…' : 'Soumettre mon profil'}
+          </button>
+        </div>
+      )}
 
       {/* Photo */}
       <div className="edit-card">

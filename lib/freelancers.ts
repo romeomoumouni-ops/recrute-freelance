@@ -15,6 +15,13 @@ export interface FreelanceCard {
   avis: number;
   estVerifie: boolean;
   portfolioPreview: string[]; // aperçu (URLs) pour le carrousel sur la carte
+  completude: number; // score de complétude pour le classement (photo > service > portfolio)
+}
+
+// Score de complétude : photo (8) > service/tarif (4) > portfolio (2).
+// Les profils plus complets remontent dans les résultats.
+export function completudeScore(p: { photoUrl: string | null; tarif: number | null; portfolioPreview: string[] }): number {
+  return (p.photoUrl ? 8 : 0) + (p.tarif != null ? 4 : 0) + (p.portfolioPreview.length > 0 ? 2 : 0);
 }
 
 interface CardRow {
@@ -48,6 +55,7 @@ function toCard(r: CardRow): FreelanceCard {
     avis: r.avis ?? 0,
     estVerifie: r.estVerifie,
     portfolioPreview: [],
+    completude: 0,
   };
 }
 
@@ -76,6 +84,10 @@ export async function getFreelanceCards(): Promise<FreelanceCard[]> {
     }
     for (const c of cards) c.portfolioPreview = byUser.get(c.id) ?? [];
   }
+
+  // Score de complétude + classement par défaut : plus complet d'abord, puis mieux noté.
+  for (const c of cards) c.completude = completudeScore(c);
+  cards.sort((a, b) => b.completude - a.completude || b.note - a.note || b.avis - a.avis);
 
   return cards;
 }
@@ -163,6 +175,7 @@ export async function getFreelanceProfile(id: string): Promise<FreelanceFull | n
     note,
     avis: reviews.length,
     estVerifie: p.estVerifie,
+    completude: completudeScore({ photoUrl: p.photoUrl, tarif: prixMin, portfolioPreview: portfolio.map((pf) => pf.imageUrl) }),
     bio: p.bio ?? '',
     mot: p.note ?? null,
     cvName: p.cvName,

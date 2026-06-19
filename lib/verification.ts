@@ -26,10 +26,11 @@ export function getVerifChecks(input: VerifInput): VerifCheck[] {
   return [
     {
       key: 'photo',
-      titre: 'Photo de profil',
-      desc: 'Une photo professionnelle rassure les clients.',
+      titre: 'Photo de profil (facultatif)',
+      desc: 'Optionnel — une photo professionnelle vous fait remonter dans les résultats.',
       ok: !!input.photoUrl,
       lien: '/mon-profil',
+      optional: true,
     },
     {
       key: 'titre-bio',
@@ -56,17 +57,19 @@ export function getVerifChecks(input: VerifInput): VerifCheck[] {
     },
     {
       key: 'service',
-      titre: 'Au moins un service',
-      desc: 'Créez une offre avec un tarif clair.',
+      titre: 'Au moins un service (facultatif)',
+      desc: 'Optionnel — créez une offre avec un tarif clair pour mieux ressortir.',
       ok: input.servicesCount >= 1,
       lien: '/mon-profil',
+      optional: true,
     },
     {
       key: 'momo',
-      titre: 'Numéro Mobile Money',
-      desc: 'Pour recevoir vos paiements.',
+      titre: 'Numéro Mobile Money (facultatif)',
+      desc: 'Optionnel ici, mais nécessaire pour recevoir vos paiements.',
       ok: !!(input.telephoneMomo && input.telephoneMomo.trim()),
       lien: '/parametres',
+      optional: true,
     },
   ];
 }

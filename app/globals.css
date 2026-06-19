@@ -753,6 +753,11 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 /* Profil freelance : rappel de finalisation sous la photo */
 .profil-todo { margin-top: 14px; padding: 12px 14px; background: #fff8e6; border: 1px solid #f3d588; border-radius: var(--radius); font-size: .85rem; line-height: 1.5; color: var(--gray-700); }
 .profil-todo strong { color: var(--black); }
+.profil-ready { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 4px 0 22px; padding: 18px 22px; background: #0d0d0d; color: #fff; border-radius: var(--radius-lg); box-shadow: 0 10px 30px rgba(0,0,0,.18); }
+.profil-ready-txt { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.profil-ready-txt strong { font-size: 1.05rem; font-weight: 800; }
+.profil-ready-txt span { font-size: .84rem; color: var(--gray-300); line-height: 1.45; }
+.profil-ready .btn { flex-shrink: 0; }
 
 /* Carte freelance : lien d'en-tête + carrousel portfolio + bouton */
 .fl-top-link { color: inherit; text-decoration: none; }

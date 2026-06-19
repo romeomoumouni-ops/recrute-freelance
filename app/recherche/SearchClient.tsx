@@ -21,7 +21,7 @@ export default function SearchClient({
   const [cat, setCat] = useState(params.get('cat') ?? '');
   const [pays, setPays] = useState('');
   const [budget, setBudget] = useState('');
-  const [tri, setTri] = useState('note');
+  const [tri, setTri] = useState('reco');
 
   // Synchronise q & cat dans l'URL (sans recharger).
   useEffect(() => {
@@ -51,6 +51,8 @@ export default function SearchClient({
       if (budget && (f.tarif == null || f.tarif > Number(budget))) return false;
       return true;
     });
+    if (tri === 'reco')
+      res = [...res].sort((a, b) => b.completude - a.completude || b.note - a.note || b.avis - a.avis);
     if (tri === 'note') res = [...res].sort((a, b) => b.note - a.note);
     if (tri === 'prix-asc') res = [...res].sort((a, b) => (a.tarif ?? 1e9) - (b.tarif ?? 1e9));
     if (tri === 'prix-desc') res = [...res].sort((a, b) => (b.tarif ?? -1) - (a.tarif ?? -1));
@@ -91,6 +93,7 @@ export default function SearchClient({
           <option value="3000">Jusqu&apos;à 3 000 €</option>
         </select>
         <select value={tri} onChange={(e) => setTri(e.target.value)} aria-label="Trier">
+          <option value="reco">Recommandés</option>
           <option value="note">Mieux notés</option>
           <option value="prix-asc">Prix croissant</option>
           <option value="prix-desc">Prix décroissant</option>

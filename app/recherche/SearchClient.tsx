@@ -22,6 +22,11 @@ export default function SearchClient({
   const [pays, setPays] = useState('');
   const [budget, setBudget] = useState('');
   const [tri, setTri] = useState('reco');
+  const [page, setPage] = useState(1);
+  const PER_PAGE = 20;
+
+  // Revenir à la 1re page dès qu'un filtre/tri change.
+  useEffect(() => setPage(1), [q, cat, pays, budget, tri]);
 
   // Synchronise q & cat dans l'URL (sans recharger).
   useEffect(() => {
@@ -105,11 +110,35 @@ export default function SearchClient({
       </div>
 
       {list.length ? (
-        <div className="freelance-grid">
-          {list.map((f) => (
-            <FreelanceCardLink key={f.id} f={f} />
-          ))}
-        </div>
+        <>
+          <div className="freelance-grid">
+            {list.slice((page - 1) * PER_PAGE, page * PER_PAGE).map((f) => (
+              <FreelanceCardLink key={f.id} f={f} />
+            ))}
+          </div>
+
+          {list.length > PER_PAGE && (
+            <div className="pagination">
+              <button
+                className="btn btn-outline btn-sm"
+                disabled={page <= 1}
+                onClick={() => { setPage((p) => Math.max(1, p - 1)); window.scrollTo({ top: 0 }); }}
+              >
+                ← Précédent
+              </button>
+              <span className="pagination-info">
+                Page {page} sur {Math.ceil(list.length / PER_PAGE)}
+              </span>
+              <button
+                className="btn btn-outline btn-sm"
+                disabled={page >= Math.ceil(list.length / PER_PAGE)}
+                onClick={() => { setPage((p) => Math.min(Math.ceil(list.length / PER_PAGE), p + 1)); window.scrollTo({ top: 0 }); }}
+              >
+                Suivant →
+              </button>
+            </div>
+          )}
+        </>
       ) : (
         <div className="empty">Aucun freelance ne correspond à votre recherche.</div>
       )}

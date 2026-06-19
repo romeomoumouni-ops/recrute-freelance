@@ -11,7 +11,7 @@ export const maxDuration = 60;
 const schema = z.object({
   subject: z.string().trim().min(2).max(150),
   message: z.string().trim().min(2).max(5000),
-  audience: z.enum(['all', 'CLIENT', 'FREELANCE']),
+  audience: z.enum(['all', 'CLIENT', 'FREELANCE', 'FREELANCE_UNVERIFIED']),
   test: z.boolean().optional(), // envoi de test à l'admin uniquement
 });
 
@@ -65,13 +65,33 @@ export async function POST(req: Request) {
   }
 
   // ----- Envoi réel -----
-  let query = supabaseAdmin().from('User').select('email, prenom').eq('banni', false).limit(5000);
-  if (audience !== 'all') query = query.eq('role', audience);
-  const { data: users, error: dbError } = await query;
-  if (dbError) {
-    return NextResponse.json({ error: 'Lecture des destinataires impossible.' }, { status: 500 });
+  const sb = supabaseAdmin();
+  let list: { email: string; prenom: string }[] = [];
+
+  if (audience === 'FREELANCE_UNVERIFIED') {
+    // Freelances dont le profil n'est PAS approuvé (non vérifiés), hors bots/bannis.
+    const { data, error: dbError } = await sb
+      .from('Profile')
+      .select('statutValidation, user:User!inner(email, prenom, role, banni, isTestBot)')
+      .neq('statutValidation', 'APPROUVE')
+      .limit(5000);
+    if (dbError) {
+      return NextResponse.json({ error: 'Lecture des destinataires impossible.' }, { status: 500 });
+    }
+    type Row = { user: { email: string; prenom: string; role: string; banni: boolean; isTestBot: boolean } | { email: string; prenom: string; role: string; banni: boolean; isTestBot: boolean }[] | null };
+    list = ((data as unknown as Row[]) ?? [])
+      .map((r) => (Array.isArray(r.user) ? r.user[0] : r.user))
+      .filter((u) => u && u.role === 'FREELANCE' && u.banni === false && u.isTestBot === false && u.email)
+      .map((u) => ({ email: u!.email, prenom: u!.prenom }));
+  } else {
+    let query = sb.from('User').select('email, prenom').eq('banni', false).eq('isTestBot', false).limit(5000);
+    if (audience !== 'all') query = query.eq('role', audience);
+    const { data: users, error: dbError } = await query;
+    if (dbError) {
+      return NextResponse.json({ error: 'Lecture des destinataires impossible.' }, { status: 500 });
+    }
+    list = ((users as { email: string; prenom: string }[]) ?? []).filter((u) => u.email);
   }
-  const list = ((users as { email: string; prenom: string }[]) ?? []).filter((u) => u.email);
 
   if (list.length === 0) {
     return NextResponse.json({ ok: true, sent: 0, total: 0, note: 'Aucun destinataire.' });

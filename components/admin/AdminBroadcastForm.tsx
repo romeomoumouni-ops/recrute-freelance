@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import { toast } from '@/lib/toast';
 
-type Audience = 'all' | 'CLIENT' | 'FREELANCE';
+type Audience = 'all' | 'CLIENT' | 'FREELANCE' | 'FREELANCE_UNVERIFIED';
 
 export default function AdminBroadcastForm({
   adminEmail,
   counts,
 }: {
   adminEmail: string;
-  counts: { all: number; CLIENT: number; FREELANCE: number };
+  counts: { all: number; CLIENT: number; FREELANCE: number; FREELANCE_UNVERIFIED: number };
 }) {
   const [subject, setSubject] = useState('');
   const [message, setMessage] = useState('');
@@ -20,7 +20,13 @@ export default function AdminBroadcastForm({
   const [error, setError] = useState<string | null>(null);
 
   const audienceLabel =
-    audience === 'all' ? 'tous les utilisateurs' : audience === 'CLIENT' ? 'tous les clients' : 'tous les freelances';
+    audience === 'all'
+      ? 'tous les utilisateurs'
+      : audience === 'CLIENT'
+        ? 'tous les clients'
+        : audience === 'FREELANCE_UNVERIFIED'
+          ? 'les freelances non vérifiés'
+          : 'tous les freelances';
   const target = counts[audience];
 
   async function post(test: boolean) {
@@ -69,6 +75,7 @@ export default function AdminBroadcastForm({
           <option value="all">Tous les utilisateurs ({counts.all})</option>
           <option value="CLIENT">Clients uniquement ({counts.CLIENT})</option>
           <option value="FREELANCE">Freelances uniquement ({counts.FREELANCE})</option>
+          <option value="FREELANCE_UNVERIFIED">Freelances non vérifiés ({counts.FREELANCE_UNVERIFIED})</option>
         </select>
       </div>
       <div className="field">

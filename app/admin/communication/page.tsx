@@ -8,16 +8,24 @@ export default async function AdminCommunication() {
   const session = await requireAdmin();
   const sb = supabaseAdmin();
 
-  const [all, clients, freelances] = await Promise.all([
-    sb.from('User').select('id', { count: 'exact', head: true }).eq('banni', false),
-    sb.from('User').select('id', { count: 'exact', head: true }).eq('banni', false).eq('role', 'CLIENT'),
-    sb.from('User').select('id', { count: 'exact', head: true }).eq('banni', false).eq('role', 'FREELANCE'),
+  const [all, clients, freelances, unverified] = await Promise.all([
+    sb.from('User').select('id', { count: 'exact', head: true }).eq('banni', false).eq('isTestBot', false),
+    sb.from('User').select('id', { count: 'exact', head: true }).eq('banni', false).eq('isTestBot', false).eq('role', 'CLIENT'),
+    sb.from('User').select('id', { count: 'exact', head: true }).eq('banni', false).eq('isTestBot', false).eq('role', 'FREELANCE'),
+    sb
+      .from('Profile')
+      .select('userId, user:User!inner(id)', { count: 'exact', head: true })
+      .neq('statutValidation', 'APPROUVE')
+      .eq('user.role', 'FREELANCE')
+      .eq('user.banni', false)
+      .eq('user.isTestBot', false),
   ]);
 
   const counts = {
     all: all.count ?? 0,
     CLIENT: clients.count ?? 0,
     FREELANCE: freelances.count ?? 0,
+    FREELANCE_UNVERIFIED: unverified.count ?? 0,
   };
 
   return (

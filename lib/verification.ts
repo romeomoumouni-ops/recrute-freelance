@@ -34,16 +34,17 @@ export function getVerifChecks(input: VerifInput): VerifCheck[] {
     {
       key: 'titre-bio',
       titre: 'Titre & présentation',
-      desc: "Votre métier et une bio d'au moins 50 caractères.",
-      ok: !!(input.titre && input.titre.trim()) && bioLen >= 50,
+      desc: 'Votre métier et une présentation (le texte que vous voulez, sans minimum).',
+      ok: !!(input.titre && input.titre.trim()) && bioLen >= 1,
       lien: '/mon-profil',
     },
     {
       key: 'portfolio',
-      titre: 'Portfolio',
-      desc: 'Au moins 2 réalisations en images.',
-      ok: input.portfolioCount >= 2,
+      titre: 'Portfolio (facultatif)',
+      desc: 'Optionnel — ajoutez des réalisations en images pour rassurer les clients.',
+      ok: input.portfolioCount >= 1,
       lien: '/mon-profil',
+      optional: true,
     },
     {
       key: 'cv',

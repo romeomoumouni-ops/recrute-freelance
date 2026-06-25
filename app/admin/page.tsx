@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 
 interface Stats {
   clients: number; freelances: number; bannis: number;
+  freelances_bloques: number;
   cmd_en_cours: number; cmd_validees: number;
   sequestre: number; gmv: number; revenus: number;
   retraits_attente_n: number; retraits_attente_montant: number;
@@ -68,6 +69,7 @@ export default async function AdminHome() {
       <div className="admin-kpis">
         <Link href="/admin/utilisateurs" className="admin-kpi link"><div className="v">{s.clients ?? 0}</div><div className="k">Clients →</div></Link>
         <Link href="/admin/utilisateurs" className="admin-kpi link"><div className="v">{s.freelances ?? 0}</div><div className="k">Freelances →</div></Link>
+        <Link href="/admin/utilisateurs" className="admin-kpi link"><div className="v">{s.freelances_bloques ?? 0}</div><div className="k">Freelances bloqués (essai expiré) →</div></Link>
         <Link href="/admin/avis" className="admin-kpi link"><div className="v">{s.avis ?? 0}</div><div className="k">Avis →</div></Link>
         <Link href="/admin/utilisateurs" className="admin-kpi link"><div className="v">{s.bannis ?? 0}</div><div className="k">Comptes bannis →</div></Link>
       </div>

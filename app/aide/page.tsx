@@ -7,8 +7,6 @@ export const metadata: Metadata = {
   description: 'Questions fréquentes et contact du support de recrutefreelance.com.',
 };
 
-const WHATSAPP = 'https://wa.me/22969201952';
-
 export default function AidePage() {
   return (
     <>
@@ -22,14 +20,11 @@ export default function AidePage() {
         {/* Contact support */}
         <div className="tarifs-cta" style={{ marginTop: 0, marginBottom: 40 }}>
           <h2>Besoin d&apos;aide ?</h2>
-          <p>Notre équipe vous répond directement dans le chat. Vous pouvez aussi nous écrire sur WhatsApp.</p>
+          <p>Notre équipe vous répond directement dans le chat.</p>
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
             <OpenSupportButton className="btn btn-dark">
               <MessageCircle size={16} /> Contacter le support
             </OpenSupportButton>
-            <a className="btn btn-outline" href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-              Nous écrire sur WhatsApp
-            </a>
           </div>
           <p className="hint" style={{ marginTop: 12 }}>
             Le chat est disponible une fois connecté à votre compte.

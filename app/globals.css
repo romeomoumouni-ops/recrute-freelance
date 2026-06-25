@@ -667,6 +667,18 @@ td { padding: 15px 18px; border-top: 1px solid var(--border); vertical-align: mi
 .abo-banner svg { flex-shrink: 0; }
 .abo-banner-btn { background: #fff; color: #0d0d0d; border: none; border-radius: 999px; padding: 5px 14px; font-weight: 800; font-size: .8rem; cursor: pointer; }
 .abo-banner-btn:hover { opacity: .9; }
+.abo-banner-link { background: none; border: none; color: #fff; text-decoration: underline; font-size: .8rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; padding: 0; }
+.abo-banner-link svg { transition: transform .15s ease; }
+.abo-banner-details { background: #fff; border-bottom: 1px solid var(--border); padding: 8px 16px 16px; }
+.abo-banner-details .abo-info { max-width: 620px; margin: 0 auto; }
+/* Liste « ce qui est conservé / en pause » */
+.abo-info { text-align: left; background: var(--off-white); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin: 16px 0 2px; }
+.abo-info-h { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: .82rem; }
+.abo-info-h.ok { color: #1e7d4f; }
+.abo-info-h.pause { color: #9a6a00; margin-top: 12px; }
+.abo-info ul { margin: 6px 0 0; padding-left: 22px; }
+.abo-info li { font-size: .82rem; color: var(--gray-700); line-height: 1.5; margin-bottom: 2px; }
+.abo-info-foot { font-size: .8rem; font-weight: 700; color: #0d0d0d; margin: 12px 0 0; }
 .abo-card { display: flex; gap: 14px; align-items: flex-start; border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 4px; background: var(--white); }
 .abo-card.trial { border-color: #0d0d0d; }
 .abo-card.expired { border-color: #c0392b; background: #fff7f6; }

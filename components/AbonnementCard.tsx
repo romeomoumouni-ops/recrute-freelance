@@ -58,10 +58,10 @@ export default function AbonnementCard() {
         <div className="abo-card-body">
           <strong>Abonnement actif</strong>
           <p>
-            Votre accès est garanti jusqu&apos;au <strong>{abo.validUntil ? frDate(abo.validUntil) : '—'}</strong>.
+            Votre accès est garanti jusqu&apos;au <strong>{abo.validUntil ? frDate(abo.validUntil) : '…'}</strong>.
             Vous pouvez le prolonger dès maintenant si vous le souhaitez.
           </p>
-          {payBtn('Prolonger mon abonnement — 20 000 FCFA/mois')}
+          {payBtn('Prolonger mon abonnement (20 000 FCFA/mois)')}
         </div>
       </div>
     );
@@ -72,10 +72,10 @@ export default function AbonnementCard() {
       <div className="abo-card trial">
         <div className="abo-card-ic"><Gift size={20} /></div>
         <div className="abo-card-body">
-          <strong>Essai gratuit — il vous reste {abo.daysLeft} jour{abo.daysLeft > 1 ? 's' : ''}</strong>
+          <strong>Essai gratuit : il vous reste {abo.daysLeft} jour{abo.daysLeft > 1 ? 's' : ''}</strong>
           <p>
             Pas envie d&apos;attendre la fin des 7 jours&nbsp;? Vous pouvez vous abonner dès maintenant
-            (20&nbsp;000 FCFA/mois, 0&nbsp;% de commission) — votre accès sera garanti sans interruption.
+            (20&nbsp;000 FCFA/mois, 0&nbsp;% de commission). Votre accès sera garanti sans interruption.
           </p>
           {payBtn('Je préfère m’abonner tout de suite →')}
         </div>
@@ -88,9 +88,9 @@ export default function AbonnementCard() {
     <div className="abo-card expired">
       <div className="abo-card-ic"><AlertCircle size={20} /></div>
       <div className="abo-card-body">
-        <strong>Essai terminé — accès bloqué</strong>
+        <strong>Essai terminé : accès bloqué</strong>
         <p>Abonnez-vous pour réactiver votre compte et continuer à recevoir des missions.</p>
-        {payBtn('M’abonner — 20 000 FCFA/mois')}
+        {payBtn('M’abonner (20 000 FCFA/mois)')}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { Clock, Wallet } from 'lucide-react';
+import { Clock, Wallet, Check, PauseCircle, ChevronDown } from 'lucide-react';
 import { createBrowserSupabase } from '@/lib/supabase-browser';
 
 interface AbonnementInfo {
@@ -11,9 +11,35 @@ interface AbonnementInfo {
   daysLeft: number;
 }
 
+// Ce qui est conservé / en pause quand le compte n'est plus abonné.
+function WhatHappens() {
+  return (
+    <div className="abo-info">
+      <div className="abo-info-h ok">
+        <Check size={15} /> Ce qui est conservé
+      </div>
+      <ul>
+        <li>Vos conversations et tout votre historique de messages</li>
+        <li>Vos fonds et votre solde restent à vous, en sécurité</li>
+        <li>Votre profil, vos services et vos réalisations</li>
+      </ul>
+      <div className="abo-info-h pause">
+        <PauseCircle size={15} /> En pause tant que vous n&apos;êtes pas abonné
+      </div>
+      <ul>
+        <li>Votre profil n&apos;apparaît plus dans «&nbsp;Trouver un freelance&nbsp;»</li>
+        <li>Vous ne pouvez plus envoyer de messages aux clients</li>
+        <li>Vous ne recevez plus de nouvelles missions et ne pouvez pas retirer vos fonds</li>
+      </ul>
+      <p className="abo-info-foot">Tout redevient actif instantanément dès que vous vous abonnez.</p>
+    </div>
+  );
+}
+
 export default function AbonnementGate() {
   const [abo, setAbo] = useState<AbonnementInfo | null>(null);
   const [url, setUrl] = useState('');
+  const [showDetails, setShowDetails] = useState(false);
   const pathname = usePathname();
 
   const check = useCallback(async () => {
@@ -56,17 +82,27 @@ export default function AbonnementGate() {
   // Essai en cours mais bientôt fini : bandeau d'alerte en haut (non bloquant).
   if (abo.active && abo.mode === 'trial' && abo.daysLeft <= 3) {
     return (
-      <div className="abo-banner">
-        <Clock size={16} />
-        <span>
-          {abo.daysLeft <= 1
-            ? "Dernier jour de votre essai gratuit."
-            : `Plus que ${abo.daysLeft} jours d'essai gratuit.`}{' '}
-          Abonnez-vous (20&nbsp;000 FCFA/mois) pour ne pas perdre l'accès.
-        </span>
-        <button className="abo-banner-btn" onClick={pay}>
-          S&apos;abonner
-        </button>
+      <div className="abo-banner-wrap">
+        <div className="abo-banner">
+          <Clock size={16} />
+          <span>
+            {abo.daysLeft <= 1
+              ? 'Dernier jour de votre essai gratuit.'
+              : `Plus que ${abo.daysLeft} jours d'essai gratuit.`}{' '}
+            Abonnez-vous (20&nbsp;000 FCFA/mois) pour garder votre accès.
+          </span>
+          <button className="abo-banner-link" onClick={() => setShowDetails((v) => !v)}>
+            Que se passe-t-il à expiration&nbsp;? <ChevronDown size={13} style={{ transform: showDetails ? 'rotate(180deg)' : 'none' }} />
+          </button>
+          <button className="abo-banner-btn" onClick={pay}>
+            S&apos;abonner
+          </button>
+        </div>
+        {showDetails && (
+          <div className="abo-banner-details">
+            <WhatHappens />
+          </div>
+        )}
       </div>
     );
   }
@@ -81,22 +117,21 @@ export default function AbonnementGate() {
           </div>
           <h1>Votre essai gratuit est terminé</h1>
           <p>
-            Vos <strong>7 jours d&apos;essai gratuits</strong> sont écoulés. Pour continuer à utiliser
-            recrutefreelance.com — recevoir des missions, échanger avec les clients et apparaître dans la
-            recherche — abonnez-vous pour <strong>20&nbsp;000 FCFA/mois</strong>.
+            Vos <strong>7 jours d&apos;essai gratuits</strong> sont écoulés. Pour continuer à recevoir des
+            missions, échanger avec les clients et rester visible dans la recherche, abonnez-vous pour{' '}
+            <strong>20&nbsp;000 FCFA/mois</strong>.
           </p>
-          <button className="btn btn-dark btn-block" onClick={pay} style={{ marginTop: 6 }}>
+
+          <WhatHappens />
+
+          <button className="btn btn-dark btn-block" onClick={pay} style={{ marginTop: 14 }}>
             Payer 20&nbsp;000 FCFA/mois
           </button>
           <p className="banned-contact" style={{ marginTop: 14 }}>
             Déjà payé&nbsp;? Votre compte est réactivé après confirmation. Une question&nbsp;?{' '}
             <a href="mailto:support@recrutefreelance.com">support@recrutefreelance.com</a>.
           </p>
-          <button
-            className="btn btn-outline btn-block"
-            onClick={signOut}
-            style={{ marginTop: 10 }}
-          >
+          <button className="btn btn-outline btn-block" onClick={signOut} style={{ marginTop: 10 }}>
             Se déconnecter
           </button>
         </div>

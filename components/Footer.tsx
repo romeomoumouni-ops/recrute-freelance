@@ -53,9 +53,6 @@ export default function Footer() {
                 <Link href="/aide">Centre d&apos;aide</Link>
               </li>
               <li>
-                <a href="https://wa.me/22969201952" target="_blank" rel="noopener noreferrer">Contact</a>
-              </li>
-              <li>
                 <Link href="/conditions">Conditions d&apos;utilisation</Link>
               </li>
             </ul>

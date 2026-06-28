@@ -81,9 +81,8 @@ export async function runBotScenarios(): Promise<RunResult> {
     for (const f of candidats) {
       if (dejaVus.has(f.id)) continue;
       const expiry = new Date(f.createdAt).getTime() + TRIAL_MS;
-      const ageDays = (now - new Date(f.createdAt).getTime()) / DAY;
       if (now >= expiry) continue; // essai déjà terminé → on ignore
-      if (ageDays < 3) continue; // on contacte le testeur 3 jours après son inscription
+      if (now < expiry - DAY) continue; // pas encore dans les 24h avant la fin
 
       const bot = bots[Math.floor(Math.random() * bots.length)];
       const seed = hash(f.id);

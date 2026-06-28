@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from 'react';
 const TABS: [string, string][] = [
   ['/admin', 'Tableau de bord'],
   ['/admin/retraits', 'Retraits'],
+  ['/admin/abonnements', 'Abonnements'],
   ['/admin/litiges', 'Commandes & litiges'],
   ['/admin/validations', 'Validations'],
   ['/admin/moderation', 'Modération'],

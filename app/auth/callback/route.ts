@@ -3,8 +3,29 @@ import type { EmailOtpType, User } from '@supabase/supabase-js';
 import { createServerSupabase } from '@/lib/supabase-server';
 import { supabaseAdmin } from '@/lib/supabase';
 import { sendEmail } from '@/lib/email';
+import { isAfricanCountry, requestCountry } from '@/lib/geo';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const BAN_ENTREPRISE_AFRIQUE =
+  'Les comptes entreprise situés en Afrique ne sont pas autorisés sur la plateforme.';
+
+// Auto-ban : une entreprise (CLIENT) qui se connecte depuis l'Afrique est bannie.
+// Renvoie true si le compte a été (ou est déjà) banni pour cette raison.
+async function banIfAfricanEntreprise(request: Request, userId: string | undefined): Promise<boolean> {
+  try {
+    if (!userId) return false;
+    if (!isAfricanCountry(requestCountry(request))) return false;
+    const sb = supabaseAdmin();
+    const { data: row } = await sb.from('User').select('role, admin, banni').eq('id', userId).maybeSingle();
+    const u = row as { role: string; admin: boolean | null; banni: boolean | null } | null;
+    if (!u || u.admin === true || u.role !== 'CLIENT') return false; // on ne touche ni aux admins ni aux freelances
+    if (!u.banni) await sb.from('User').update({ banni: true }).eq('id', userId);
+    return true;
+  } catch {
+    return false; // ne jamais casser le flux d'auth
+  }
+}
 
 // Envoie NOTRE e-mail de bienvenue (adapté au rôle), une seule fois par compte.
 // Lit le rôle réel dans public.User (source de vérité).
@@ -115,13 +136,22 @@ export async function GET(request: Request) {
 
   // Connexion OAuth (Google) : on GARDE la session et on redirige vers l'app.
   if (next && next.startsWith('/') && !next.startsWith('//')) {
+    // onboardOAuthUser applique d'abord le rôle choisi (le ban se base sur le rôle réel).
     await onboardOAuthUser(origin, searchParams.get('newrole'), authedUser);
+    if (await banIfAfricanEntreprise(request, authedUser?.id)) {
+      await supabase.auth.signOut();
+      return NextResponse.redirect(`${origin}/connexion?toast=${encodeURIComponent(BAN_ENTREPRISE_AFRIQUE)}`);
+    }
     return NextResponse.redirect(`${origin}${next}`);
   }
 
-  // Confirmation d'inscription par e-mail : on envoie NOTRE e-mail de bienvenue
-  // (rappel de compléter + soumettre le profil pour les freelances), puis on déconnecte
-  // pour que la personne se connecte avec ses identifiants.
+  // Confirmation d'inscription par e-mail. Entreprise en Afrique → bannie, on bloque.
+  if (await banIfAfricanEntreprise(request, authedUser?.id)) {
+    await supabase.auth.signOut();
+    return NextResponse.redirect(`${origin}/connexion?toast=${encodeURIComponent(BAN_ENTREPRISE_AFRIQUE)}`);
+  }
+  // Sinon : on envoie NOTRE e-mail de bienvenue puis on déconnecte
+  // (rappel de compléter + soumettre le profil pour les freelances).
   await sendWelcomeOnce(origin, authedUser);
   await supabase.auth.signOut();
   return NextResponse.redirect(`${origin}/inscription-confirmee`);

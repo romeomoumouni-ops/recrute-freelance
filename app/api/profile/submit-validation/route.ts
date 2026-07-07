@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabase';
 import { isVerified } from '@/lib/verification';
 import { blockIfFreelanceExpired } from '@/lib/abonnement';
+import { createNotification } from '@/lib/notifications';
 
 export const dynamic = 'force-dynamic';
 
@@ -66,10 +67,29 @@ export async function POST() {
     );
   }
 
+  // Auto-approbation : le profil remplit tous les critères → validé immédiatement.
+  // dateValidationAuto marque l'auto-approbation (pour le décompte admin).
+  // verifManuel=true fige la décision (recomputeVerification ne l'écrase pas).
+  const now = new Date().toISOString();
   await sb
     .from('Profile')
-    .update({ statutValidation: 'EN_ATTENTE', dateSoumission: new Date().toISOString(), motifRejet: null })
+    .update({
+      statutValidation: 'APPROUVE',
+      estVerifie: true,
+      verifManuel: true,
+      motifRejet: null,
+      dateSoumission: now,
+      dateValidationAuto: now,
+    })
     .eq('id', profile.id);
 
-  return NextResponse.json({ ok: true, statut: 'EN_ATTENTE' });
+  await createNotification({
+    userId: session.user.id,
+    type: 'VALIDATION',
+    titre: 'Profil approuvé ✓',
+    corps: 'Félicitations ! Votre profil est validé : il est désormais visible par les clients sur la plateforme.',
+    lien: '/mon-profil',
+  });
+
+  return NextResponse.json({ ok: true, statut: 'APPROUVE' });
 }

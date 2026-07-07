@@ -124,7 +124,11 @@ export default function ProfilEditor({
     const data = await res.json().catch(() => ({}));
     setSubmitting(false);
     if (!res.ok) return toast(data.error || 'Soumission impossible.');
-    toast('Demande de validation envoyée ✓');
+    toast(
+      data.statut === 'APPROUVE'
+        ? 'Profil validé ✓ Vous êtes désormais visible par les clients.'
+        : 'Demande de validation envoyée ✓'
+    );
     router.refresh();
   }
 

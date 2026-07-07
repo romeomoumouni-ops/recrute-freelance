@@ -16,13 +16,18 @@ interface Stats {
 export default async function AdminHome() {
   const sb = supabaseAdmin();
   const cutoff24h = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().replace('Z', '');
+  // Début de journée en heure d'Afrique de l'Ouest (UTC+1) pour le décompte "aujourd'hui".
+  const watNow = new Date(Date.now() + 60 * 60 * 1000);
+  const debutJour = new Date(
+    Date.UTC(watNow.getUTCFullYear(), watNow.getUTCMonth(), watNow.getUTCDate()) - 60 * 60 * 1000
+  ).toISOString();
   const [{ data }, validations, nouvellesCommandes] = await Promise.all([
     sb.rpc('admin_stats'),
-    sb.from('Profile').select('userId', { count: 'exact', head: true }).eq('statutValidation', 'EN_ATTENTE'),
+    sb.from('Profile').select('userId', { count: 'exact', head: true }).gte('dateValidationAuto', debutJour),
     sb.from('Order').select('id', { count: 'exact', head: true }).gte('createdAt', cutoff24h),
   ]);
   const s = (data as Stats) ?? ({} as Stats);
-  const validationsEnAttente = validations.count ?? 0;
+  const autoApprouvesJour = validations.count ?? 0;
   const commandes24h = nouvellesCommandes.count ?? 0;
 
   return (
@@ -35,9 +40,9 @@ export default async function AdminHome() {
           <div className="n">{commandes24h}</div>
           <div className="l">Nouvelles commandes<br />(dernières 24h)</div>
         </Link>
-        <Link href="/admin/validations" className={`admin-alert${validationsEnAttente ? ' hot' : ''}`}>
-          <div className="n">{validationsEnAttente}</div>
-          <div className="l">Demandes de validation<br />à traiter</div>
+        <Link href="/admin/validations" className="admin-alert">
+          <div className="n">{autoApprouvesJour}</div>
+          <div className="l">Validations auto<br />aujourd’hui</div>
         </Link>
         <Link href="/admin/retraits" className={`admin-alert${s.retraits_attente_n ? ' hot' : ''}`}>
           <div className="n">{s.retraits_attente_n ?? 0}</div>

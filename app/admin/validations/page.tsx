@@ -1,148 +1,105 @@
 import Link from 'next/link';
 import { supabaseAdmin } from '@/lib/supabase';
-import { dateCourte, heureCourte, euros } from '@/lib/utils';
-import { OPERATEUR_LABEL } from '@/lib/constants';
-import AdminValidationActions from '@/components/admin/AdminValidationActions';
+import { dateCourte, heureCourte } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
+// Début de la journée en heure d'Afrique de l'Ouest (WAT, UTC+1, sans DST).
+function debutJourWAT(): string {
+  const now = new Date();
+  const wat = new Date(now.getTime() + 60 * 60 * 1000);
+  const watMidnight = Date.UTC(wat.getUTCFullYear(), wat.getUTCMonth(), wat.getUTCDate(), 0, 0, 0);
+  return new Date(watMidnight - 60 * 60 * 1000).toISOString(); // repasse en UTC
+}
+
 export default async function AdminValidations() {
   const sb = supabaseAdmin();
+  const debutJour = debutJourWAT();
+  const debut7j = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-  const { data: profiles } = await sb
-    .from('Profile')
-    .select(
-      'userId, titre, bio, photoUrl, cvName, cvUrl, dateSoumission, services:Service(id,titre,description,prix,delaiJours,createdAt), portfolio:PortfolioItem(id,imageUrl,ordre), user:User(prenom, email, pays, telephoneMomo, operateurMomo, banni)'
-    )
-    .eq('statutValidation', 'EN_ATTENTE')
-    .order('dateSoumission', { ascending: true });
+  const [aujourdhui, semaine, total, enAttente, recentsRes] = await Promise.all([
+    sb.from('Profile').select('userId', { count: 'exact', head: true }).gte('dateValidationAuto', debutJour),
+    sb.from('Profile').select('userId', { count: 'exact', head: true }).gte('dateValidationAuto', debut7j),
+    sb.from('Profile').select('userId', { count: 'exact', head: true }).not('dateValidationAuto', 'is', null),
+    sb.from('Profile').select('userId', { count: 'exact', head: true }).eq('statutValidation', 'EN_ATTENTE'),
+    sb
+      .from('Profile')
+      .select('userId, titre, dateValidationAuto, user:User(prenom, email)')
+      .not('dateValidationAuto', 'is', null)
+      .order('dateValidationAuto', { ascending: false })
+      .limit(20),
+  ]);
 
-  type Svc = { id: string; titre: string; description: string; prix: number; delaiJours: number; createdAt: string };
-  type Pf = { id: string; imageUrl: string; ordre: number };
-  type Row = {
+  const nbAujourdhui = aujourdhui.count ?? 0;
+  const nbSemaine = semaine.count ?? 0;
+  const nbTotal = total.count ?? 0;
+  const nbEnAttente = enAttente.count ?? 0;
+
+  type Recent = {
     userId: string;
     titre: string | null;
-    bio: string | null;
-    photoUrl: string | null;
-    cvName: string | null;
-    cvUrl: string | null;
-    dateSoumission: string | null;
-    services: Svc[];
-    portfolio: Pf[];
-    user: { prenom: string; email: string; pays: string | null; telephoneMomo: string | null; operateurMomo: string | null; banni: boolean } | null;
+    dateValidationAuto: string | null;
+    user: { prenom: string | null; email: string | null } | null;
   };
-  const list = (profiles as unknown as Row[]) ?? [];
+  const recents = (recentsRes.data as unknown as Recent[]) ?? [];
 
   return (
     <>
       <h1 className="admin-h1">Demandes de validation</h1>
       <p className="admin-sub">
-        Freelances ayant complété tous les critères et soumis leur profil. Vérifiez le portfolio et les
-        services, puis approuvez ou refusez. Une fois <strong>approuvé</strong>, le freelance devient
-        visible dans « Trouver un freelance ».
+        Les profils freelances complets sont désormais <strong>approuvés automatiquement</strong> dès leur
+        soumission. Voici le nombre d’approbations automatiques.
       </p>
 
-      {list.length === 0 ? (
-        <div className="admin-empty">Aucune demande en attente. ✅</div>
+      {/* Décompte */}
+      <div className="admin-alerts" style={{ marginTop: 4 }}>
+        <div className={`admin-alert${nbAujourdhui ? ' hot' : ''}`} style={{ cursor: 'default' }}>
+          <div className="n">{nbAujourdhui}</div>
+          <div className="l">Approuvés automatiquement<br />aujourd’hui</div>
+        </div>
+        <div className="admin-alert" style={{ cursor: 'default' }}>
+          <div className="n">{nbSemaine}</div>
+          <div className="l">Approuvés automatiquement<br />(7 derniers jours)</div>
+        </div>
+        <div className="admin-alert" style={{ cursor: 'default' }}>
+          <div className="n">{nbTotal}</div>
+          <div className="l">Total approuvés<br />automatiquement</div>
+        </div>
+      </div>
+
+      {nbEnAttente > 0 && (
+        <p className="admin-sub" style={{ marginTop: 16 }}>
+          ⚠️ {nbEnAttente} profil(s) encore en attente (cas anciens). Ils seront traités automatiquement à
+          leur prochaine soumission.
+        </p>
+      )}
+
+      {/* Liste récente des auto-approbations */}
+      <h2 className="admin-h1" style={{ fontSize: 18, marginTop: 28 }}>
+        Dernières approbations automatiques
+      </h2>
+      {recents.length === 0 ? (
+        <div className="admin-empty">Aucune approbation automatique pour l’instant.</div>
       ) : (
         <div className="admin-cards">
-          {list.map((p) => {
-            const services = (p.services ?? []).slice().sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1));
-            const portfolio = (p.portfolio ?? []).slice().sort((a, b) => a.ordre - b.ordre);
-            return (
-              <div className="admin-card hot" key={p.userId} style={{ flexDirection: 'column', alignItems: 'stretch' }}>
-                <div className="admin-card-main">
-                  {/* En-tête */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    {p.photoUrl && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={p.photoUrl}
-                        alt=""
-                        style={{ width: 52, height: 52, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
-                      />
-                    )}
-                    <div>
-                      <strong>{p.user?.prenom ?? '—'}</strong>{' '}
-                      {p.user?.banni && <span className="status red">banni</span>}
-                      <div className="admin-meta">
-                        {p.titre || 'Sans titre'} · {p.user?.email}
-                        {p.user?.pays ? ` · ${p.user.pays}` : ''}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bio */}
-                  {p.bio && (
-                    <div className="admin-meta" style={{ marginTop: 10, lineHeight: 1.5 }}>{p.bio}</div>
+          {recents.map((r) => (
+            <div className="admin-card" key={r.userId}>
+              <div className="admin-card-main">
+                <strong>{r.user?.prenom ?? '—'}</strong>
+                <div className="admin-meta">
+                  {r.titre || 'Sans titre'} · {r.user?.email ?? '—'}
+                  {r.dateValidationAuto && (
+                    <> · approuvé le {dateCourte(r.dateValidationAuto)} {heureCourte(r.dateValidationAuto)}</>
                   )}
-
-                  {/* Portfolio */}
-                  <div style={{ marginTop: 12 }}>
-                    <div className="admin-meta" style={{ fontWeight: 700, marginBottom: 6 }}>
-                      Portfolio ({portfolio.length})
-                    </div>
-                    {portfolio.length ? (
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {portfolio.map((img) => (
-                          <a key={img.id} href={img.imageUrl} target="_blank" rel="noopener noreferrer">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              src={img.imageUrl}
-                              alt="Réalisation"
-                              style={{ width: 110, height: 74, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }}
-                            />
-                          </a>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="admin-meta">Aucune réalisation.</div>
-                    )}
-                  </div>
-
-                  {/* Services */}
-                  <div style={{ marginTop: 12 }}>
-                    <div className="admin-meta" style={{ fontWeight: 700, marginBottom: 6 }}>
-                      Services ({services.length})
-                    </div>
-                    {services.length ? (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                        {services.map((s) => (
-                          <div key={s.id} className="admin-meta" style={{ display: 'flex', justifyContent: 'space-between', gap: 12 }}>
-                            <span><strong>{s.titre}</strong>{s.description ? ` — ${s.description.slice(0, 100)}${s.description.length > 100 ? '…' : ''}` : ''}</span>
-                            <span style={{ whiteSpace: 'nowrap', fontWeight: 700 }}>dès {euros(s.prix)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="admin-meta">Aucun service.</div>
-                    )}
-                  </div>
-
-                  {/* Infos diverses */}
-                  <div className="admin-meta" style={{ marginTop: 12 }}>
-                    MoMo : {p.user?.telephoneMomo || '—'}
-                    {p.user?.operateurMomo ? ` (${OPERATEUR_LABEL[p.user.operateurMomo] ?? p.user.operateurMomo})` : ''}
-                    {p.cvName && (
-                      <> · CV : {p.cvUrl ? (<a href={p.cvUrl} target="_blank" rel="noopener noreferrer" className="inline-ic">{p.cvName}</a>) : p.cvName}</>
-                    )}
-                    {p.dateSoumission && <> · soumis le {dateCourte(p.dateSoumission)} {heureCourte(p.dateSoumission)}</>}
-                  </div>
-
-                  <div className="admin-meta" style={{ marginTop: 8, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-                    <a href={`/freelance/${p.userId}`} target="_blank" rel="noopener noreferrer" className="inline-ic">
-                      Aperçu du profil public ↗
-                    </a>
-                    <Link href={`/admin/utilisateurs/${p.userId}`} className="inline-ic">Fiche complète →</Link>
-                  </div>
                 </div>
-
-                <div style={{ marginTop: 14 }}>
-                  <AdminValidationActions userId={p.userId} prenom={p.user?.prenom ?? 'ce freelance'} />
+                <div className="admin-meta" style={{ marginTop: 8 }}>
+                  <Link href={`/admin/utilisateurs/${r.userId}`} className="inline-ic">
+                    Fiche complète →
+                  </Link>
                 </div>
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       )}
     </>

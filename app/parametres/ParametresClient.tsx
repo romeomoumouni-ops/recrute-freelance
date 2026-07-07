@@ -147,8 +147,13 @@ export default function ParametresClient({
     const data = await res.json().catch(() => ({}));
     setSubmitting(false);
     if (!res.ok) return toast(data.error || 'Soumission impossible.');
-    setStatut('EN_ATTENTE');
-    toast('Demande de validation envoyée ✓');
+    const statut = (data.statut as ValidationStatus) || 'APPROUVE';
+    setStatut(statut);
+    toast(
+      statut === 'APPROUVE'
+        ? 'Profil validé ✓ Vous êtes désormais visible par les clients.'
+        : 'Demande de validation envoyée ✓'
+    );
     router.refresh();
   }
 
